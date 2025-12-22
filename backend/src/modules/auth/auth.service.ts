@@ -166,7 +166,11 @@ export class AuthService {
         });
 
         await this.userRepository.save(newAdmin);
-        console.log('✅ Default admin user created: admin@example.com / Admin123!');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Default admin user created: admin@example.com / Admin123!');
+        } else {
+          console.log('✅ Default admin user created');
+        }
       }
     }
   }

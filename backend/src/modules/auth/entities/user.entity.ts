@@ -52,7 +52,9 @@ export class User {
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
-    if (this.password && !this.password.startsWith('$2b$')) {
+    // Only hash if password is present and appears to be plain text (length < 60)
+    // bcrypt hashes are always 60 characters
+    if (this.password && this.password.length < 60) {
       this.password = await bcrypt.hash(this.password, 10);
     }
   }
