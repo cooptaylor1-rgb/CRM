@@ -5,9 +5,9 @@ services:
     image: postgres:15-alpine
     container_name: crm-postgres
     environment:
-      POSTGRES_USER: crm_user
-      POSTGRES_PASSWORD: crm_password
-      POSTGRES_DB: crm_wealth
+      POSTGRES_USER: ${POSTGRES_USER:-crm_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crm_password}
+      POSTGRES_DB: ${POSTGRES_DB:-crm_wealth}
     ports:
       - "5432:5432"
     volumes:
@@ -43,9 +43,9 @@ services:
       NODE_ENV: development
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USERNAME: crm_user
-      DB_PASSWORD: crm_password
-      DB_DATABASE: crm_wealth
+      DB_USERNAME: ${POSTGRES_USER:-crm_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-crm_password}
+      DB_DATABASE: ${POSTGRES_DB:-crm_wealth}
       REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
