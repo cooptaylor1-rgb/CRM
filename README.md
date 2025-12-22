@@ -43,6 +43,35 @@ The Wealth Management CRM is a comprehensive, enterprise-grade system designed s
 
 ## Quick Start
 
+### Using Docker Compose (Recommended)
+
+The fastest way to get the entire application running:
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd CRM
+
+# Start all services
+docker-compose up
+
+# Or start in detached mode
+docker-compose up -d
+```
+
+Wait 2-3 minutes for services to initialize, then access:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:3001
+- **API Documentation**: http://localhost:3001/api/docs
+
+**Default Login Credentials:**
+- Email: `admin@example.com`
+- Password: `Admin123!`
+
+### Manual Development Setup
+
+If you prefer to run services individually:
+
 ### Prerequisites
 
 - Node.js 18+
