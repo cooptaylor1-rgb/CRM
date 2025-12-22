@@ -155,17 +155,19 @@ export class AuthService {
 
       // Create admin user
       const adminRole = roles.find((r) => r.name === 'admin');
-      const newAdmin = this.userRepository.create({
-        email: 'admin@example.com',
-        password: 'Admin123!',
-        firstName: 'System',
-        lastName: 'Administrator',
-        isActive: true,
-        roles: [adminRole],
-      });
+      if (adminRole) {
+        const newAdmin = this.userRepository.create({
+          email: 'admin@example.com',
+          password: 'Admin123!',
+          firstName: 'System',
+          lastName: 'Administrator',
+          isActive: true,
+          roles: [adminRole],
+        });
 
-      await this.userRepository.save(newAdmin);
-      console.log('✅ Default admin user created: admin@example.com / Admin123!');
+        await this.userRepository.save(newAdmin);
+        console.log('✅ Default admin user created: admin@example.com / Admin123!');
+      }
     }
   }
 }

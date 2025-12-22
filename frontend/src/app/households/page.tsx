@@ -105,7 +105,7 @@ export default function HouseholdsPage() {
               {households.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                    No households found. Click "Add Household" to create one.
+                    No households found. Click &quot;Add Household&quot; to create one.
                   </td>
                 </tr>
               ) : (

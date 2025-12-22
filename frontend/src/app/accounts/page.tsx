@@ -107,7 +107,7 @@ export default function AccountsPage() {
               {accounts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                    No accounts found. Click "Add Account" to create one.
+                    No accounts found. Click &quot;Add Account&quot; to create one.
                   </td>
                 </tr>
               ) : (
