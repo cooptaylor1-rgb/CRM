@@ -110,13 +110,13 @@ CREATE INDEX idx_households_created_at ON households(created_at);
 
 CREATE TABLE persons (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    middle_name VARCHAR(100),
+    first_name TEXT NOT NULL, -- Encrypted, stores encrypted value
+    last_name TEXT NOT NULL, -- Encrypted, stores encrypted value
+    middle_name TEXT, -- Encrypted, stores encrypted value
     suffix VARCHAR(20),
     preferred_name VARCHAR(100),
-    date_of_birth DATE NOT NULL,
-    ssn VARCHAR(11), -- Encrypted
+    date_of_birth TEXT NOT NULL, -- Encrypted, stores encrypted value
+    ssn TEXT, -- Encrypted, stores encrypted value
     citizenship VARCHAR(2),
     country_of_birth VARCHAR(2),
     marital_status marital_status,
@@ -124,15 +124,15 @@ CREATE TABLE persons (
     employer VARCHAR(200),
     occupation VARCHAR(100),
     tax_filing_status tax_filing_status,
-    email VARCHAR(255),
+    email TEXT, -- Encrypted, stores encrypted value
     email_verified BOOLEAN DEFAULT false,
-    phone_primary VARCHAR(20),
-    phone_secondary VARCHAR(20),
-    address_line1 VARCHAR(255),
-    address_line2 VARCHAR(255),
-    city VARCHAR(100),
+    phone_primary TEXT, -- Encrypted, stores encrypted value
+    phone_secondary TEXT, -- Encrypted, stores encrypted value
+    address_line1 TEXT, -- Encrypted, stores encrypted value
+    address_line2 TEXT, -- Encrypted, stores encrypted value
+    city TEXT, -- Encrypted, stores encrypted value
     state VARCHAR(2),
-    postal_code VARCHAR(20),
+    postal_code TEXT, -- Encrypted, stores encrypted value
     country VARCHAR(2) DEFAULT 'US',
     kyc_status kyc_status NOT NULL DEFAULT 'PENDING',
     kyc_verified_date DATE,
@@ -196,7 +196,7 @@ CREATE TABLE entities (
     short_name VARCHAR(100),
     type entity_type NOT NULL,
     sub_type VARCHAR(100),
-    tax_id VARCHAR(20), -- Encrypted
+    tax_id TEXT, -- Encrypted, stores encrypted value
     state_of_formation VARCHAR(2),
     country_of_formation VARCHAR(2) NOT NULL DEFAULT 'US',
     formation_date DATE,
@@ -230,7 +230,7 @@ CREATE TABLE accounts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     household_id UUID NOT NULL REFERENCES households(id) ON DELETE RESTRICT,
     entity_id UUID REFERENCES entities(id),
-    account_number VARCHAR(50) NOT NULL, -- Encrypted
+    account_number TEXT NOT NULL, -- Encrypted, stores encrypted value
     account_number_last_four VARCHAR(4) NOT NULL,
     account_name VARCHAR(255) NOT NULL,
     account_type account_type NOT NULL,
@@ -392,7 +392,7 @@ CREATE TABLE documents (
     name VARCHAR(255) NOT NULL,
     document_type document_type NOT NULL,
     category document_category NOT NULL,
-    file_path TEXT NOT NULL, -- Encrypted S3 path
+    file_path TEXT NOT NULL, -- Encrypted S3 path, stores encrypted value
     file_size BIGINT NOT NULL CHECK (file_size > 0),
     mime_type VARCHAR(100) NOT NULL,
     extension VARCHAR(10) NOT NULL,
@@ -436,7 +436,7 @@ CREATE TABLE communications (
     type communication_type NOT NULL,
     direction communication_direction NOT NULL,
     subject VARCHAR(500),
-    body TEXT, -- Encrypted
+    body TEXT, -- Encrypted, stores encrypted value
     participants JSONB NOT NULL,
     timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     duration_seconds INTEGER,
