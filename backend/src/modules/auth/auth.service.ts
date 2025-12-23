@@ -20,16 +20,26 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
+    console.log(`Login attempt for: ${loginDto.email}`);
+    
     const user = await this.userRepository.findOne({
       where: { email: loginDto.email },
       relations: ['roles'],
     });
 
-    if (!user || !user.isActive) {
+    if (!user) {
+      console.log(`User not found: ${loginDto.email}`);
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    
+    if (!user.isActive) {
+      console.log(`User inactive: ${loginDto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await user.validatePassword(loginDto.password);
+    console.log(`Password valid for ${loginDto.email}: ${isPasswordValid}`);
+    
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -127,32 +137,33 @@ export class AuthService {
       where: { email: 'admin@example.com' },
     });
 
-    if (!adminUser) {
-      // Create roles if they don't exist
-      const roleNames = [
-        'admin',
-        'compliance_officer',
-        'advisor',
-        'operations',
-        'read_only',
-      ];
+    // Create roles if they don't exist
+    const roleNames = [
+      'admin',
+      'compliance_officer',
+      'advisor',
+      'operations',
+      'read_only',
+    ];
 
-      const roles = [];
-      for (const roleName of roleNames) {
-        let role = await this.roleRepository.findOne({
-          where: { name: roleName },
+    const roles = [];
+    for (const roleName of roleNames) {
+      let role = await this.roleRepository.findOne({
+        where: { name: roleName },
+      });
+
+      if (!role) {
+        role = this.roleRepository.create({
+          name: roleName,
+          description: `${roleName} role`,
         });
-
-        if (!role) {
-          role = this.roleRepository.create({
-            name: roleName,
-            description: `${roleName} role`,
-          });
-          role = await this.roleRepository.save(role);
-        }
-        roles.push(role);
+        role = await this.roleRepository.save(role);
+        console.log(`✅ Created role: ${roleName}`);
       }
+      roles.push(role);
+    }
 
+    if (!adminUser) {
       // Create admin user
       const adminRole = roles.find((r) => r.name === 'admin');
       if (adminRole) {
@@ -166,12 +177,10 @@ export class AuthService {
         });
 
         await this.userRepository.save(newAdmin);
-        if (process.env.NODE_ENV === 'development') {
-          console.log('✅ Default admin user created: admin@example.com / Admin123!');
-        } else {
-          console.log('✅ Default admin user created');
-        }
+        console.log('✅ Default admin user created: admin@example.com / Admin123!');
       }
+    } else {
+      console.log('ℹ️ Admin user already exists');
     }
   }
 }
