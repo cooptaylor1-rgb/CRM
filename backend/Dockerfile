@@ -44,8 +44,12 @@ RUN addgroup -g 1001 -S nodejs && \
 
 USER nestjs
 
+ENV NODE_ENV=production
+ENV PORT=3001
+
 EXPOSE 3001
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "dist/main"]
 CMD ["node", "dist/main"]

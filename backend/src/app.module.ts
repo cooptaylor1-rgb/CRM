@@ -9,6 +9,7 @@ import { EntitiesModule } from './modules/entities/entities.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { ComplianceModule } from './modules/compliance/compliance.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -45,5 +46,6 @@ import { DocumentsModule } from './modules/documents/documents.module';
     ComplianceModule,
     DocumentsModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}
