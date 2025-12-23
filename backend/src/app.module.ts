@@ -56,8 +56,8 @@ const entities = [
             type: 'postgres',
             url: databaseUrl,
             entities: entities,
-            synchronize: false,
-            logging: configService.get('NODE_ENV') === 'development',
+            synchronize: true, // Auto-create tables
+            logging: false,
             ssl: { rejectUnauthorized: false },
           };
         }
