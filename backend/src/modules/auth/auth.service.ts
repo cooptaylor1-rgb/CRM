@@ -132,11 +132,6 @@ export class AuthService {
   }
 
   async ensureDefaultUsers() {
-    // Check if admin user exists
-    const adminUser = await this.userRepository.findOne({
-      where: { email: 'admin@example.com' },
-    });
-
     // Create roles if they don't exist
     const roleNames = [
       'admin',
@@ -163,24 +158,30 @@ export class AuthService {
       roles.push(role);
     }
 
-    if (!adminUser) {
-      // Create admin user
-      const adminRole = roles.find((r) => r.name === 'admin');
-      if (adminRole) {
-        const newAdmin = this.userRepository.create({
-          email: 'admin@example.com',
-          password: 'Admin123!',
-          firstName: 'System',
-          lastName: 'Administrator',
-          isActive: true,
-          roles: [adminRole],
-        });
+    // Delete existing admin user and recreate to ensure clean state
+    const existingAdmin = await this.userRepository.findOne({
+      where: { email: 'admin@example.com' },
+    });
 
-        await this.userRepository.save(newAdmin);
-        console.log('✅ Default admin user created: admin@example.com / Admin123!');
-      }
-    } else {
-      console.log('ℹ️ Admin user already exists');
+    if (existingAdmin) {
+      await this.userRepository.remove(existingAdmin);
+      console.log('🔄 Removed existing admin user for fresh setup');
+    }
+
+    // Create admin user with fresh password
+    const adminRole = roles.find((r) => r.name === 'admin');
+    if (adminRole) {
+      const newAdmin = this.userRepository.create({
+        email: 'admin@example.com',
+        password: 'admin123',
+        firstName: 'System',
+        lastName: 'Administrator',
+        isActive: true,
+        roles: [adminRole],
+      });
+
+      await this.userRepository.save(newAdmin);
+      console.log('✅ Admin user created: admin@example.com / admin123');
     }
   }
 }
