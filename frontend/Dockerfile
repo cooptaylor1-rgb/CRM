@@ -38,7 +38,7 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application
 COPY --from=build /app/.next ./.next
-COPY --from=build /app/public ./public
+COPY --from=build /app/public* ./public/
 COPY --from=build /app/next.config.js ./
 
 # Create non-root user
