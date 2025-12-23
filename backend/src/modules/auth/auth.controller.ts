@@ -11,6 +11,12 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Get('debug')
+  @ApiOperation({ summary: 'Debug auth' })
+  async debug() {
+    return this.authService.debugAuth();
+  }
+
   @Post('login')
   @ApiOperation({ summary: 'User login' })
   @ApiResponse({ status: 200, description: 'Login successful', type: AuthResponseDto })

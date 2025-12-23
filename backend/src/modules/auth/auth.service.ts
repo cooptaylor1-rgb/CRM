@@ -115,6 +115,29 @@ export class AuthService {
     };
   }
 
+  async debugAuth() {
+    const user = await this.userRepository.findOne({
+      where: { email: 'admin@example.com' },
+    });
+    
+    if (!user) {
+      return { error: 'No admin user found' };
+    }
+
+    const bcrypt = require('bcrypt');
+    const testPassword = 'admin123';
+    const isValid = await bcrypt.compare(testPassword, user.password);
+    
+    return {
+      userExists: true,
+      email: user.email,
+      passwordLength: user.password?.length,
+      passwordStart: user.password?.substring(0, 10),
+      isActive: user.isActive,
+      testPasswordValid: isValid,
+    };
+  }
+
   private async generateTokens(user: User) {
     const payload = { email: user.email, sub: user.id, roles: user.roleNames };
 
