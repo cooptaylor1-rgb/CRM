@@ -11,6 +11,31 @@ import { ComplianceModule } from './modules/compliance/compliance.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { HealthController } from './health.controller';
 
+// Import all entities explicitly for production builds
+import { User } from './modules/auth/entities/user.entity';
+import { Role } from './modules/auth/entities/role.entity';
+import { Household } from './modules/households/entities/household.entity';
+import { Account } from './modules/accounts/entities/account.entity';
+import { Position } from './modules/accounts/entities/position.entity';
+import { Person } from './modules/persons/entities/person.entity';
+import { LegalEntity } from './modules/entities/entities/entity.entity';
+import { AuditEvent } from './modules/audit/entities/audit-event.entity';
+import { ComplianceReview } from './modules/compliance/entities/compliance-review.entity';
+import { Document } from './modules/documents/entities/document.entity';
+
+const entities = [
+  User,
+  Role,
+  Household,
+  Account,
+  Position,
+  Person,
+  LegalEntity,
+  AuditEvent,
+  ComplianceReview,
+  Document,
+];
+
 @Module({
   imports: [
     // Global configuration
@@ -30,7 +55,7 @@ import { HealthController } from './health.controller';
           return {
             type: 'postgres',
             url: databaseUrl,
-            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+            entities: entities,
             synchronize: false,
             logging: configService.get('NODE_ENV') === 'development',
             ssl: { rejectUnauthorized: false },
@@ -45,7 +70,7 @@ import { HealthController } from './health.controller';
           username: configService.get('DB_USER'),
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_NAME'),
-          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          entities: entities,
           synchronize: false,
           logging: configService.get('NODE_ENV') === 'development',
           ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
