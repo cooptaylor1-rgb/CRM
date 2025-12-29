@@ -101,9 +101,16 @@ const entities = [
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const databaseUrl = configService.get('DATABASE_URL');
+        // Railway provides DATABASE_URL automatically when Postgres is linked
+        // It may also be available as POSTGRES_URL or similar
+        const databaseUrl = configService.get('DATABASE_URL') || 
+                           configService.get('POSTGRES_URL') ||
+                           configService.get('POSTGRESQL_URL');
         
         console.log('📦 Configuring database connection...');
+        console.log('📦 DATABASE_URL exists:', !!configService.get('DATABASE_URL'));
+        console.log('📦 POSTGRES_URL exists:', !!configService.get('POSTGRES_URL'));
+        console.log('📦 DB_HOST value:', configService.get('DB_HOST'));
         
         // If DATABASE_URL is provided (Railway), use it directly
         if (databaseUrl) {
