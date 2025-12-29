@@ -47,6 +47,11 @@ export class CreatePersonDto {
   @IsString()
   address?: string;
 
+  @ApiPropertyOptional({ example: '123-45-6789', description: 'Social Security Number (will be encrypted)' })
+  @IsOptional()
+  @IsString()
+  ssn?: string;
+
   @ApiPropertyOptional({ default: false })
   @IsOptional()
   @IsBoolean()

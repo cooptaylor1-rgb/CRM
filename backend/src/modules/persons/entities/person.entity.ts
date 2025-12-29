@@ -9,7 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Household } from '../../households/entities/household.entity';
-import { Encrypted } from '../../../common/decorators/encrypted.decorator';
+import { encryptedTransformer } from '../../../common/transformers/encrypted.transformer';
 
 export enum KycStatus {
   PENDING = 'pending',
@@ -34,24 +34,19 @@ export class Person {
   @Column({ name: 'middle_name', nullable: true })
   middleName: string;
 
-  @Column({ name: 'date_of_birth', nullable: true })
-  @Encrypted()
-  dateOfBirth: Date;
+  @Column({ name: 'date_of_birth', type: 'text', nullable: true, transformer: encryptedTransformer })
+  dateOfBirth: string;
 
-  @Column({ nullable: true })
-  @Encrypted()
+  @Column({ type: 'text', nullable: true, transformer: encryptedTransformer })
   email: string;
 
-  @Column({ name: 'phone_primary', nullable: true })
-  @Encrypted()
+  @Column({ name: 'phone_primary', type: 'text', nullable: true, transformer: encryptedTransformer })
   phonePrimary: string;
 
-  @Column({ type: 'text', nullable: true })
-  @Encrypted()
+  @Column({ type: 'text', nullable: true, transformer: encryptedTransformer })
   address: string;
 
-  @Column({ name: 'ssn', type: 'text', nullable: true })
-  @Encrypted()
+  @Column({ name: 'ssn', type: 'text', nullable: true, transformer: encryptedTransformer })
   ssn: string;
 
   @Column({ name: 'is_primary_contact', default: false })
