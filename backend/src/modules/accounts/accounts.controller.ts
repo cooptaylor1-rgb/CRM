@@ -15,6 +15,7 @@ import { UpdateAccountDto } from './dto/update-account.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('accounts')
 @Controller('accounts')
@@ -27,8 +28,11 @@ export class AccountsController {
   @Roles('admin', 'advisor', 'operations')
   @ApiOperation({ summary: 'Create a new account' })
   @ApiResponse({ status: 201, description: 'Account created successfully' })
-  create(@Body() createAccountDto: CreateAccountDto) {
-    return this.accountsService.create(createAccountDto);
+  create(
+    @Body() createAccountDto: CreateAccountDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.accountsService.create(createAccountDto, userId);
   }
 
   @Get()
@@ -50,15 +54,19 @@ export class AccountsController {
   @Roles('admin', 'advisor', 'operations')
   @ApiOperation({ summary: 'Update an account' })
   @ApiResponse({ status: 200, description: 'Account updated successfully' })
-  update(@Param('id') id: string, @Body() updateAccountDto: UpdateAccountDto) {
-    return this.accountsService.update(id, updateAccountDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateAccountDto: UpdateAccountDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.accountsService.update(id, updateAccountDto, userId);
   }
 
   @Delete(':id')
   @Roles('admin')
-  @ApiOperation({ summary: 'Delete an account' })
-  @ApiResponse({ status: 200, description: 'Account deleted successfully' })
-  remove(@Param('id') id: string) {
-    return this.accountsService.remove(id);
+  @ApiOperation({ summary: 'Soft delete an account (SEC compliance)' })
+  @ApiResponse({ status: 200, description: 'Account soft deleted successfully' })
+  remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.accountsService.remove(id, userId);
   }
 }

@@ -148,7 +148,8 @@ CREATE TABLE persons (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by UUID NOT NULL REFERENCES users(id),
     updated_by UUID NOT NULL REFERENCES users(id),
-    CONSTRAINT chk_age CHECK (date_of_birth <= CURRENT_DATE - INTERVAL '18 years'),
+    -- Note: Age check removed - cannot validate encrypted date_of_birth at DB level
+    -- Application layer must validate age >= 18 before encryption
     CONSTRAINT chk_kyc_expiration CHECK (kyc_expiration_date IS NULL OR kyc_expiration_date > kyc_verified_date)
 );
 
@@ -463,29 +464,27 @@ CREATE INDEX idx_communications_tags ON communications USING gin (tags);
 -- AUDIT EVENTS
 -- =============================================
 
+-- Non-partitioned audit table for simplicity (can partition later)
 CREATE TABLE audit_events (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID NOT NULL DEFAULT uuid_generate_v4(),
     event_type audit_event_type NOT NULL,
-    entity_type VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(100),
     entity_id UUID,
     user_id UUID NOT NULL REFERENCES users(id),
     timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    ip_address INET NOT NULL,
+    ip_address INET,
     user_agent TEXT,
     session_id VARCHAR(100),
     request_id VARCHAR(100),
     action VARCHAR(100) NOT NULL,
-    result audit_result NOT NULL,
-    severity audit_severity NOT NULL,
+    result audit_result DEFAULT 'SUCCESS',
+    severity audit_severity DEFAULT 'INFO',
     changes JSONB,
     metadata JSONB,
     error_message TEXT,
-    retention_until DATE NOT NULL DEFAULT (CURRENT_DATE + INTERVAL '7 years')
-) PARTITION BY RANGE (timestamp);
-
--- Create monthly partitions (manually or via automation)
-CREATE TABLE audit_events_2024_12 PARTITION OF audit_events
-    FOR VALUES FROM ('2024-12-01') TO ('2025-01-01');
+    retention_until DATE NOT NULL DEFAULT (CURRENT_DATE + INTERVAL '7 years'),
+    PRIMARY KEY (id)
+);
 
 CREATE INDEX idx_audit_timestamp ON audit_events(timestamp);
 CREATE INDEX idx_audit_user ON audit_events(user_id);

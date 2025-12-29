@@ -4,17 +4,31 @@ import { Repository } from 'typeorm';
 import { Person } from './entities/person.entity';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
+import { AuditService } from '../audit/audit.service';
+import { AuditEventType } from '../audit/entities/audit-event.entity';
 
 @Injectable()
 export class PersonsService {
   constructor(
     @InjectRepository(Person)
     private personsRepository: Repository<Person>,
+    private auditService: AuditService,
   ) {}
 
-  async create(createPersonDto: CreatePersonDto): Promise<Person> {
+  async create(createPersonDto: CreatePersonDto, userId: string): Promise<Person> {
     const person = this.personsRepository.create(createPersonDto);
-    return this.personsRepository.save(person);
+    const saved = await this.personsRepository.save(person);
+    
+    await this.auditService.logEvent({
+      userId,
+      eventType: AuditEventType.CREATE,
+      entityType: 'Person',
+      entityId: saved.id,
+      action: 'Created person',
+      changes: { lastName: saved.lastName, isPrimaryContact: saved.isPrimaryContact },
+    });
+    
+    return saved;
   }
 
   async findAll(): Promise<Person[]> {
@@ -37,14 +51,45 @@ export class PersonsService {
     return person;
   }
 
-  async update(id: string, updatePersonDto: UpdatePersonDto): Promise<Person> {
+  async update(id: string, updatePersonDto: UpdatePersonDto, userId: string): Promise<Person> {
     const person = await this.findOne(id);
+    const previousState = { ...person };
+    
     Object.assign(person, updatePersonDto);
-    return this.personsRepository.save(person);
+    const saved = await this.personsRepository.save(person);
+    
+    await this.auditService.logEvent({
+      userId,
+      eventType: AuditEventType.UPDATE,
+      entityType: 'Person',
+      entityId: id,
+      action: 'Updated person',
+      changes: {
+        before: { kycStatus: previousState.kycStatus },
+        after: { kycStatus: saved.kycStatus },
+      },
+    });
+    
+    return saved;
   }
 
-  async remove(id: string): Promise<void> {
+  /**
+   * Soft delete for SEC compliance - person records must be retained.
+   */
+  async remove(id: string, userId: string): Promise<void> {
     const person = await this.findOne(id);
-    await this.personsRepository.remove(person);
+    
+    person.deletedBy = userId;
+    await this.personsRepository.save(person);
+    await this.personsRepository.softRemove(person);
+    
+    await this.auditService.logEvent({
+      userId,
+      eventType: AuditEventType.DELETE,
+      entityType: 'Person',
+      entityId: id,
+      action: 'Soft deleted person',
+      changes: { lastName: person.lastName },
+    });
   }
 }

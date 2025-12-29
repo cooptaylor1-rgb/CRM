@@ -15,6 +15,7 @@ import { UpdatePersonDto } from './dto/update-person.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('persons')
 @Controller('persons')
@@ -27,8 +28,11 @@ export class PersonsController {
   @Roles('admin', 'advisor', 'operations')
   @ApiOperation({ summary: 'Create a new person' })
   @ApiResponse({ status: 201, description: 'Person created successfully' })
-  create(@Body() createPersonDto: CreatePersonDto) {
-    return this.personsService.create(createPersonDto);
+  create(
+    @Body() createPersonDto: CreatePersonDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.personsService.create(createPersonDto, userId);
   }
 
   @Get()
@@ -50,15 +54,19 @@ export class PersonsController {
   @Roles('admin', 'advisor', 'operations')
   @ApiOperation({ summary: 'Update a person' })
   @ApiResponse({ status: 200, description: 'Person updated successfully' })
-  update(@Param('id') id: string, @Body() updatePersonDto: UpdatePersonDto) {
-    return this.personsService.update(id, updatePersonDto);
+  update(
+    @Param('id') id: string,
+    @Body() updatePersonDto: UpdatePersonDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.personsService.update(id, updatePersonDto, userId);
   }
 
   @Delete(':id')
   @Roles('admin')
-  @ApiOperation({ summary: 'Delete a person' })
-  @ApiResponse({ status: 200, description: 'Person deleted successfully' })
-  remove(@Param('id') id: string) {
-    return this.personsService.remove(id);
+  @ApiOperation({ summary: 'Soft delete a person (SEC compliance)' })
+  @ApiResponse({ status: 200, description: 'Person soft deleted successfully' })
+  remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.personsService.remove(id, userId);
   }
 }

@@ -4,10 +4,12 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { Household } from '../../households/entities/household.entity';
+import { Encrypted } from '../../../common/decorators/encrypted.decorator';
 
 export enum KycStatus {
   PENDING = 'pending',
@@ -33,16 +35,24 @@ export class Person {
   middleName: string;
 
   @Column({ name: 'date_of_birth', nullable: true })
+  @Encrypted()
   dateOfBirth: Date;
 
   @Column({ nullable: true })
+  @Encrypted()
   email: string;
 
   @Column({ name: 'phone_primary', nullable: true })
+  @Encrypted()
   phonePrimary: string;
 
   @Column({ type: 'text', nullable: true })
+  @Encrypted()
   address: string;
+
+  @Column({ name: 'ssn', type: 'text', nullable: true })
+  @Encrypted()
+  ssn: string;
 
   @Column({ name: 'is_primary_contact', default: false })
   isPrimaryContact: boolean;
@@ -64,4 +74,10 @@ export class Person {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date | null;
+
+  @Column({ name: 'deleted_by', type: 'uuid', nullable: true })
+  deletedBy: string | null;
 }

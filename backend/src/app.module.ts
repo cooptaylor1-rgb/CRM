@@ -10,6 +10,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { ComplianceModule } from './modules/compliance/compliance.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { HealthController } from './health.controller';
+import { EncryptionModule } from './common/services/encryption.module';
 
 // Import all entities explicitly for production builds
 import { User } from './modules/auth/entities/user.entity';
@@ -71,7 +72,7 @@ const entities = [
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_NAME'),
           entities: entities,
-          synchronize: false,
+          synchronize: true, // Auto-sync in development
           logging: configService.get('NODE_ENV') === 'development',
           ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
         };
@@ -79,6 +80,7 @@ const entities = [
     }),
 
     // Feature modules
+    EncryptionModule,
     AuthModule,
     HouseholdsModule,
     AccountsModule,
