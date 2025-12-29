@@ -36,8 +36,27 @@ async function bootstrap() {
   );
 
   // Enable CORS for frontend
+  const allowedOrigins = process.env.FRONTEND_URL 
+    ? [process.env.FRONTEND_URL, 'http://localhost:3000']
+    : ['http://localhost:3000'];
+  
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+      
+      // Check if origin matches allowed origins or Railway/GitHub patterns
+      const isAllowed = allowedOrigins.some(allowed => origin === allowed) ||
+        /\.up\.railway\.app$/.test(origin) ||
+        /\.railway\.app$/.test(origin) ||
+        /\.app\.github\.dev$/.test(origin);
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow all for now, tighten in production
+      }
+    },
     credentials: true,
   });
 
