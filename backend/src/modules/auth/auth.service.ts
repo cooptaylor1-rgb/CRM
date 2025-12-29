@@ -20,25 +20,16 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    console.log(`Login attempt for: ${loginDto.email}`);
-    
     const user = await this.userRepository.findOne({
       where: { email: loginDto.email },
       relations: ['roles'],
     });
 
-    if (!user) {
-      console.log(`User not found: ${loginDto.email}`);
-      throw new UnauthorizedException('Invalid credentials');
-    }
-    
-    if (!user.isActive) {
-      console.log(`User inactive: ${loginDto.email}`);
+    if (!user || !user.isActive) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await user.validatePassword(loginDto.password);
-    console.log(`Password valid for ${loginDto.email}: ${isPasswordValid}`);
     
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -115,29 +106,6 @@ export class AuthService {
     };
   }
 
-  async debugAuth() {
-    const user = await this.userRepository.findOne({
-      where: { email: 'admin@example.com' },
-    });
-    
-    if (!user) {
-      return { error: 'No admin user found' };
-    }
-
-    const bcrypt = require('bcrypt');
-    const testPassword = 'admin123';
-    const isValid = await bcrypt.compare(testPassword, user.password);
-    
-    return {
-      userExists: true,
-      email: user.email,
-      passwordLength: user.password?.length,
-      passwordStart: user.password?.substring(0, 10),
-      isActive: user.isActive,
-      testPasswordValid: isValid,
-    };
-  }
-
   private async generateTokens(user: User) {
     const payload = { email: user.email, sub: user.id, roles: user.roleNames };
 
@@ -176,7 +144,6 @@ export class AuthService {
           description: `${roleName} role`,
         });
         role = await this.roleRepository.save(role);
-        console.log(`✅ Created role: ${roleName}`);
       }
       roles.push(role);
     }
@@ -188,15 +155,14 @@ export class AuthService {
 
     if (existingAdmin) {
       await this.userRepository.remove(existingAdmin);
-      console.log('🔄 Removed existing admin user for fresh setup');
     }
 
-    // Create admin user with fresh password
+    // Create admin user with fresh password (matches README)
     const adminRole = roles.find((r) => r.name === 'admin');
     if (adminRole) {
       const newAdmin = this.userRepository.create({
         email: 'admin@example.com',
-        password: 'admin123',
+        password: 'Admin123!',
         firstName: 'System',
         lastName: 'Administrator',
         isActive: true,
@@ -204,7 +170,6 @@ export class AuthService {
       });
 
       await this.userRepository.save(newAdmin);
-      console.log('✅ Admin user created: admin@example.com / admin123');
     }
   }
 }

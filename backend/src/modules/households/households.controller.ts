@@ -15,6 +15,7 @@ import { UpdateHouseholdDto } from './dto/update-household.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('households')
 @Controller('households')
@@ -29,8 +30,11 @@ export class HouseholdsController {
   @ApiResponse({ status: 201, description: 'Household created successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createHouseholdDto: CreateHouseholdDto) {
-    return this.householdsService.create(createHouseholdDto);
+  create(
+    @Body() createHouseholdDto: CreateHouseholdDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.householdsService.create(createHouseholdDto, userId);
   }
 
   @Get()
@@ -53,16 +57,20 @@ export class HouseholdsController {
   @ApiOperation({ summary: 'Update a household' })
   @ApiResponse({ status: 200, description: 'Household updated successfully' })
   @ApiResponse({ status: 404, description: 'Household not found' })
-  update(@Param('id') id: string, @Body() updateHouseholdDto: UpdateHouseholdDto) {
-    return this.householdsService.update(id, updateHouseholdDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateHouseholdDto: UpdateHouseholdDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.householdsService.update(id, updateHouseholdDto, userId);
   }
 
   @Delete(':id')
   @Roles('admin')
-  @ApiOperation({ summary: 'Delete a household' })
-  @ApiResponse({ status: 200, description: 'Household deleted successfully' })
+  @ApiOperation({ summary: 'Soft delete a household (SEC compliance)' })
+  @ApiResponse({ status: 200, description: 'Household soft deleted successfully' })
   @ApiResponse({ status: 404, description: 'Household not found' })
-  remove(@Param('id') id: string) {
-    return this.householdsService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.householdsService.remove(id, userId);
   }
 }
