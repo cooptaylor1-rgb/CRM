@@ -30,7 +30,7 @@ export class EncryptedTransformer implements ValueTransformer {
   /**
    * Encrypt value when writing to database
    */
-  to(value: string | null | undefined): string | null {
+  to(value: string | Date | null | undefined): string | null {
     if (value === null || value === undefined || value === '') {
       return value as null;
     }
