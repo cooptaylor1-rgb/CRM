@@ -12,6 +12,16 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { HealthController } from './health.controller';
 import { EncryptionModule } from './common/services/encryption.module';
 
+// New feature modules
+import { TasksModule } from './modules/tasks/tasks.module';
+import { PipelineModule } from './modules/pipeline/pipeline.module';
+import { PreferencesModule } from './modules/preferences/preferences.module';
+import { SecurityModule } from './modules/security/security.module';
+import { MeetingsModule } from './modules/meetings/meetings.module';
+import { WorkflowsModule } from './modules/workflows/workflows.module';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+
 // Import all entities explicitly for production builds
 import { User } from './modules/auth/entities/user.entity';
 import { Role } from './modules/auth/entities/role.entity';
@@ -24,7 +34,20 @@ import { AuditEvent } from './modules/audit/entities/audit-event.entity';
 import { ComplianceReview } from './modules/compliance/entities/compliance-review.entity';
 import { Document } from './modules/documents/entities/document.entity';
 
+// New module entities
+import { Task } from './modules/tasks/entities/task.entity';
+import { Prospect, ProspectActivity } from './modules/pipeline/entities/prospect.entity';
+import { ClientPreference } from './modules/preferences/entities/client-preference.entity';
+import { ClientRelationship } from './modules/preferences/entities/client-relationship.entity';
+import { SecurityIncident } from './modules/security/entities/security-incident.entity';
+import { KycVerification, SuspiciousActivityReport } from './modules/security/entities/kyc.entity';
+import { Meeting, MeetingNotes } from './modules/meetings/entities/meeting.entity';
+import { WorkflowTemplate, WorkflowInstance } from './modules/workflows/entities/workflow.entity';
+import { UserIntegration, SyncedCalendarEvent, SyncedEmail, EmailThread, IntegrationSyncLog } from './modules/integrations/entities/integration.entity';
+import { ClientProfitability, AdvisorMetrics, FirmMetrics, ActivitySnapshot } from './modules/analytics/entities/analytics.entity';
+
 const entities = [
+  // Core entities
   User,
   Role,
   Household,
@@ -35,6 +58,35 @@ const entities = [
   AuditEvent,
   ComplianceReview,
   Document,
+  // Task management
+  Task,
+  // Pipeline
+  Prospect,
+  ProspectActivity,
+  // Client preferences
+  ClientPreference,
+  ClientRelationship,
+  // Security & compliance
+  SecurityIncident,
+  KycVerification,
+  SuspiciousActivityReport,
+  // Meetings
+  Meeting,
+  MeetingNotes,
+  // Workflows
+  WorkflowTemplate,
+  WorkflowInstance,
+  // Integrations
+  UserIntegration,
+  SyncedCalendarEvent,
+  SyncedEmail,
+  EmailThread,
+  IntegrationSyncLog,
+  // Analytics
+  ClientProfitability,
+  AdvisorMetrics,
+  FirmMetrics,
+  ActivitySnapshot,
 ];
 
 @Module({
@@ -89,6 +141,15 @@ const entities = [
     AuditModule,
     ComplianceModule,
     DocumentsModule,
+    // New feature modules
+    TasksModule,
+    PipelineModule,
+    PreferencesModule,
+    SecurityModule,
+    MeetingsModule,
+    WorkflowsModule,
+    IntegrationsModule,
+    AnalyticsModule,
   ],
   controllers: [HealthController],
 })

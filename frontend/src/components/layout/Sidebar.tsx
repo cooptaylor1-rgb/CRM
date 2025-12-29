@@ -13,6 +13,10 @@ export function Sidebar() {
     { name: 'Dashboard', href: '/dashboard', icon: '📊' },
     { name: 'Households', href: '/households', icon: '🏠' },
     { name: 'Accounts', href: '/accounts', icon: '💼' },
+    { name: 'Pipeline', href: '/pipeline', icon: '🎯' },
+    { name: 'Tasks', href: '/tasks', icon: '✓' },
+    { name: 'Meetings', href: '/meetings', icon: '📅' },
+    { name: 'Workflows', href: '/workflows', icon: '⚡' },
     { name: 'Compliance', href: '/compliance', icon: '✅' },
     { name: 'Audit Log', href: '/audit', icon: '📝' },
   ];
