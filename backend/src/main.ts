@@ -6,6 +6,10 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
 async function bootstrap() {
+  console.log('🚀 Starting CRM Backend...');
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Database URL configured: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
+  
   const app = await NestFactory.create(AppModule);
 
   // Security middleware

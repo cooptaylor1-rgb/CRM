@@ -103,8 +103,11 @@ const entities = [
       useFactory: (configService: ConfigService) => {
         const databaseUrl = configService.get('DATABASE_URL');
         
+        console.log('📦 Configuring database connection...');
+        
         // If DATABASE_URL is provided (Railway), use it directly
         if (databaseUrl) {
+          console.log('📦 Using DATABASE_URL for connection');
           return {
             type: 'postgres',
             url: databaseUrl,
@@ -115,14 +118,15 @@ const entities = [
           };
         }
         
+        console.log('📦 Using individual DB_* environment variables');
         // Otherwise use individual environment variables
         return {
           type: 'postgres',
-          host: configService.get('DB_HOST'),
-          port: configService.get('DB_PORT'),
-          username: configService.get('DB_USER'),
-          password: configService.get('DB_PASSWORD'),
-          database: configService.get('DB_NAME'),
+          host: configService.get('DB_HOST') || 'localhost',
+          port: configService.get('DB_PORT') || 5432,
+          username: configService.get('DB_USER') || 'postgres',
+          password: configService.get('DB_PASSWORD') || 'postgres',
+          database: configService.get('DB_NAME') || 'crm_db',
           entities: entities,
           synchronize: true, // Auto-sync in development
           logging: configService.get('NODE_ENV') === 'development',
