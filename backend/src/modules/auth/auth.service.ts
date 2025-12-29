@@ -57,7 +57,7 @@ export class AuthService {
   async refreshToken(refreshToken: string): Promise<AuthResponseDto> {
     try {
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get('REFRESH_TOKEN_SECRET'),
+        secret: this.configService.get('REFRESH_TOKEN_SECRET') || 'dev-refresh-secret-change-in-production',
       });
 
       const user = await this.userRepository.findOne({
@@ -110,12 +110,12 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id, roles: user.roleNames };
 
     const accessToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_SECRET'),
+      secret: this.configService.get('JWT_SECRET') || 'dev-jwt-secret-change-in-production',
       expiresIn: this.configService.get('JWT_EXPIRES_IN') || '15m',
     });
 
     const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('REFRESH_TOKEN_SECRET'),
+      secret: this.configService.get('REFRESH_TOKEN_SECRET') || 'dev-refresh-secret-change-in-production',
       expiresIn: this.configService.get('REFRESH_TOKEN_EXPIRES_IN') || '7d',
     });
 

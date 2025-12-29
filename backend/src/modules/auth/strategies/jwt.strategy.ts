@@ -13,10 +13,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {
+    const jwtSecret = configService.get('JWT_SECRET') || 'dev-jwt-secret-change-in-production';
+    if (!configService.get('JWT_SECRET')) {
+      console.warn('⚠️  JWT_SECRET not set - using development secret. Set JWT_SECRET in production!');
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_SECRET'),
+      secretOrKey: jwtSecret,
     });
   }
 
