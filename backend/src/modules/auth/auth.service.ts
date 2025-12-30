@@ -171,11 +171,11 @@ export class AuthService {
         ['admin@example.com']
       );
       const deleteResult = await this.userRepository.delete({ email: 'admin@example.com' });
-      if (deleteResult.affected > 0) {
+      if (deleteResult.affected && deleteResult.affected > 0) {
         console.log('🔐 Removed existing admin user');
       }
     } catch (err) {
-      console.log('🔐 Note: Could not delete existing admin (may not exist):', err.message);
+      console.log('🔐 Note: Could not delete existing admin (may not exist):', (err as Error).message);
     }
 
     // Create admin user with fresh password (matches README)
