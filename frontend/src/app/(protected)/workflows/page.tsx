@@ -1,7 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { 
+  PageHeader, 
+  PageContent 
+} from '@/components/layout/AppShell';
+import { 
+  Button,
+  Card,
+  StatusBadge,
+} from '@/components/ui';
+import { PlusIcon, Cog6ToothIcon, PlayIcon, XCircleIcon } from '@heroicons/react/20/solid';
 import { workflowsService, WorkflowTemplate, WorkflowInstance, WorkflowStats } from '@/services/workflows.service';
+
+type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'default';
+
+const statusConfig: Record<string, { label: string; variant: StatusVariant }> = {
+  pending: { label: 'Pending', variant: 'default' },
+  in_progress: { label: 'In Progress', variant: 'info' },
+  running: { label: 'Running', variant: 'info' },
+  completed: { label: 'Completed', variant: 'success' },
+  failed: { label: 'Failed', variant: 'error' },
+  cancelled: { label: 'Cancelled', variant: 'warning' },
+};
 
 export default function WorkflowsPage() {
   const [activeTab, setActiveTab] = useState<'templates' | 'instances'>('templates');
@@ -11,10 +32,6 @@ export default function WorkflowsPage() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplate | null>(null);
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   const loadData = async () => {
     try {
@@ -33,6 +50,10 @@ export default function WorkflowsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleToggleTemplate = async (templateId: string, isActive: boolean) => {
     try {
@@ -56,17 +77,6 @@ export default function WorkflowsPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      pending: 'bg-gray-100 text-gray-700',
-      in_progress: 'bg-blue-100 text-blue-700',
-      completed: 'bg-green-100 text-green-700',
-      failed: 'bg-red-100 text-red-700',
-      cancelled: 'bg-yellow-100 text-yellow-700',
-    };
-    return styles[status] || 'bg-gray-100 text-gray-700';
-  };
-
   const getTriggerIcon = (triggerType: string) => {
     const icons: Record<string, string> = {
       manual: '👆',
@@ -79,242 +89,246 @@ export default function WorkflowsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading workflows...</div>
-      </div>
+      <>
+        <PageHeader title="Workflows" subtitle="Automate your client management processes" />
+        <PageContent>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-primary"></div>
+          </div>
+        </PageContent>
+      </>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Workflows</h1>
-          <p className="text-gray-600 mt-1">Automate your client management processes</p>
-        </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          + New Template
-        </button>
-      </div>
-
-      {/* Stats Cards */}
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <div className="text-2xl font-bold text-gray-900">{templates.length}</div>
-            <div className="text-sm text-gray-500">Total Templates</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <div className="text-2xl font-bold text-green-600">{stats.totalActive}</div>
-            <div className="text-sm text-gray-500">Active Workflows</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <div className="text-2xl font-bold text-blue-600">{stats.completedThisMonth}</div>
-            <div className="text-sm text-gray-500">Completed This Month</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <div className="text-2xl font-bold text-purple-600">{stats.averageCompletionDays.toFixed(1)}</div>
-            <div className="text-sm text-gray-500">Avg Days to Complete</div>
-          </div>
-        </div>
-      )}
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('templates')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'templates'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+    <>
+      <PageHeader
+        title="Workflows"
+        subtitle="Automate your client management processes"
+        actions={
+          <Button 
+            leftIcon={<PlusIcon className="w-4 h-4" />}
+            onClick={() => setShowCreateModal(true)}
           >
-            Templates ({templates.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('instances')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'instances'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Runs ({instances.length})
-          </button>
-        </nav>
-      </div>
+            New Template
+          </Button>
+        }
+      />
 
-      {/* Templates Tab */}
-      {activeTab === 'templates' && (
-        <div className="grid gap-4">
-          {templates.length === 0 ? (
-            <div className="bg-white rounded-lg p-8 text-center shadow-sm border">
-              <div className="text-4xl mb-4">🔧</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No workflow templates</h3>
-              <p className="text-gray-500 mb-4">Create your first workflow template to automate tasks</p>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Create Template
-              </button>
-            </div>
-          ) : (
-            templates.map((template) => (
-              <div
-                key={template.id}
-                className="bg-white rounded-lg p-4 shadow-sm border hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{getTriggerIcon(template.trigger)}</span>
-                      <div>
-                        <h3 className="font-medium text-gray-900">{template.name}</h3>
-                        <p className="text-sm text-gray-500">{template.description}</p>
+      <PageContent>
+        {/* Stats Cards */}
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <Card className="p-4">
+              <p className="text-xs font-medium text-content-secondary uppercase tracking-wider">Total Templates</p>
+              <p className="text-2xl font-semibold text-content-primary mt-1">{templates.length}</p>
+            </Card>
+            <Card className="p-4">
+              <p className="text-xs font-medium text-content-secondary uppercase tracking-wider">Active Workflows</p>
+              <p className="text-2xl font-semibold text-status-success-text mt-1">{stats.totalActive}</p>
+            </Card>
+            <Card className="p-4">
+              <p className="text-xs font-medium text-content-secondary uppercase tracking-wider">Completed This Month</p>
+              <p className="text-2xl font-semibold text-status-info-text mt-1">{stats.completedThisMonth}</p>
+            </Card>
+            <Card className="p-4">
+              <p className="text-xs font-medium text-content-secondary uppercase tracking-wider">Avg Days to Complete</p>
+              <p className="text-2xl font-semibold text-accent-primary mt-1">{stats.averageCompletionDays.toFixed(1)}</p>
+            </Card>
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div className="border-b border-border-default mb-6">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('templates')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'templates'
+                  ? 'border-accent-primary text-accent-primary'
+                  : 'border-transparent text-content-secondary hover:text-content-primary'
+              }`}
+            >
+              Templates ({templates.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('instances')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'instances'
+                  ? 'border-accent-primary text-accent-primary'
+                  : 'border-transparent text-content-secondary hover:text-content-primary'
+              }`}
+            >
+              Runs ({instances.length})
+            </button>
+          </nav>
+        </div>
+
+        {/* Templates Tab */}
+        {activeTab === 'templates' && (
+          <div className="grid gap-4">
+            {templates.length === 0 ? (
+              <Card className="p-8 text-center">
+                <Cog6ToothIcon className="w-12 h-12 text-content-tertiary mx-auto" />
+                <h3 className="text-lg font-medium text-content-primary mt-4 mb-2">No workflow templates</h3>
+                <p className="text-content-secondary mb-4">Create your first workflow template to automate tasks</p>
+                <Button
+                  onClick={() => setShowCreateModal(true)}
+                  leftIcon={<PlusIcon className="w-4 h-4" />}
+                >
+                  Create Template
+                </Button>
+              </Card>
+            ) : (
+              templates.map((template) => (
+                <Card
+                  key={template.id}
+                  className="p-4 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{getTriggerIcon(template.trigger)}</span>
+                        <div>
+                          <h3 className="font-medium text-content-primary">{template.name}</h3>
+                          <p className="text-sm text-content-secondary">{template.description}</p>
+                        </div>
+                      </div>
+
+                      {/* Steps Preview */}
+                      <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2">
+                        {template.steps.map((step, index) => (
+                          <div key={step.id} className="flex items-center">
+                            <div className="px-3 py-1 bg-surface-secondary rounded text-sm whitespace-nowrap text-content-primary">
+                              {step.name}
+                            </div>
+                            {index < template.steps.length - 1 && (
+                              <span className="mx-2 text-content-tertiary">→</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-4 text-sm text-content-tertiary">
+                        <span>Trigger: {template.trigger}</span>
+                        <span>{template.steps.length} steps</span>
+                        <span>
+                          Created {new Date(template.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Steps Preview */}
-                    <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2">
-                      {template.steps.map((step, index) => (
-                        <div key={step.id} className="flex items-center">
-                          <div className="px-3 py-1 bg-gray-100 rounded text-sm whitespace-nowrap">
-                            {step.name}
-                          </div>
-                          {index < template.steps.length - 1 && (
-                            <span className="mx-2 text-gray-400">→</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-3 flex items-center gap-4 text-sm text-gray-500">
-                      <span>Trigger: {template.trigger}</span>
-                      <span>{template.steps.length} steps</span>
-                      <span>
-                        Created {new Date(template.createdAt).toLocaleDateString()}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={template.status === 'active' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => handleToggleTemplate(template.id, template.status === 'active')}
+                      >
+                        {template.status === 'active' ? 'Active' : 'Inactive'}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedTemplate(template)}
+                      >
+                        <Cog6ToothIcon className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
+                </Card>
+              ))
+            )}
+          </div>
+        )}
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleToggleTemplate(template.id, template.status === 'active')}
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        template.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}
-                    >
-                      {template.status === 'active' ? 'Active' : 'Inactive'}
-                    </button>
-                    <button
-                      onClick={() => setSelectedTemplate(template)}
-                      className="p-2 text-gray-400 hover:text-gray-600"
-                    >
-                      ⚙️
-                    </button>
-                  </div>
-                </div>
+        {/* Instances Tab */}
+        {activeTab === 'instances' && (
+          <Card noPadding>
+            {instances.length === 0 ? (
+              <div className="p-8 text-center">
+                <PlayIcon className="w-12 h-12 text-content-tertiary mx-auto" />
+                <h3 className="text-lg font-medium text-content-primary mt-4 mb-2">No workflow runs</h3>
+                <p className="text-content-secondary">Workflow runs will appear here when templates are triggered</p>
               </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {/* Instances Tab */}
-      {activeTab === 'instances' && (
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          {instances.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="text-4xl mb-4">📋</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No workflow runs</h3>
-              <p className="text-gray-500">Workflow runs will appear here when templates are triggered</p>
-            </div>
-          ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Instance
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Progress
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Started
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {instances.map((instance) => {
-                  const template = templates.find(t => t.id === instance.templateId);
-                  const totalSteps = template?.steps.length || Object.keys(instance.stepStatuses).length || 1;
-                  return (
-                    <tr key={instance.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{template?.name || 'Unknown Workflow'}</div>
-                        <div className="text-sm text-gray-500">
-                          {instance.metadata?.householdName || instance.metadata?.clientName || 'N/A'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(
-                            instance.status
-                          )}`}
-                        >
-                          {instance.status.replace('_', ' ')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 bg-gray-200 rounded-full h-2 w-24">
-                            <div
-                              className="bg-blue-600 h-2 rounded-full"
-                              style={{
-                                width: `${(instance.currentStep / totalSteps) * 100}%`,
-                              }}
-                            />
+            ) : (
+              <table className="min-w-full divide-y divide-border-default">
+                <thead className="bg-surface-secondary">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">
+                      Instance
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">
+                      Progress
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">
+                      Started
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-surface-primary divide-y divide-border-default">
+                  {instances.map((instance) => {
+                    const template = templates.find(t => t.id === instance.templateId);
+                    const totalSteps = template?.steps.length || Object.keys(instance.stepStatuses).length || 1;
+                    return (
+                      <tr key={instance.id} className="hover:bg-surface-secondary">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-content-primary">{template?.name || 'Unknown Workflow'}</div>
+                          <div className="text-sm text-content-secondary">
+                            {instance.metadata?.householdName || instance.metadata?.clientName || 'N/A'}
                           </div>
-                          <span className="text-sm text-gray-500">
-                            {instance.currentStep}/{totalSteps}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(instance.startedAt).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {instance.status === 'running' && (
-                          <button
-                            onClick={() => handleCancelInstance(instance.id)}
-                            className="text-red-600 hover:text-red-800 text-sm"
-                          >
-                            Cancel
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <StatusBadge 
+                            status={statusConfig[instance.status]?.variant || 'default'} 
+                            label={statusConfig[instance.status]?.label || instance.status.replace('_', ' ')} 
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 bg-surface-secondary rounded-full h-2 w-24">
+                              <div
+                                className="bg-accent-primary h-2 rounded-full"
+                                style={{
+                                  width: `${(instance.currentStep / totalSteps) * 100}%`,
+                                }}
+                              />
+                            </div>
+                            <span className="text-sm text-content-tertiary">
+                              {instance.currentStep}/{totalSteps}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-content-secondary">
+                          {new Date(instance.startedAt).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {instance.status === 'running' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCancelInstance(instance.id)}
+                              className="text-status-error-text"
+                            >
+                              <XCircleIcon className="w-4 h-4 mr-1" />
+                              Cancel
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </Card>
+        )}
+      </PageContent>
 
       {/* Create Template Modal */}
       {showCreateModal && (
@@ -338,7 +352,7 @@ export default function WorkflowsPage() {
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 

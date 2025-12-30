@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   PageHeader, 
   PageContent 
@@ -12,13 +13,15 @@ import {
   StatusBadge,
   DataTable,
   Avatar,
+  ConfirmModal,
   formatCurrency,
   formatDate,
   type Column,
   type SortDirection,
 } from '@/components/ui';
-import { PlusIcon, EyeIcon, PencilSquareIcon } from '@heroicons/react/20/solid';
+import { PlusIcon, EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/20/solid';
 import { householdsService, Household } from '@/services/households.service';
+import { AddHouseholdModal } from '@/components/modals';
 
 type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'default';
 
@@ -30,6 +33,7 @@ const statusMap: Record<string, { label: string; variant: StatusVariant }> = {
 };
 
 export default function HouseholdsPage() {
+  const router = useRouter();
   const [households, setHouseholds] = useState<Household[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchValue, setSearchValue] = useState('');
@@ -38,22 +42,36 @@ export default function HouseholdsPage() {
     direction: 'asc',
   });
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [deleteHouseholdId, setDeleteHouseholdId] = useState<string | null>(null);
   const pageSize = 10;
 
-  useEffect(() => {
-    const fetchHouseholds = async () => {
-      try {
-        const data = await householdsService.getHouseholds();
-        setHouseholds(data);
-      } catch (error) {
-        console.error('Failed to fetch households:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchHouseholds = async () => {
+    try {
+      setLoading(true);
+      const data = await householdsService.getHouseholds();
+      setHouseholds(data);
+    } catch (error) {
+      console.error('Failed to fetch households:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchHouseholds();
   }, []);
+
+  const handleDeleteHousehold = async () => {
+    if (!deleteHouseholdId) return;
+    try {
+      await householdsService.deleteHousehold(deleteHouseholdId);
+      setDeleteHouseholdId(null);
+      fetchHouseholds();
+    } catch (error) {
+      console.error('Failed to delete household:', error);
+    }
+  };
 
   // Filter and sort data
   const processedData = useMemo(() => {
@@ -179,17 +197,36 @@ export default function HouseholdsPage() {
     {
       id: 'actions',
       header: '',
-      width: '100px',
+      width: '120px',
       align: 'right',
       cell: ({ row }) => (
         <div className="flex items-center justify-end gap-1">
           <Link href={`/households/${row.id}`}>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" title="View details">
               <EyeIcon className="w-4 h-4" />
             </Button>
           </Link>
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            title="Edit"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/households/${row.id}/edit`);
+            }}
+          >
             <PencilSquareIcon className="w-4 h-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            title="Delete"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteHouseholdId(row.id);
+            }}
+          >
+            <TrashIcon className="w-4 h-4 text-status-error-text" />
           </Button>
         </div>
       ),
@@ -207,7 +244,10 @@ export default function HouseholdsPage() {
         title="Households"
         subtitle={`${processedData.length} household${processedData.length !== 1 ? 's' : ''} total`}
         actions={
-          <Button leftIcon={<PlusIcon className="w-4 h-4" />}>
+          <Button 
+            leftIcon={<PlusIcon className="w-4 h-4" />}
+            onClick={() => setShowAddModal(true)}
+          >
             Add Household
           </Button>
         }
@@ -234,7 +274,7 @@ export default function HouseholdsPage() {
               onPageChange: setCurrentPage,
             }}
             onRowClick={(row) => {
-              window.location.href = `/households/${row.id}`;
+              router.push(`/households/${row.id}`);
             }}
             striped
             emptyState={
@@ -242,7 +282,10 @@ export default function HouseholdsPage() {
                 <p className="text-content-secondary mb-4">
                   No households found. Click &quot;Add Household&quot; to create one.
                 </p>
-                <Button leftIcon={<PlusIcon className="w-4 h-4" />}>
+                <Button 
+                  leftIcon={<PlusIcon className="w-4 h-4" />}
+                  onClick={() => setShowAddModal(true)}
+                >
                   Add Household
                 </Button>
               </div>
@@ -250,6 +293,24 @@ export default function HouseholdsPage() {
           />
         </Card>
       </PageContent>
+
+      {/* Add Household Modal */}
+      <AddHouseholdModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={fetchHouseholds}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deleteHouseholdId}
+        onClose={() => setDeleteHouseholdId(null)}
+        onConfirm={handleDeleteHousehold}
+        title="Delete Household"
+        message="Are you sure you want to delete this household? This action cannot be undone and will remove all associated data."
+        confirmText="Delete"
+        variant="danger"
+      />
     </>
   );
 }
