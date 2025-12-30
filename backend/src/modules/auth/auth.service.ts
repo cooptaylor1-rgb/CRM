@@ -20,16 +20,26 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
+    console.log(`🔑 Login attempt for: ${loginDto.email}`);
+    
     const user = await this.userRepository.findOne({
       where: { email: loginDto.email },
       relations: ['roles'],
     });
 
-    if (!user || !user.isActive) {
+    if (!user) {
+      console.log(`🔑 User not found: ${loginDto.email}`);
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    
+    if (!user.isActive) {
+      console.log(`🔑 User inactive: ${loginDto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    console.log(`🔑 User found, validating password...`);
     const isPasswordValid = await user.validatePassword(loginDto.password);
+    console.log(`🔑 Password valid: ${isPasswordValid}`);
     
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -123,6 +133,8 @@ export class AuthService {
   }
 
   async ensureDefaultUsers() {
+    console.log('🔐 Starting ensureDefaultUsers...');
+    
     // Create roles if they don't exist
     const roleNames = [
       'admin',
@@ -144,6 +156,7 @@ export class AuthService {
           description: `${roleName} role`,
         });
         role = await this.roleRepository.save(role);
+        console.log(`🔐 Created role: ${roleName}`);
       }
       roles.push(role);
     }
@@ -154,6 +167,7 @@ export class AuthService {
     });
 
     if (existingAdmin) {
+      console.log('🔐 Removing existing admin user...');
       await this.userRepository.remove(existingAdmin);
     }
 
@@ -169,7 +183,20 @@ export class AuthService {
         roles: [adminRole],
       });
 
-      await this.userRepository.save(newAdmin);
+      const savedAdmin = await this.userRepository.save(newAdmin);
+      console.log(`🔐 Created admin user: ${savedAdmin.email}`);
+      console.log(`🔐 Admin password hash length: ${savedAdmin.password?.length}`);
+      
+      // Verify the password works
+      const testUser = await this.userRepository.findOne({
+        where: { email: 'admin@example.com' },
+      });
+      if (testUser) {
+        const isValid = await testUser.validatePassword('Admin123!');
+        console.log(`🔐 Password validation test: ${isValid ? 'PASSED' : 'FAILED'}`);
+      }
     }
+    
+    console.log('🔐 ensureDefaultUsers completed');
   }
 }
