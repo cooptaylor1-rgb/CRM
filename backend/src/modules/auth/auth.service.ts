@@ -164,13 +164,10 @@ export class AuthService {
     }
 
     // Delete existing admin user and recreate to ensure clean state
-    const existingAdmin = await this.userRepository.findOne({
-      where: { email: 'admin@example.com' },
-    });
-
-    if (existingAdmin) {
-      console.log('🔐 Removing existing admin user...');
-      await this.userRepository.remove(existingAdmin);
+    // Use delete() instead of remove() to avoid potential cascade issues
+    const deleteResult = await this.userRepository.delete({ email: 'admin@example.com' });
+    if (deleteResult.affected > 0) {
+      console.log('🔐 Removed existing admin user');
     }
 
     // Create admin user with fresh password (matches README)
@@ -187,15 +184,20 @@ export class AuthService {
 
       const savedAdmin = await this.userRepository.save(newAdmin);
       console.log(`🔐 Created admin user: ${savedAdmin.email}`);
+      console.log(`🔐 Admin password hash: ${savedAdmin.password?.substring(0, 20)}...`);
       console.log(`🔐 Admin password hash length: ${savedAdmin.password?.length}`);
       
-      // Verify the password works
+      // Verify the password works immediately
       const testUser = await this.userRepository.findOne({
         where: { email: 'admin@example.com' },
       });
       if (testUser) {
+        console.log(`🔐 Loaded admin password hash: ${testUser.password?.substring(0, 20)}...`);
         const isValid = await testUser.validatePassword('Admin123!');
-        console.log(`🔐 Password validation test: ${isValid ? 'PASSED' : 'FAILED'}`);
+        console.log(`🔐 Password validation test: ${isValid ? 'PASSED ✅' : 'FAILED ❌'}`);
+        if (!isValid) {
+          console.log(`🔐 DEBUG: Stored hash doesn't match 'Admin123!'`);
+        }
       }
     }
     
