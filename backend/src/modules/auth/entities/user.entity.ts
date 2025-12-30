@@ -49,18 +49,32 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
+  private originalPassword: string;
+
   @BeforeInsert()
+  async hashPasswordOnInsert() {
+    // Always hash on insert
+    if (this.password && !this.password.startsWith('$2b$')) {
+      console.log(`🔒 Hashing password on INSERT for ${this.email}`);
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  }
+
   @BeforeUpdate()
-  async hashPassword() {
-    // Only hash if password is present and appears to be plain text (length < 60)
-    // bcrypt hashes are always 60 characters
-    if (this.password && this.password.length < 60) {
+  async hashPasswordOnUpdate() {
+    // Only hash on update if password was explicitly changed to a non-hashed value
+    // bcrypt hashes start with $2b$ (or $2a$, $2y$)
+    if (this.password && !this.password.startsWith('$2b$') && !this.password.startsWith('$2a$')) {
+      console.log(`🔒 Hashing password on UPDATE for ${this.email}`);
       this.password = await bcrypt.hash(this.password, 10);
     }
   }
 
   async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.password);
+    console.log(`🔒 Validating password for ${this.email}, hash starts with: ${this.password?.substring(0, 10)}`);
+    const result = await bcrypt.compare(password, this.password);
+    console.log(`🔒 Password validation result: ${result}`);
+    return result;
   }
 
   get roleNames(): string[] {

@@ -45,9 +45,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Update last login
-    user.lastLogin = new Date();
-    await this.userRepository.save(user);
+    // Update last login using query builder to avoid triggering entity hooks
+    await this.userRepository.update(
+      { id: user.id },
+      { lastLogin: new Date() }
+    );
 
     const tokens = await this.generateTokens(user);
 
