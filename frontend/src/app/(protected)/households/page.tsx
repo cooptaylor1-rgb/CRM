@@ -1,13 +1,44 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Header } from '@/components/layout/Header';
+import { 
+  PageHeader, 
+  PageContent 
+} from '@/components/layout/AppShell';
+import { 
+  Button,
+  Card,
+  StatusBadge,
+  DataTable,
+  Avatar,
+  formatCurrency,
+  formatDate,
+  type Column,
+  type SortDirection,
+} from '@/components/ui';
+import { PlusIcon, EyeIcon, PencilSquareIcon } from '@heroicons/react/20/solid';
 import { householdsService, Household } from '@/services/households.service';
+
+type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'default';
+
+const statusMap: Record<string, { label: string; variant: StatusVariant }> = {
+  active: { label: 'Active', variant: 'success' },
+  prospect: { label: 'Prospect', variant: 'info' },
+  inactive: { label: 'Inactive', variant: 'default' },
+  closed: { label: 'Closed', variant: 'error' },
+};
 
 export default function HouseholdsPage() {
   const [households, setHouseholds] = useState<Household[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchValue, setSearchValue] = useState('');
+  const [sortState, setSortState] = useState<{ column: string; direction: SortDirection }>({
+    column: 'name',
+    direction: 'asc',
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     const fetchHouseholds = async () => {
@@ -24,136 +55,201 @@ export default function HouseholdsPage() {
     fetchHouseholds();
   }, []);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+  // Filter and sort data
+  const processedData = useMemo(() => {
+    let filtered = households;
 
-  const getStatusBadge = (status: string) => {
-    const colors: Record<string, string> = {
-      active: 'bg-green-100 text-green-800',
-      prospect: 'bg-blue-100 text-blue-800',
-      inactive: 'bg-gray-100 text-gray-800',
-      closed: 'bg-red-100 text-red-800',
-    };
+    // Search filter
+    if (searchValue) {
+      const query = searchValue.toLowerCase();
+      filtered = households.filter(
+        (h) =>
+          h.name.toLowerCase().includes(query) ||
+          h.status.toLowerCase().includes(query)
+      );
+    }
 
-    return (
-      <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${
-          colors[status] || 'bg-gray-100 text-gray-800'
-        }`}
-      >
-        {status}
-      </span>
-    );
-  };
+    // Sort
+    if (sortState.column && sortState.direction) {
+      filtered = [...filtered].sort((a, b) => {
+        let aVal: string | number = '';
+        let bVal: string | number = '';
 
-  if (loading) {
-    return (
-      <div>
-        <Header title="Households" />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        switch (sortState.column) {
+          case 'name':
+            aVal = a.name;
+            bVal = b.name;
+            break;
+          case 'status':
+            aVal = a.status;
+            bVal = b.status;
+            break;
+          case 'totalAum':
+            aVal = a.totalAum;
+            bVal = b.totalAum;
+            break;
+          case 'riskTolerance':
+            aVal = a.riskTolerance || '';
+            bVal = b.riskTolerance || '';
+            break;
+          case 'lastReviewDate':
+            aVal = a.lastReviewDate || '';
+            bVal = b.lastReviewDate || '';
+            break;
+        }
+
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortState.direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+
+        const comparison = String(aVal).localeCompare(String(bVal));
+        return sortState.direction === 'asc' ? comparison : -comparison;
+      });
+    }
+
+    return filtered;
+  }, [households, searchValue, sortState]);
+
+  // Paginate
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return processedData.slice(start, start + pageSize);
+  }, [processedData, currentPage]);
+
+  const columns: Column<Household>[] = [
+    {
+      id: 'name',
+      header: 'Household',
+      accessorKey: 'name',
+      sortable: true,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <Avatar name={row.name} size="sm" />
+          <div>
+            <p className="font-medium text-content-primary">{row.name}</p>
+          </div>
         </div>
-      </div>
-    );
-  }
+      ),
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      sortable: true,
+      cell: ({ value }) => {
+        const status = statusMap[value as string] || { label: String(value), variant: 'default' as StatusVariant };
+        return <StatusBadge status={status.variant} label={status.label} />;
+      },
+    },
+    {
+      id: 'totalAum',
+      header: 'Total AUM',
+      accessorKey: 'totalAum',
+      sortable: true,
+      align: 'right',
+      cell: ({ value }) => (
+        <span className="font-medium text-content-primary">
+          {formatCurrency(value as number)}
+        </span>
+      ),
+    },
+    {
+      id: 'riskTolerance',
+      header: 'Risk Tolerance',
+      accessorKey: 'riskTolerance',
+      sortable: true,
+      cell: ({ value }) => (
+        <span className="capitalize text-content-secondary">
+          {(value as string) || 'N/A'}
+        </span>
+      ),
+    },
+    {
+      id: 'lastReviewDate',
+      header: 'Last Review',
+      accessorKey: 'lastReviewDate',
+      sortable: true,
+      hiddenOnMobile: true,
+      cell: ({ value }) => (
+        <span className="text-content-secondary">
+          {value ? formatDate(value as string) : 'Never'}
+        </span>
+      ),
+    },
+    {
+      id: 'actions',
+      header: '',
+      width: '100px',
+      align: 'right',
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-1">
+          <Link href={`/households/${row.id}`}>
+            <Button variant="ghost" size="sm">
+              <EyeIcon className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Button variant="ghost" size="sm">
+            <PencilSquareIcon className="w-4 h-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  const handleSortChange = (column: string, direction: SortDirection) => {
+    setSortState({ column, direction });
+    setCurrentPage(1);
+  };
 
   return (
-    <div>
-      <Header title="Households" />
-      <div className="p-8">
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">All Households</h2>
-            <p className="text-gray-600 mt-1">
-              {households.length} household{households.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-          <button className="btn btn-primary">+ Add Household</button>
-        </div>
+    <>
+      <PageHeader
+        title="Households"
+        subtitle={`${processedData.length} household${processedData.length !== 1 ? 's' : ''} total`}
+        actions={
+          <Button leftIcon={<PlusIcon className="w-4 h-4" />}>
+            Add Household
+          </Button>
+        }
+      />
 
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total AUM
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Risk Tolerance
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Review
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {households.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                    No households found. Click &quot;Add Household&quot; to create one.
-                  </td>
-                </tr>
-              ) : (
-                households.map((household) => (
-                  <tr key={household.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {household.name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(household.status)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {formatCurrency(household.totalAum)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 capitalize">
-                        {household.riskTolerance || 'N/A'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {household.lastReviewDate
-                          ? new Date(household.lastReviewDate).toLocaleDateString()
-                          : 'Never'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Link
-                        href={`/households/${household.id}`}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
-                      >
-                        View
-                      </Link>
-                      <button className="text-indigo-600 hover:text-indigo-900">
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      <PageContent>
+        <Card noPadding>
+          <DataTable
+            data={paginatedData}
+            columns={columns}
+            loading={loading}
+            searchable
+            searchValue={searchValue}
+            onSearchChange={(value) => {
+              setSearchValue(value);
+              setCurrentPage(1);
+            }}
+            sortState={sortState}
+            onSortChange={handleSortChange}
+            pagination={{
+              currentPage,
+              pageSize,
+              totalItems: processedData.length,
+              onPageChange: setCurrentPage,
+            }}
+            onRowClick={(row) => {
+              window.location.href = `/households/${row.id}`;
+            }}
+            striped
+            emptyState={
+              <div className="text-center py-8">
+                <p className="text-content-secondary mb-4">
+                  No households found. Click &quot;Add Household&quot; to create one.
+                </p>
+                <Button leftIcon={<PlusIcon className="w-4 h-4" />}>
+                  Add Household
+                </Button>
+              </div>
+            }
+          />
+        </Card>
+      </PageContent>
+    </>
   );
 }

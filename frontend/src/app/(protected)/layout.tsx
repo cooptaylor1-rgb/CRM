@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { AppShell } from '@/components/layout/AppShell';
 import { useAuthStore } from '@/store/authStore';
 
 export default function ProtectedLayout({
@@ -30,23 +30,17 @@ export default function ProtectedLayout({
   // Show loading while checking auth
   if (isChecking || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-app">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-semibold text-sm">W</span>
+          </div>
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-neutral-300 border-t-accent-600 mx-auto"></div>
+          <p className="mt-4 text-sm text-content-secondary">Loading...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
+  return <AppShell>{children}</AppShell>;
 }

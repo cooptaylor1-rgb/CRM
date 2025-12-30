@@ -1,38 +1,38 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Header } from '@/components/layout/Header';
-import { analyticsService, AdvisorDashboard } from '@/services/analytics.service';
 import Link from 'next/link';
-
-const formatCurrency = (value: number) => {
-  if (value >= 1000000) {
-    return `$${(value / 1000000).toFixed(1)}M`;
-  }
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-const getSeverityColor = (severity: string) => {
-  switch (severity) {
-    case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-    case 'warning': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    default: return 'bg-blue-100 text-blue-800 border-blue-200';
-  }
-};
+import { analyticsService, AdvisorDashboard } from '@/services/analytics.service';
+import { PageHeader, PageContent, ContentGrid } from '@/components/layout/AppShell';
+import {
+  MetricCard,
+  MetricGrid,
+  Card,
+  CardHeader,
+  Button,
+  Badge,
+  GoalProgress,
+  ActionCenter,
+  ActionItem,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  EmptyState,
+  SkeletonDashboard,
+  formatCurrency,
+  formatDateTime,
+  formatRelativeTime,
+} from '@/components/ui';
+import {
+  ExclamationTriangleIcon,
+  ClockIcon,
+  ArrowRightIcon,
+  CalendarIcon,
+  UserGroupIcon,
+} from '@heroicons/react/24/outline';
 
 export default function DashboardPage() {
   const [dashboard, setDashboard] = useState<AdvisorDashboard | null>(null);
@@ -58,10 +58,13 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div>
-        <Header title="Dashboard" />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
+        <PageHeader
+          title="Advisor Dashboard"
+          subtitle="Loading your workspace..."
+        />
+        <PageContent>
+          <SkeletonDashboard />
+        </PageContent>
       </div>
     );
   }
@@ -69,281 +72,315 @@ export default function DashboardPage() {
   if (error || !dashboard) {
     return (
       <div>
-        <Header title="Dashboard" />
-        <div className="p-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-600">{error || 'Failed to load dashboard'}</p>
-          </div>
-        </div>
+        <PageHeader title="Advisor Dashboard" />
+        <PageContent>
+          <Card className="p-8">
+            <EmptyState
+              icon={<ExclamationTriangleIcon />}
+              title="Unable to load dashboard"
+              description={error || 'An unexpected error occurred. Please try again.'}
+              action={
+                <Button variant="secondary" onClick={() => window.location.reload()}>
+                  Retry
+                </Button>
+              }
+            />
+          </Card>
+        </PageContent>
       </div>
     );
   }
 
   const { overview, recentActivity, goals, topClients, upcomingMeetings, alerts } = dashboard;
 
+  // Calculate action items from alerts
+  const actionItems = alerts?.map((alert) => ({
+    label: alert.message,
+    count: alert.count || 0,
+    severity: (alert.severity === 'critical' ? 'high' : alert.severity === 'warning' ? 'medium' : 'low') as 'high' | 'medium' | 'low',
+    icon: alert.severity === 'critical' ? (
+      <ExclamationTriangleIcon className="w-4 h-4" />
+    ) : (
+      <ClockIcon className="w-4 h-4" />
+    ),
+    href: alert.severity === 'critical' ? '/compliance' : '/tasks',
+  })) || [];
+
+  // Sort by severity
+  actionItems.sort((a, b) => {
+    const order: Record<string, number> = { high: 0, medium: 1, low: 2 };
+    return order[a.severity] - order[b.severity];
+  });
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header title="Advisor Dashboard" />
-      
-      <div className="p-6 lg:p-8">
-        {/* Alerts Section */}
-        {alerts && alerts.length > 0 && (
-          <div className="mb-6 space-y-2">
-            {alerts.map((alert, idx) => (
-              <div
-                key={idx}
-                className={`border rounded-lg p-4 flex items-center justify-between ${getSeverityColor(alert.severity)}`}
+    <div>
+      {/* Page Header */}
+      <PageHeader
+        title="Advisor Dashboard"
+        subtitle={`Last updated ${formatRelativeTime(new Date().toISOString())}`}
+      />
+
+      <PageContent>
+        {/* Metrics Grid */}
+        <MetricGrid columns={4} className="mb-6">
+          <MetricCard
+            label="Total Households"
+            value={overview.totalHouseholds}
+            icon="households"
+            subtext="active clients"
+          />
+          <MetricCard
+            label="Total AUM"
+            value={overview.totalAum}
+            formatAsCurrency
+            icon="currency"
+            change={
+              overview.totalAum > 0
+                ? { value: '+2.3% MTD', trend: 'up' }
+                : undefined
+            }
+          />
+          <MetricCard
+            label="YTD Revenue"
+            value={overview.ytdRevenue}
+            formatAsCurrency
+            icon="revenue"
+            subtext="vs target"
+          />
+          <MetricCard
+            label="Pipeline Value"
+            value={overview.pipelineValue}
+            formatAsCurrency
+            icon="pipeline"
+            subtext="active opportunities"
+          />
+        </MetricGrid>
+
+        {/* Two Column Layout */}
+        <ContentGrid layout="primary-secondary">
+          {/* Left Column - Primary Content */}
+          <div className="space-y-6">
+            {/* Goals Progress */}
+            <Card>
+              <CardHeader title="Annual Goals" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <GoalProgress
+                  label="Revenue"
+                  actual={goals.revenueActual}
+                  target={goals.revenueTarget}
+                  progress={goals.revenueProgress}
+                  variant={goals.revenueProgress >= 100 ? 'success' : 'default'}
+                  formatValue={(v) => formatCurrency(Number(v))}
+                />
+                <GoalProgress
+                  label="Meetings"
+                  actual={goals.meetingsActual}
+                  target={goals.meetingsTarget}
+                  progress={goals.meetingsProgress}
+                  variant={goals.meetingsProgress >= 100 ? 'success' : 'default'}
+                />
+                <GoalProgress
+                  label="New Clients"
+                  actual={goals.newClientsActual}
+                  target={goals.newClientsTarget}
+                  progress={goals.newClientsProgress}
+                  variant={goals.newClientsProgress >= 100 ? 'success' : 'default'}
+                />
+              </div>
+            </Card>
+
+            {/* Top Clients Table */}
+            <Card noPadding>
+              <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+                <h3 className="text-subtitle text-content-primary">Top Clients by AUM</h3>
+                <Link
+                  href="/households"
+                  className="text-sm text-content-link hover:text-content-primary transition-colors flex items-center gap-1"
+                >
+                  View all
+                  <ArrowRightIcon className="w-3 h-3" />
+                </Link>
+              </div>
+              {topClients && topClients.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Household</TableHead>
+                      <TableHead className="text-right">AUM</TableHead>
+                      <TableHead className="text-right">Revenue</TableHead>
+                      <TableHead className="text-right">Last Contact</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {topClients.slice(0, 5).map((client) => (
+                      <TableRow key={client.householdId}>
+                        <TableCell>
+                          <Link
+                            href={`/households/${client.householdId}`}
+                            className="font-medium text-content-link hover:underline"
+                          >
+                            {client.householdName}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(client.aum)}
+                        </TableCell>
+                        <TableCell className="text-right text-content-secondary">
+                          {formatCurrency(client.revenue)}
+                        </TableCell>
+                        <TableCell className="text-right text-content-tertiary text-sm">
+                          {formatRelativeTime(client.lastContact)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="px-5 pb-5">
+                  <EmptyState
+                    icon={<UserGroupIcon />}
+                    title="No clients yet"
+                    description="Add your first household to get started"
+                  />
+                </div>
+              )}
+            </Card>
+
+            {/* Activity Summary */}
+            <Card>
+              <CardHeader title="This Month's Activity" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-surface-secondary rounded-lg">
+                  <p className="text-2xl font-semibold text-accent-600">
+                    {recentActivity.tasksCompleted}
+                  </p>
+                  <p className="text-sm text-content-secondary">Tasks Done</p>
+                </div>
+                <div className="p-4 bg-surface-secondary rounded-lg">
+                  <p className="text-2xl font-semibold text-accent-600">
+                    {recentActivity.meetingsCompleted}
+                  </p>
+                  <p className="text-sm text-content-secondary">Meetings</p>
+                </div>
+                <div className="p-4 bg-surface-secondary rounded-lg">
+                  <p className="text-2xl font-semibold text-accent-600">
+                    {recentActivity.emailsSent}
+                  </p>
+                  <p className="text-sm text-content-secondary">Emails</p>
+                </div>
+                <div className="p-4 bg-surface-secondary rounded-lg">
+                  <p className="text-2xl font-semibold text-accent-600">
+                    {recentActivity.newProspects}
+                  </p>
+                  <p className="text-sm text-content-secondary">New Leads</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Right Column - Secondary Content */}
+          <div className="space-y-6">
+            {/* Action Center */}
+            {actionItems.length > 0 && (
+              <ActionCenter
+                title="Action Required"
+                footer={
+                  <Link
+                    href="/tasks"
+                    className="text-sm text-content-link hover:text-content-primary transition-colors flex items-center gap-1"
+                  >
+                    Review all items
+                    <ArrowRightIcon className="w-3 h-3" />
+                  </Link>
+                }
               >
-                <div className="flex items-center">
-                  <span className="mr-3">
-                    {alert.severity === 'critical' ? '🚨' : alert.severity === 'warning' ? '⚠️' : 'ℹ️'}
-                  </span>
-                  <span className="font-medium">{alert.message}</span>
-                </div>
-                {alert.count && (
-                  <span className="text-sm font-bold">{alert.count}</span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Quick Actions */}
-        <div className="mb-6 flex flex-wrap gap-3">
-          <Link
-            href="/tasks"
-            className="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm"
-          >
-            <span className="mr-2">✓</span> View Tasks
-          </Link>
-          <Link
-            href="/meetings"
-            className="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm"
-          >
-            <span className="mr-2">📅</span> Schedule Meeting
-          </Link>
-          <Link
-            href="/pipeline"
-            className="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm"
-          >
-            <span className="mr-2">🎯</span> View Pipeline
-          </Link>
-          <Link
-            href="/households"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 shadow-sm"
-          >
-            <span className="mr-2">+</span> Add Household
-          </Link>
-        </div>
-
-        {/* Key Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Total Households</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{overview.totalHouseholds}</p>
-              </div>
-              <div className="bg-blue-100 rounded-full p-3">
-                <span className="text-2xl">🏠</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Total AUM</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{formatCurrency(overview.totalAum)}</p>
-              </div>
-              <div className="bg-green-100 rounded-full p-3">
-                <span className="text-2xl">💰</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">YTD Revenue</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{formatCurrency(overview.ytdRevenue)}</p>
-              </div>
-              <div className="bg-purple-100 rounded-full p-3">
-                <span className="text-2xl">📈</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Pipeline Value</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{formatCurrency(overview.pipelineValue)}</p>
-              </div>
-              <div className="bg-orange-100 rounded-full p-3">
-                <span className="text-2xl">🎯</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Goals Progress */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Annual Goals Progress</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600">Revenue</span>
-                <span className="font-medium">{goals.revenueProgress}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className="bg-green-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(goals.revenueProgress, 100)}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {formatCurrency(goals.revenueActual)} / {formatCurrency(goals.revenueTarget)}
-              </p>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600">Meetings</span>
-                <span className="font-medium">{goals.meetingsProgress}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className="bg-blue-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(goals.meetingsProgress, 100)}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {goals.meetingsActual} / {goals.meetingsTarget}
-              </p>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600">New Clients</span>
-                <span className="font-medium">{goals.newClientsProgress}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className="bg-purple-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(goals.newClientsProgress, 100)}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {goals.newClientsActual} / {goals.newClientsTarget}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Activity */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">This Month&apos;s Activity</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-2xl font-bold text-blue-600">{recentActivity.tasksCompleted}</p>
-                <p className="text-sm text-gray-600">Tasks Completed</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-2xl font-bold text-green-600">{recentActivity.meetingsCompleted}</p>
-                <p className="text-sm text-gray-600">Meetings Held</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-2xl font-bold text-purple-600">{recentActivity.emailsSent}</p>
-                <p className="text-sm text-gray-600">Emails Sent</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-2xl font-bold text-orange-600">{recentActivity.newProspects}</p>
-                <p className="text-sm text-gray-600">New Prospects</p>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-gray-200">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Quick Stats</h3>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Overdue Tasks</span>
-                <span className="font-medium text-red-600">{overview.tasksOverdue}</span>
-              </div>
-              <div className="flex justify-between text-sm mt-2">
-                <span className="text-gray-600">Meetings This Week</span>
-                <span className="font-medium">{overview.meetingsThisWeek}</span>
-              </div>
-              <div className="flex justify-between text-sm mt-2">
-                <span className="text-gray-600">Reviews Due</span>
-                <span className="font-medium text-yellow-600">{overview.reviewsDue}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Upcoming Meetings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Upcoming Meetings</h2>
-              <Link href="/meetings" className="text-sm text-blue-600 hover:text-blue-700">
-                View All →
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {upcomingMeetings.map((meeting) => (
-                <div key={meeting.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-900">{meeting.title}</p>
-                    <p className="text-sm text-gray-500">{meeting.householdName}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{formatDate(meeting.startTime)}</p>
-                    <p className="text-xs text-gray-500 capitalize">{meeting.type.replace('_', ' ')}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Top Clients */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Top Clients by AUM</h2>
-            <Link href="/households" className="text-sm text-blue-600 hover:text-blue-700">
-              View All →
-            </Link>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-sm text-gray-500 border-b border-gray-200">
-                  <th className="pb-3 font-medium">Household</th>
-                  <th className="pb-3 font-medium text-right">AUM</th>
-                  <th className="pb-3 font-medium text-right">Revenue</th>
-                  <th className="pb-3 font-medium text-right">Last Contact</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topClients.map((client) => (
-                  <tr key={client.householdId} className="border-b border-gray-100 last:border-0">
-                    <td className="py-3">
-                      <Link href={`/households/${client.householdId}`} className="text-blue-600 hover:text-blue-700 font-medium">
-                        {client.householdName}
-                      </Link>
-                    </td>
-                    <td className="py-3 text-right font-medium">{formatCurrency(client.aum)}</td>
-                    <td className="py-3 text-right text-gray-600">{formatCurrency(client.revenue)}</td>
-                    <td className="py-3 text-right text-gray-500 text-sm">
-                      {new Date(client.lastContact).toLocaleDateString()}
-                    </td>
-                  </tr>
+                {actionItems.map((item, idx) => (
+                  <ActionItem
+                    key={idx}
+                    icon={item.icon}
+                    label={item.label}
+                    count={item.count}
+                    severity={item.severity}
+                    href={item.href}
+                  />
                 ))}
-              </tbody>
-            </table>
+              </ActionCenter>
+            )}
+
+            {/* Quick Stats */}
+            <Card>
+              <CardHeader title="Quick Stats" />
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-content-secondary">Overdue Tasks</span>
+                  <Badge variant={overview.tasksOverdue > 0 ? 'error' : 'default'}>
+                    {overview.tasksOverdue}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-content-secondary">Meetings This Week</span>
+                  <Badge variant="info">{overview.meetingsThisWeek}</Badge>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-content-secondary">Reviews Due</span>
+                  <Badge variant={overview.reviewsDue > 0 ? 'warning' : 'default'}>
+                    {overview.reviewsDue}
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+
+            {/* Upcoming Meetings */}
+            <Card>
+              <CardHeader
+                title="Upcoming Meetings"
+                action={
+                  <Link
+                    href="/meetings"
+                    className="text-sm text-content-link hover:text-content-primary transition-colors"
+                  >
+                    View all
+                  </Link>
+                }
+              />
+              {upcomingMeetings && upcomingMeetings.length > 0 ? (
+                <div className="space-y-3">
+                  {upcomingMeetings.slice(0, 4).map((meeting) => (
+                    <div
+                      key={meeting.id}
+                      className="flex items-start gap-3 p-3 bg-surface-secondary rounded-lg"
+                    >
+                      <div className="w-8 h-8 rounded-md bg-accent-100 flex items-center justify-center shrink-0">
+                        <CalendarIcon className="w-4 h-4 text-accent-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-content-primary truncate">
+                          {meeting.title}
+                        </p>
+                        <p className="text-xs text-content-tertiary truncate">
+                          {meeting.householdName}
+                        </p>
+                        <p className="text-xs text-content-secondary mt-1">
+                          {formatDateTime(meeting.startTime)}
+                        </p>
+                      </div>
+                      <Badge variant="default" size="sm">
+                        {meeting.type.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<CalendarIcon />}
+                  title="No upcoming meetings"
+                  description="Schedule a meeting to stay connected with clients"
+                />
+              )}
+            </Card>
           </div>
-        </div>
-      </div>
+        </ContentGrid>
+      </PageContent>
     </div>
   );
 }

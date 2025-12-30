@@ -1,60 +1,99 @@
+@import '../styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
 @layer base {
-  h1 {
-    @apply text-3xl font-bold;
+  *,
+  *::before,
+  *::after {
+    @apply border-border;
   }
-  h2 {
-    @apply text-2xl font-bold;
+
+  html {
+    @apply antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
   }
-  h3 {
+
+  body {
+    @apply bg-app text-content-primary font-sans text-base;
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-border-focus ring-offset-2 ring-offset-surface;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-400;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-700;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-600;
+  }
+}
+
+@layer utilities {
+  /* Typography utilities */
+  .text-display {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+
+  .text-title {
     @apply text-xl font-semibold;
   }
-}
 
-@layer components {
-  .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors;
+  .text-subtitle {
+    @apply text-lg font-medium;
   }
-  .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700;
+
+  .text-body {
+    @apply text-base text-content-primary;
   }
-  .btn-secondary {
-    @apply bg-gray-600 text-white hover:bg-gray-700;
+
+  .text-caption {
+    @apply text-sm text-content-secondary;
   }
-  .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700;
+
+  .text-overline {
+    @apply text-xs font-semibold uppercase tracking-wider text-content-tertiary;
   }
+
+  /* Container utilities */
+  .container-page {
+    @apply max-w-content mx-auto px-6 lg:px-8;
+  }
+
+  /* Card base */
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-surface rounded-lg border border-border shadow-sm;
   }
-  .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500;
+
+  /* Interactive states */
+  .interactive {
+    @apply transition-colors duration-fast;
+  }
+
+  .interactive-hover {
+    @apply hover:bg-interactive-secondary-hover;
   }
 }
