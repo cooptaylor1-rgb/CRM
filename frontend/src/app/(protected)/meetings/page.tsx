@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Header } from '../../components/layout/Header';
-import { meetingsService, Meeting, MeetingStats, MeetingType, CreateMeetingDto } from '../../services/meetings.service';
+import { Header } from '@/components/layout/Header';
+import { meetingsService, Meeting, MeetingStats, MeetingType, CreateMeetingDto } from '@/services/meetings.service';
 
 const meetingTypeLabels: Record<MeetingType, string> = {
   initial_consultation: 'Initial Consultation',

@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Header } from '../../components/layout/Header';
-import { pipelineService, Prospect, PipelineStage, PipelineStats, CreateProspectDto, ChangeStageDto, MarkLostDto } from '../../services/pipeline.service';
+import { Header } from '@/components/layout/Header';
+import { pipelineService, Prospect, PipelineStage, PipelineStats, CreateProspectDto, ChangeStageDto, MarkLostDto } from '@/services/pipeline.service';
 
 const stageConfig: Record<PipelineStage, { label: string; color: string; bgColor: string }> = {
   lead: { label: 'Lead', color: 'text-gray-700', bgColor: 'bg-gray-100' },

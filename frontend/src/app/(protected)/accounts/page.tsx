@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Header } from '../../components/layout/Header';
-import { accountsService, Account } from '../../services/accounts.service';
+import { Header } from '@/components/layout/Header';
+import { accountsService, Account } from '@/services/accounts.service';
 
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);

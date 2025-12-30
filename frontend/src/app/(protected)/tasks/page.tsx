@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Header } from '../../components/layout/Header';
-import { tasksService, Task, TaskFilter, TaskStats, CreateTaskDto } from '../../services/tasks.service';
+import { Header } from '@/components/layout/Header';
+import { tasksService, Task, TaskFilter, TaskStats, CreateTaskDto } from '@/services/tasks.service';
 
 const priorityColors = {
   urgent: 'bg-red-100 text-red-800',

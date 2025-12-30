@@ -1,27 +1,34 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '../../components/layout/Sidebar';
-import { Header } from '../../components/layout/Header';
-import { useAuthStore } from '../../store/authStore';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { useAuthStore } from '@/store/authStore';
 
-export default function DashboardLayout({
+export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
   const { isAuthenticated, checkAuth } = useAuthStore();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    // Check auth status from localStorage
     checkAuth();
-    if (!isAuthenticated) {
+    setIsChecking(false);
+  }, [checkAuth]);
+
+  useEffect(() => {
+    // Only redirect after we've checked auth status
+    if (!isChecking && !isAuthenticated) {
       router.push('/');
     }
-  }, [isAuthenticated, checkAuth, router]);
+  }, [isChecking, isAuthenticated, router]);
 
-  if (!isAuthenticated) {
+  // Show loading while checking auth
+  if (isChecking || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

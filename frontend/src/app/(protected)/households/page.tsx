@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Header } from '../../components/layout/Header';
-import { householdsService, Household } from '../../services/households.service';
+import { Header } from '@/components/layout/Header';
+import { householdsService, Household } from '@/services/households.service';
 
 export default function HouseholdsPage() {
   const [households, setHouseholds] = useState<Household[]>([]);

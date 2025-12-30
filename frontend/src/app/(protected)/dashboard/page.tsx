@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Header } from '../../components/layout/Header';
-import { analyticsService, AdvisorDashboard } from '../../services/analytics.service';
+import { Header } from '@/components/layout/Header';
+import { analyticsService, AdvisorDashboard } from '@/services/analytics.service';
 import Link from 'next/link';
 
 const formatCurrency = (value: number) => {
