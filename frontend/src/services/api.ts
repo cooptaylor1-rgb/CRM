@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
+// Use relative URL for API calls - Next.js rewrites will proxy to the backend
+// This works both locally and on Railway because the requests go through the Next.js server
 export const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -38,7 +38,8 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${API_URL}/api/auth/refresh`, {
+          // Use relative URL - Next.js rewrites will proxy this to the backend
+          const response = await axios.post('/api/auth/refresh', {
             refreshToken,
           });
 
