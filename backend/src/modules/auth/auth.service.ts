@@ -164,10 +164,18 @@ export class AuthService {
     }
 
     // Delete existing admin user and recreate to ensure clean state
-    // Use delete() instead of remove() to avoid potential cascade issues
-    const deleteResult = await this.userRepository.delete({ email: 'admin@example.com' });
-    if (deleteResult.affected > 0) {
-      console.log('🔐 Removed existing admin user');
+    // Use raw query to bypass any ORM issues and ensure clean deletion
+    try {
+      await this.userRepository.query(
+        `DELETE FROM user_roles WHERE user_id IN (SELECT id FROM users WHERE email = $1)`,
+        ['admin@example.com']
+      );
+      const deleteResult = await this.userRepository.delete({ email: 'admin@example.com' });
+      if (deleteResult.affected > 0) {
+        console.log('🔐 Removed existing admin user');
+      }
+    } catch (err) {
+      console.log('🔐 Note: Could not delete existing admin (may not exist):', err.message);
     }
 
     // Create admin user with fresh password (matches README)
