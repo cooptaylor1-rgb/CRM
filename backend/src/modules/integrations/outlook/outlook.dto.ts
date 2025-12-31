@@ -24,6 +24,10 @@ export class CompleteOutlookConnectionDto {
 
   @IsOptional()
   @IsString()
+  redirectUri?: string;
+
+  @IsOptional()
+  @IsString()
   state?: string;
 }
 
