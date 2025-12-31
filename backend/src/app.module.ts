@@ -60,6 +60,10 @@ import { HouseholdTeam, ActivityFeed, Comment, Notification, NotificationPrefere
 // Customization entities
 import { CustomFieldDefinition, CustomFieldValue, Tag, EntityTag, SavedView, UserPreference } from './modules/customization/entities/customization.entity';
 
+// Outlook integration entities
+import { OutlookConnection, OutlookEmail, OutlookEvent, OutlookMatchingRule, OutlookContact } from './modules/integrations/outlook/outlook.entity';
+import { OutlookModule } from './modules/integrations/outlook/outlook.module';
+
 const entities = [
   // Core entities
   User,
@@ -121,6 +125,12 @@ const entities = [
   EntityTag,
   SavedView,
   UserPreference,
+  // Outlook integration
+  OutlookConnection,
+  OutlookEmail,
+  OutlookEvent,
+  OutlookMatchingRule,
+  OutlookContact,
 ];
 
 @Module({
@@ -199,6 +209,7 @@ const entities = [
     CustodianModule,
     CollaborationModule,
     CustomizationModule,
+    OutlookModule,
   ],
   controllers: [HealthController],
 })
