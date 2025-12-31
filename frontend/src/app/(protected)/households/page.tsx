@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   PageHeader, 
   PageContent 
@@ -11,17 +11,30 @@ import {
   Button,
   Card,
   StatusBadge,
-  DataTable,
   Avatar,
   ConfirmModal,
   formatCurrency,
   formatDate,
-  type Column,
-  type SortDirection,
 } from '@/components/ui';
-import { PlusIcon, EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/20/solid';
+import { 
+  PlusIcon, 
+  PencilSquareIcon, 
+  TrashIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  MagnifyingGlassIcon,
+} from '@heroicons/react/20/solid';
+import {
+  ChartPieIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
+  DocumentTextIcon,
+  CalendarDaysIcon,
+  Cog6ToothIcon,
+} from '@heroicons/react/24/outline';
 import { householdsService, Household } from '@/services/households.service';
 import { AddHouseholdModal } from '@/components/modals';
+import { AssetAllocationManager, FeeScheduleManager } from '@/components/features';
 
 type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'default';
 
@@ -32,19 +45,17 @@ const statusMap: Record<string, { label: string; variant: StatusVariant }> = {
   closed: { label: 'Closed', variant: 'error' },
 };
 
+type ExpandedTab = 'allocation' | 'fees' | 'members' | 'documents' | 'activity' | 'settings';
+
 export default function HouseholdsPage() {
   const router = useRouter();
   const [households, setHouseholds] = useState<Household[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchValue, setSearchValue] = useState('');
-  const [sortState, setSortState] = useState<{ column: string; direction: SortDirection }>({
-    column: 'name',
-    direction: 'asc',
-  });
-  const [currentPage, setCurrentPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteHouseholdId, setDeleteHouseholdId] = useState<string | null>(null);
-  const pageSize = 10;
+  const [expandedHousehold, setExpandedHousehold] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<ExpandedTab>('allocation');
 
   const fetchHouseholds = async () => {
     try {
@@ -67,182 +78,46 @@ export default function HouseholdsPage() {
     try {
       await householdsService.deleteHousehold(deleteHouseholdId);
       setDeleteHouseholdId(null);
+      setExpandedHousehold(null);
       fetchHouseholds();
     } catch (error) {
       console.error('Failed to delete household:', error);
     }
   };
 
-  // Filter and sort data
-  const processedData = useMemo(() => {
-    let filtered = households;
+  const filteredData = useMemo(() => {
+    if (!searchValue) return households;
+    const query = searchValue.toLowerCase();
+    return households.filter(
+      (h) =>
+        h.name.toLowerCase().includes(query) ||
+        h.status.toLowerCase().includes(query)
+    );
+  }, [households, searchValue]);
 
-    // Search filter
-    if (searchValue) {
-      const query = searchValue.toLowerCase();
-      filtered = households.filter(
-        (h) =>
-          h.name.toLowerCase().includes(query) ||
-          h.status.toLowerCase().includes(query)
-      );
+  const toggleExpand = (householdId: string) => {
+    if (expandedHousehold === householdId) {
+      setExpandedHousehold(null);
+    } else {
+      setExpandedHousehold(householdId);
+      setActiveTab('allocation');
     }
-
-    // Sort
-    if (sortState.column && sortState.direction) {
-      filtered = [...filtered].sort((a, b) => {
-        let aVal: string | number = '';
-        let bVal: string | number = '';
-
-        switch (sortState.column) {
-          case 'name':
-            aVal = a.name;
-            bVal = b.name;
-            break;
-          case 'status':
-            aVal = a.status;
-            bVal = b.status;
-            break;
-          case 'totalAum':
-            aVal = a.totalAum;
-            bVal = b.totalAum;
-            break;
-          case 'riskTolerance':
-            aVal = a.riskTolerance || '';
-            bVal = b.riskTolerance || '';
-            break;
-          case 'lastReviewDate':
-            aVal = a.lastReviewDate || '';
-            bVal = b.lastReviewDate || '';
-            break;
-        }
-
-        if (typeof aVal === 'number' && typeof bVal === 'number') {
-          return sortState.direction === 'asc' ? aVal - bVal : bVal - aVal;
-        }
-
-        const comparison = String(aVal).localeCompare(String(bVal));
-        return sortState.direction === 'asc' ? comparison : -comparison;
-      });
-    }
-
-    return filtered;
-  }, [households, searchValue, sortState]);
-
-  // Paginate
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return processedData.slice(start, start + pageSize);
-  }, [processedData, currentPage]);
-
-  const columns: Column<Household>[] = [
-    {
-      id: 'name',
-      header: 'Household',
-      accessorKey: 'name',
-      sortable: true,
-      cell: ({ row }) => (
-        <div className="flex items-center gap-3">
-          <Avatar name={row.name} size="sm" />
-          <div>
-            <p className="font-medium text-content-primary">{row.name}</p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      accessorKey: 'status',
-      sortable: true,
-      cell: ({ value }) => {
-        const status = statusMap[value as string] || { label: String(value), variant: 'default' as StatusVariant };
-        return <StatusBadge status={status.variant} label={status.label} />;
-      },
-    },
-    {
-      id: 'totalAum',
-      header: 'Total AUM',
-      accessorKey: 'totalAum',
-      sortable: true,
-      align: 'right',
-      cell: ({ value }) => (
-        <span className="font-medium text-content-primary">
-          {formatCurrency(value as number)}
-        </span>
-      ),
-    },
-    {
-      id: 'riskTolerance',
-      header: 'Risk Tolerance',
-      accessorKey: 'riskTolerance',
-      sortable: true,
-      cell: ({ value }) => (
-        <span className="capitalize text-content-secondary">
-          {(value as string) || 'N/A'}
-        </span>
-      ),
-    },
-    {
-      id: 'lastReviewDate',
-      header: 'Last Review',
-      accessorKey: 'lastReviewDate',
-      sortable: true,
-      hiddenOnMobile: true,
-      cell: ({ value }) => (
-        <span className="text-content-secondary">
-          {value ? formatDate(value as string) : 'Never'}
-        </span>
-      ),
-    },
-    {
-      id: 'actions',
-      header: '',
-      width: '120px',
-      align: 'right',
-      cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1">
-          <Link href={`/households/${row.id}`}>
-            <Button variant="ghost" size="sm" title="View details">
-              <EyeIcon className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            title="Edit"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/households/${row.id}/edit`);
-            }}
-          >
-            <PencilSquareIcon className="w-4 h-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            title="Delete"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDeleteHouseholdId(row.id);
-            }}
-          >
-            <TrashIcon className="w-4 h-4 text-status-error-text" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
-  const handleSortChange = (column: string, direction: SortDirection) => {
-    setSortState({ column, direction });
-    setCurrentPage(1);
   };
+
+  const tabs: { id: ExpandedTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'allocation', label: 'Asset Allocation', icon: <ChartPieIcon className="w-4 h-4" /> },
+    { id: 'fees', label: 'Fee Schedule', icon: <CurrencyDollarIcon className="w-4 h-4" /> },
+    { id: 'members', label: 'Members', icon: <UserGroupIcon className="w-4 h-4" /> },
+    { id: 'documents', label: 'Documents', icon: <DocumentTextIcon className="w-4 h-4" /> },
+    { id: 'activity', label: 'Activity', icon: <CalendarDaysIcon className="w-4 h-4" /> },
+    { id: 'settings', label: 'Settings', icon: <Cog6ToothIcon className="w-4 h-4" /> },
+  ];
 
   return (
     <>
       <PageHeader
         title="Households"
-        subtitle={`${processedData.length} household${processedData.length !== 1 ? 's' : ''} total`}
+        subtitle={`${filteredData.length} household${filteredData.length !== 1 ? 's' : ''} total`}
         actions={
           <Button 
             leftIcon={<PlusIcon className="w-4 h-4" />}
@@ -255,42 +130,246 @@ export default function HouseholdsPage() {
 
       <PageContent>
         <Card noPadding>
-          <DataTable
-            data={paginatedData}
-            columns={columns}
-            loading={loading}
-            searchable
-            searchValue={searchValue}
-            onSearchChange={(value) => {
-              setSearchValue(value);
-              setCurrentPage(1);
-            }}
-            sortState={sortState}
-            onSortChange={handleSortChange}
-            pagination={{
-              currentPage,
-              pageSize,
-              totalItems: processedData.length,
-              onPageChange: setCurrentPage,
-            }}
-            onRowClick={(row) => {
-              router.push(`/households/${row.id}`);
-            }}
-            striped
-            emptyState={
-              <div className="text-center py-8">
-                <p className="text-content-secondary mb-4">
-                  No households found. Click &quot;Add Household&quot; to create one.
-                </p>
+          {/* Search Bar */}
+          <div className="p-4 border-b border-stone-800">
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500" />
+              <input
+                type="text"
+                placeholder="Search households..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-stone-800 border border-stone-700 rounded-lg text-white text-sm placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              />
+            </div>
+          </div>
+
+          {/* Households List */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+            </div>
+          ) : filteredData.length === 0 ? (
+            <div className="text-center py-12">
+              <UserGroupIcon className="w-12 h-12 text-stone-500 mx-auto mb-4" />
+              <p className="text-stone-400 mb-4">
+                {searchValue ? 'No households match your search.' : 'No households found. Click "Add Household" to create one.'}
+              </p>
+              {!searchValue && (
                 <Button 
                   leftIcon={<PlusIcon className="w-4 h-4" />}
                   onClick={() => setShowAddModal(true)}
                 >
                   Add Household
                 </Button>
-              </div>
-            }
-          />
+              )}
+            </div>
+          ) : (
+            <div className="divide-y divide-stone-800">
+              {filteredData.map((household) => {
+                const status = statusMap[household.status] || { label: household.status, variant: 'default' as StatusVariant };
+                const isExpanded = expandedHousehold === household.id;
+
+                return (
+                  <div key={household.id} className="bg-stone-900/30">
+                    {/* Main Row */}
+                    <div 
+                      className={`flex items-center gap-4 p-4 hover:bg-stone-800/50 transition-colors cursor-pointer ${isExpanded ? 'bg-stone-800/30' : ''}`}
+                      onClick={() => toggleExpand(household.id)}
+                    >
+                      {/* Expand/Collapse Icon */}
+                      <button
+                        className="p-1 text-stone-500 hover:text-white transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleExpand(household.id);
+                        }}
+                      >
+                        {isExpanded ? (
+                          <ChevronUpIcon className="w-5 h-5" />
+                        ) : (
+                          <ChevronDownIcon className="w-5 h-5" />
+                        )}
+                      </button>
+
+                      {/* Avatar & Name */}
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <Avatar name={household.name} size="md" />
+                        <div className="min-w-0">
+                          <p className="font-medium text-white truncate">{household.name}</p>
+                          <p className="text-sm text-stone-400 truncate">
+                            {household.riskTolerance ? `${household.riskTolerance} risk` : 'Risk not set'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Status */}
+                      <div className="hidden sm:block">
+                        <StatusBadge status={status.variant} label={status.label} />
+                      </div>
+
+                      {/* AUM */}
+                      <div className="hidden md:block text-right">
+                        <p className="text-sm text-stone-400">Total AUM</p>
+                        <p className="font-semibold text-white">{formatCurrency(household.totalAum)}</p>
+                      </div>
+
+                      {/* Last Review */}
+                      <div className="hidden lg:block text-right">
+                        <p className="text-sm text-stone-400">Last Review</p>
+                        <p className="text-white">
+                          {household.lastReviewDate ? formatDate(household.lastReviewDate) : 'Never'}
+                        </p>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          title="Edit"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <PencilSquareIcon className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          title="Delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteHouseholdId(household.id);
+                          }}
+                        >
+                          <TrashIcon className="w-4 h-4 text-red-400" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Expanded Content */}
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-stone-800 bg-stone-900/50">
+                            {/* Tabs */}
+                            <div className="flex items-center gap-1 p-2 border-b border-stone-800 overflow-x-auto">
+                              {tabs.map((tab) => (
+                                <button
+                                  key={tab.id}
+                                  onClick={() => setActiveTab(tab.id)}
+                                  className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                                    activeTab === tab.id
+                                      ? 'bg-blue-500/20 text-blue-400'
+                                      : 'text-stone-400 hover:text-white hover:bg-stone-800'
+                                  }`}
+                                >
+                                  {tab.icon}
+                                  {tab.label}
+                                </button>
+                              ))}
+                            </div>
+
+                            {/* Tab Content */}
+                            <div className="p-4">
+                              {activeTab === 'allocation' && (
+                                <AssetAllocationManager
+                                  entityType="household"
+                                  entityId={household.id}
+                                  entityName={household.name}
+                                />
+                              )}
+
+                              {activeTab === 'fees' && (
+                                <FeeScheduleManager
+                                  entityType="household"
+                                  entityId={household.id}
+                                  entityName={household.name}
+                                  currentAUM={household.totalAum}
+                                />
+                              )}
+
+                              {activeTab === 'members' && (
+                                <div className="bg-stone-800/30 rounded-lg p-6 text-center">
+                                  <UserGroupIcon className="w-10 h-10 text-stone-500 mx-auto mb-3" />
+                                  <p className="text-stone-400 text-sm">Household members will appear here</p>
+                                  <p className="text-stone-500 text-xs mt-1">Link clients and contacts to this household</p>
+                                </div>
+                              )}
+
+                              {activeTab === 'documents' && (
+                                <div className="bg-stone-800/30 rounded-lg p-6 text-center">
+                                  <DocumentTextIcon className="w-10 h-10 text-stone-500 mx-auto mb-3" />
+                                  <p className="text-stone-400 text-sm">Documents will appear here</p>
+                                  <p className="text-stone-500 text-xs mt-1">Upload and manage household documents</p>
+                                </div>
+                              )}
+
+                              {activeTab === 'activity' && (
+                                <div className="bg-stone-800/30 rounded-lg p-6 text-center">
+                                  <CalendarDaysIcon className="w-10 h-10 text-stone-500 mx-auto mb-3" />
+                                  <p className="text-stone-400 text-sm">Activity history will appear here</p>
+                                  <p className="text-stone-500 text-xs mt-1">View meetings, communications, and tasks</p>
+                                </div>
+                              )}
+
+                              {activeTab === 'settings' && (
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-stone-800/30 rounded-lg p-4">
+                                      <h4 className="text-sm font-medium text-white mb-3">Household Details</h4>
+                                      <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                          <span className="text-stone-400">Status</span>
+                                          <StatusBadge status={status.variant} label={status.label} />
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-stone-400">Risk Tolerance</span>
+                                          <span className="text-white capitalize">{household.riskTolerance || 'Not Set'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-stone-400">Investment Objective</span>
+                                          <span className="text-white">{household.investmentObjective || 'Not Set'}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="bg-stone-800/30 rounded-lg p-4">
+                                      <h4 className="text-sm font-medium text-white mb-3">Key Dates</h4>
+                                      <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                          <span className="text-stone-400">Onboarding</span>
+                                          <span className="text-white">{household.onboardingDate ? formatDate(household.onboardingDate) : 'Not Set'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-stone-400">Last Review</span>
+                                          <span className="text-white">{household.lastReviewDate ? formatDate(household.lastReviewDate) : 'Never'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span className="text-stone-400">Next Review</span>
+                                          <span className="text-white">{household.nextReviewDate ? formatDate(household.nextReviewDate) : 'Not Scheduled'}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </Card>
       </PageContent>
 
