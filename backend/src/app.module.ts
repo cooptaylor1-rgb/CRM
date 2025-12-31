@@ -22,6 +22,11 @@ import { WorkflowsModule } from './modules/workflows/workflows.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 
+// Advanced feature modules - Custodian, Collaboration, Customization
+import { CustodianModule } from './modules/integrations/custodian/custodian.module';
+import { CollaborationModule } from './modules/collaboration/collaboration.module';
+import { CustomizationModule } from './modules/customization/customization.module';
+
 // Import all entities explicitly for production builds
 import { User } from './modules/auth/entities/user.entity';
 import { Role } from './modules/auth/entities/role.entity';
@@ -29,7 +34,7 @@ import { Household } from './modules/households/entities/household.entity';
 import { Account } from './modules/accounts/entities/account.entity';
 import { Position } from './modules/accounts/entities/position.entity';
 import { Person } from './modules/persons/entities/person.entity';
-import { LegalEntity } from './modules/entities/entities/entity.entity';
+import { LegalEntity, EntityRelationship, EntityDistribution, EntityDocument } from './modules/entities/entities/entity.entity';
 import { AuditEvent } from './modules/audit/entities/audit-event.entity';
 import { ComplianceReview } from './modules/compliance/entities/compliance-review.entity';
 import { Document } from './modules/documents/entities/document.entity';
@@ -46,6 +51,15 @@ import { WorkflowTemplate, WorkflowInstance } from './modules/workflows/entities
 import { UserIntegration, SyncedCalendarEvent, SyncedEmail, EmailThread, IntegrationSyncLog } from './modules/integrations/entities/integration.entity';
 import { ClientProfitability, AdvisorMetrics, FirmMetrics, ActivitySnapshot } from './modules/analytics/entities/analytics.entity';
 
+// Custodian integration entities
+import { CustodianConnection, CustodianAccountLink, CustodianSyncLog } from './modules/integrations/custodian/custodian.entity';
+
+// Collaboration entities
+import { HouseholdTeam, ActivityFeed, Comment, Notification, NotificationPreference } from './modules/collaboration/entities/collaboration.entity';
+
+// Customization entities
+import { CustomFieldDefinition, CustomFieldValue, Tag, EntityTag, SavedView, UserPreference } from './modules/customization/entities/customization.entity';
+
 const entities = [
   // Core entities
   User,
@@ -55,6 +69,9 @@ const entities = [
   Position,
   Person,
   LegalEntity,
+  EntityRelationship,
+  EntityDistribution,
+  EntityDocument,
   AuditEvent,
   ComplianceReview,
   Document,
@@ -87,6 +104,23 @@ const entities = [
   AdvisorMetrics,
   FirmMetrics,
   ActivitySnapshot,
+  // Custodian integration
+  CustodianConnection,
+  CustodianAccountLink,
+  CustodianSyncLog,
+  // Collaboration
+  HouseholdTeam,
+  ActivityFeed,
+  Comment,
+  Notification,
+  NotificationPreference,
+  // Customization
+  CustomFieldDefinition,
+  CustomFieldValue,
+  Tag,
+  EntityTag,
+  SavedView,
+  UserPreference,
 ];
 
 @Module({
@@ -161,6 +195,10 @@ const entities = [
     WorkflowsModule,
     IntegrationsModule,
     AnalyticsModule,
+    // Advanced feature modules
+    CustodianModule,
+    CollaborationModule,
+    CustomizationModule,
   ],
   controllers: [HealthController],
 })
