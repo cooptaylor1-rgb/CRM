@@ -64,6 +64,10 @@ import { CustomFieldDefinition, CustomFieldValue, Tag, EntityTag, SavedView, Use
 import { OutlookConnection, OutlookEmail, OutlookEvent, OutlookMatchingRule, OutlookContact } from './modules/integrations/outlook/outlook.entity';
 import { OutlookModule } from './modules/integrations/outlook/outlook.module';
 
+// Allocations (Asset Allocation & Fee Schedules) entities
+import { TargetAssetAllocation, AllocationLineItem, FeeSchedule, FeeTier, FeeHistory } from './modules/allocations/entities/allocation.entity';
+import { AllocationsModule } from './modules/allocations/allocations.module';
+
 const entities = [
   // Core entities
   User,
@@ -131,6 +135,12 @@ const entities = [
   OutlookEvent,
   OutlookMatchingRule,
   OutlookContact,
+  // Allocations (Asset Allocation & Fee Schedules)
+  TargetAssetAllocation,
+  AllocationLineItem,
+  FeeSchedule,
+  FeeTier,
+  FeeHistory,
 ];
 
 @Module({
@@ -210,6 +220,7 @@ const entities = [
     CollaborationModule,
     CustomizationModule,
     OutlookModule,
+    AllocationsModule,
   ],
   controllers: [HealthController],
 })
