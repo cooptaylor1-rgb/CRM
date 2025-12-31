@@ -49,7 +49,7 @@ export function AppShell({ children }: AppShellProps) {
  */
 export interface PageHeaderProps {
   title: string;
-  subtitle?: string;
+  subtitle?: string | React.ReactNode;
   /** Right-aligned actions */
   actions?: React.ReactNode;
   /** Breadcrumb or back link */
@@ -72,7 +72,7 @@ export function PageHeader({
           <div>
             <h1 className="text-display text-content-primary">{title}</h1>
             {subtitle && (
-              <p className="text-sm text-content-secondary mt-1">{subtitle}</p>
+              <div className="text-sm text-content-secondary mt-1">{subtitle}</div>
             )}
           </div>
           {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}

@@ -1,0 +1,305 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import {
+  ArrowLeftIcon,
+  PencilSquareIcon,
+  UserGroupIcon,
+  CurrencyDollarIcon,
+  ChartBarIcon,
+  CalendarIcon,
+  ClockIcon,
+  BuildingLibraryIcon,
+} from '@heroicons/react/24/outline';
+import { PageHeader, PageContent } from '@/components/layout/AppShell';
+import { Button, Card, StatusBadge, formatCurrency, formatDate } from '@/components/ui';
+import { householdsService, Household } from '@/services/households.service';
+import { AssetAllocationManager, FeeScheduleManager } from '@/components/features';
+
+type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'default';
+
+const statusMap: Record<string, { label: string; variant: StatusVariant }> = {
+  active: { label: 'Active', variant: 'success' },
+  prospect: { label: 'Prospect', variant: 'info' },
+  inactive: { label: 'Inactive', variant: 'default' },
+  closed: { label: 'Closed', variant: 'error' },
+};
+
+const riskToleranceLabels: Record<string, string> = {
+  conservative: 'Conservative',
+  moderately_conservative: 'Moderately Conservative',
+  moderate: 'Moderate',
+  moderately_aggressive: 'Moderately Aggressive',
+  aggressive: 'Aggressive',
+};
+
+export default function HouseholdDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const householdId = params.id as string;
+
+  const [household, setHousehold] = useState<Household | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHousehold = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await householdsService.getHousehold(householdId);
+        setHousehold(data);
+      } catch (err: any) {
+        console.error('Failed to fetch household:', err);
+        setError(err.response?.data?.message || 'Failed to load household');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (householdId) {
+      fetchHousehold();
+    }
+  }, [householdId]);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Loading..." />
+        <PageContent>
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+          </div>
+        </PageContent>
+      </>
+    );
+  }
+
+  if (error || !household) {
+    return (
+      <>
+        <PageHeader title="Household Not Found" />
+        <PageContent>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <UserGroupIcon className="w-16 h-16 text-stone-500 mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Household Not Found</h2>
+            <p className="text-stone-400 mb-6">{error || 'The household you are looking for does not exist.'}</p>
+            <Link href="/households">
+              <Button variant="secondary" leftIcon={<ArrowLeftIcon className="w-4 h-4" />}>
+                Back to Households
+              </Button>
+            </Link>
+          </div>
+        </PageContent>
+      </>
+    );
+  }
+
+  const status = statusMap[household.status] || { label: household.status, variant: 'default' as StatusVariant };
+
+  return (
+    <>
+      <PageHeader
+        title={household.name}
+        subtitle={
+          <div className="flex items-center gap-3 mt-1">
+            <StatusBadge status={status.variant} label={status.label} />
+            {household.riskTolerance && (
+              <span className="text-sm text-stone-400">
+                {riskToleranceLabels[household.riskTolerance] || household.riskTolerance}
+              </span>
+            )}
+          </div>
+        }
+        actions={
+          <div className="flex items-center gap-2">
+            <Link href="/households">
+              <Button variant="ghost" leftIcon={<ArrowLeftIcon className="w-4 h-4" />}>
+                Back
+              </Button>
+            </Link>
+            <Button
+              variant="secondary"
+              leftIcon={<PencilSquareIcon className="w-4 h-4" />}
+              onClick={() => router.push(`/households/${householdId}/edit`)}
+            >
+              Edit
+            </Button>
+          </div>
+        }
+      />
+
+      <PageContent>
+        <div className="space-y-6">
+          {/* Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-emerald-500/10 rounded-lg">
+                    <CurrencyDollarIcon className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-stone-400">Total AUM</p>
+                    <p className="text-xl font-semibold text-white">
+                      {formatCurrency(household.totalAum)}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-blue-500/10 rounded-lg">
+                    <ChartBarIcon className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-stone-400">Risk Tolerance</p>
+                    <p className="text-lg font-medium text-white capitalize">
+                      {riskToleranceLabels[household.riskTolerance || ''] || household.riskTolerance || 'Not Set'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-purple-500/10 rounded-lg">
+                    <CalendarIcon className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-stone-400">Last Review</p>
+                    <p className="text-lg font-medium text-white">
+                      {household.lastReviewDate ? formatDate(household.lastReviewDate) : 'Never'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-amber-500/10 rounded-lg">
+                    <ClockIcon className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-stone-400">Next Review</p>
+                    <p className="text-lg font-medium text-white">
+                      {household.nextReviewDate ? formatDate(household.nextReviewDate) : 'Not Scheduled'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Investment Details Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Investment Objective */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-indigo-500/10 rounded-lg">
+                    <BuildingLibraryIcon className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <h3 className="font-medium text-white">Investment Objective</h3>
+                </div>
+                <p className="text-stone-300">
+                  {household.investmentObjective || 'No investment objective defined for this household.'}
+                </p>
+              </Card>
+            </motion.div>
+
+            {/* Key Dates */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+            >
+              <Card className="p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-cyan-500/10 rounded-lg">
+                    <CalendarIcon className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <h3 className="font-medium text-white">Key Dates</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-stone-400">Onboarding Date</span>
+                    <span className="text-white">
+                      {household.onboardingDate ? formatDate(household.onboardingDate) : 'Not Set'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-stone-400">Created</span>
+                    <span className="text-white">{formatDate(household.createdAt)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-stone-400">Last Updated</span>
+                    <span className="text-white">{formatDate(household.updatedAt)}</span>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Asset Allocation & Fee Schedule */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <AssetAllocationManager
+                entityType="household"
+                entityId={householdId}
+                entityName={household.name}
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45 }}
+            >
+              <FeeScheduleManager
+                entityType="household"
+                entityId={householdId}
+                entityName={household.name}
+                currentAUM={household.totalAum}
+              />
+            </motion.div>
+          </div>
+        </div>
+      </PageContent>
+    </>
+  );
+}
