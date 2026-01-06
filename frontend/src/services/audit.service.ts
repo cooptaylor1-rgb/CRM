@@ -38,7 +38,7 @@ export const auditService = {
     
     const queryString = params.toString();
     const response = await api.get<AuditEvent[]>(`/api/audit${queryString ? `?${queryString}` : ''}`);
-    return response;
+    return response.data;
   },
 
   /**
@@ -48,7 +48,7 @@ export const auditService = {
     const response = await api.get<AuditEvent[]>(
       `/api/audit/entity?entityType=${entityType}&entityId=${entityId}`
     );
-    return response;
+    return response.data;
   },
 
   /**
@@ -56,6 +56,6 @@ export const auditService = {
    */
   async getByUser(userId: string): Promise<AuditEvent[]> {
     const response = await api.get<AuditEvent[]>(`/api/audit/user?userId=${userId}`);
-    return response;
+    return response.data;
   },
 };

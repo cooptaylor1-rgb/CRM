@@ -92,7 +92,7 @@ export default function DashboardPage() {
       id: m.id,
       title: m.title,
       startTime: m.startTime,
-      householdId: m.householdId,
+      householdId: (m as { householdId?: string }).householdId || '',
       householdName: m.householdName,
     })) || [],
   });

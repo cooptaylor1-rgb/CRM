@@ -38,6 +38,7 @@ export interface AdvisorDashboard {
   upcomingMeetings: {
     id: string;
     title: string;
+    householdId?: string;
     householdName: string;
     startTime: string;
     type: string;
