@@ -255,3 +255,43 @@ export type {
   ActionCard,
   ClientResult,
 } from './AIAdvisorAssistant';
+
+// Document Collaboration - Secure document management
+export {
+  DocumentCollaboration,
+} from './DocumentCollaboration';
+export type {
+  DocumentCollaborationProps,
+  DocumentType,
+  DocumentStatus,
+  Document,
+  DocumentVersion,
+  DocumentShare,
+  SharePermission,
+  Folder,
+} from './DocumentCollaboration';
+
+// Tax Planning Tools - Tax-loss harvesting and optimization
+export {
+  TaxPlanningTools,
+} from './TaxPlanningTools';
+export type {
+  TaxPlanningToolsProps,
+  TaxLotMethod,
+  TaxLot,
+  HarvestingOpportunity,
+  TaxProjection,
+} from './TaxPlanningTools';
+
+// Risk Assessment Module - Portfolio risk analysis
+export {
+  RiskAssessmentModule,
+} from './RiskAssessmentModule';
+export type {
+  RiskAssessmentModuleProps,
+  RiskLevel,
+  RiskProfile,
+  PortfolioRisk,
+  StressTest,
+  RebalanceAlert,
+} from './RiskAssessmentModule';
