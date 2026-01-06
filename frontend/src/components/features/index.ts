@@ -107,3 +107,89 @@ export type {
   KeyboardShortcut,
   NavigableItem,
 } from './KeyboardFirst';
+
+// ============================================
+// Magic Features - v4: Enterprise-Grade CRM
+// ============================================
+
+// Workflow Automation Engine - Visual workflow builder
+export {
+  WorkflowAutomation,
+  WORKFLOW_TEMPLATES,
+  TRIGGER_CONFIG,
+  ACTION_CONFIG,
+} from './WorkflowAutomation';
+export type {
+  WorkflowAutomationProps,
+  Workflow,
+  WorkflowTrigger,
+  WorkflowAction,
+  WorkflowCondition,
+  WorkflowTemplate,
+  TriggerType,
+  ActionType,
+  ConditionOperator,
+} from './WorkflowAutomation';
+
+// Smart Email Composer - AI-assisted email drafting
+export {
+  SmartEmailComposer,
+  EMAIL_TEMPLATES,
+  MERGE_FIELDS,
+} from './SmartEmailComposer';
+export type {
+  SmartEmailComposerProps,
+  EmailTemplate,
+  MergeField,
+  EmailRecipient,
+  DraftEmail,
+  ToneType,
+  AIEmailContext,
+} from './SmartEmailComposer';
+
+// Client Segmentation - Dynamic smart lists
+export {
+  ClientSegmentation,
+  FIELD_CONFIG,
+  OPERATOR_LABELS,
+  PRESET_SEGMENTS,
+} from './ClientSegmentation';
+export type {
+  ClientSegmentationProps,
+  Segment,
+  FilterCondition,
+  FilterGroup,
+  FilterField,
+  FilterOperator,
+  SegmentClient,
+} from './ClientSegmentation';
+
+// Meeting Notes AI - Smart meeting capture
+export {
+  MeetingNotesAI,
+  EXAMPLE_MEETING_NOTES,
+} from './MeetingNotesAI';
+export type {
+  MeetingNotesAIProps,
+  MeetingNote,
+  AISummary,
+  ActionItem,
+  Attendee,
+  NoteCategory,
+} from './MeetingNotesAI';
+
+// Performance Analytics Dashboard - Business intelligence
+export {
+  PerformanceAnalytics,
+} from './PerformanceAnalytics';
+export type {
+  PerformanceAnalyticsProps,
+  TimeRange,
+  MetricData,
+  ChartDataPoint,
+  AUMFlowData,
+  ActivityMetrics,
+  RevenueData,
+  ClientHealthData,
+  AdvisorPerformance,
+} from './PerformanceAnalytics';
