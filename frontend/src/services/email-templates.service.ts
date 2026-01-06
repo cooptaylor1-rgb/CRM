@@ -1,4 +1,4 @@
-import { apiClient } from './api';
+import api from './api';
 
 export type EmailTemplateCategory = 
   | 'onboarding'

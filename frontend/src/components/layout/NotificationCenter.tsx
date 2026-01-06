@@ -126,29 +126,29 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
   const hasUrgent = (stats?.byPriority?.urgent ?? 0) > 0;
 
   const displayNotifications = activeTab === 'unread' 
-    ? notifications.filter(n => !n.read)
+    ? notifications.filter(n => !n.isRead)
     : notifications;
 
   const handleMarkAsRead = async (id: string) => {
     await notificationsService.markAsRead(id);
     setNotifications(prev => 
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
+      prev.map(n => n.id === id ? { ...n, isRead: true } : n)
     );
-    setStats(prev => ({ ...prev, unread: Math.max(0, prev.unread - 1) }));
+    setStats(prev => prev ? { ...prev, unreadCount: Math.max(0, prev.unreadCount - 1) } : null);
   };
 
   const handleMarkAllAsRead = async () => {
     await notificationsService.markAllAsRead();
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    setStats(prev => ({ ...prev, unread: 0 }));
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    setStats(prev => prev ? { ...prev, unreadCount: 0 } : null);
   };
 
   const handleArchive = async (id: string) => {
     await notificationsService.archive(id);
     setNotifications(prev => prev.filter(n => n.id !== id));
     const notification = notifications.find(n => n.id === id);
-    if (notification && !notification.read) {
-      setStats(prev => ({ ...prev, unread: Math.max(0, prev.unread - 1) }));
+    if (notification && !notification.isRead) {
+      setStats(prev => prev ? { ...prev, unreadCount: Math.max(0, prev.unreadCount - 1) } : null);
     }
   };
 
@@ -311,12 +311,12 @@ function NotificationItem({ notification, onMarkAsRead, onArchive }: Notificatio
         'relative px-4 py-3 hover:bg-surface-secondary transition-colors cursor-pointer',
         'border-l-4',
         priorityStyles[notification.priority],
-        !notification.read && 'bg-accent-50/50'
+        !notification.isRead && 'bg-accent-50/50'
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => {
-        if (!notification.read) {
+        if (!notification.isRead) {
           onMarkAsRead(notification.id);
         }
         if (notification.actionUrl) {
@@ -332,7 +332,7 @@ function NotificationItem({ notification, onMarkAsRead, onArchive }: Notificatio
           <div className="flex items-start justify-between gap-2">
             <p className={cn(
               'text-sm',
-              notification.read ? 'text-content-secondary' : 'text-content-primary font-medium'
+              notification.isRead ? 'text-content-secondary' : 'text-content-primary font-medium'
             )}>
               {notification.title}
             </p>
@@ -367,7 +367,7 @@ function NotificationItem({ notification, onMarkAsRead, onArchive }: Notificatio
         leaveTo="opacity-0"
       >
         <div className="absolute right-2 top-2 flex items-center gap-1 bg-surface-primary rounded-md shadow-sm border border-border p-0.5">
-          {!notification.read && (
+          {!notification.isRead && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -393,7 +393,7 @@ function NotificationItem({ notification, onMarkAsRead, onArchive }: Notificatio
       </Transition>
 
       {/* Unread indicator */}
-      {!notification.read && (
+      {!notification.isRead && (
         <span className="absolute left-1.5 top-1/2 -translate-y-1/2 w-2 h-2 bg-accent-600 rounded-full" />
       )}
     </div>
