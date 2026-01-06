@@ -57,3 +57,32 @@ export type {
   UseScrollAnimationOptions,
   UseSpringOptions,
 } from './useAnimation';
+
+// React Query Hooks - Data fetching with caching & optimistic updates
+export {
+  useHouseholds,
+  useHousehold,
+  useCreateHousehold,
+  useUpdateHousehold,
+  useDeleteHousehold,
+  usePrefetchHousehold,
+  householdKeys,
+} from './useHouseholds';
+
+export {
+  useTasks,
+  useMyTasks,
+  useOverdueTasks,
+  useTasksDueSoon,
+  useTaskStats,
+  useHouseholdTasks,
+  useTask,
+  useTaskSubtasks,
+  useCreateTask,
+  useUpdateTask,
+  useCompleteTask,
+  useDeleteTask,
+  useBulkCreateTasks,
+  usePrefetchTask,
+  taskKeys,
+} from './useTasks';

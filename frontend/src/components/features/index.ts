@@ -12,6 +12,12 @@ export { UserPreferencesPage } from '../customization/UserPreferencesPage';
 
 // Integration Components
 export { default as SchwabIntegration } from '../integrations/SchwabIntegration';
+
 // Asset Allocation & Fee Management
 export { default as AssetAllocationManager } from './AssetAllocationManager';
 export { default as FeeScheduleManager } from './FeeScheduleManager';
+
+// Magic Features
+export { SmartCommandPalette, useSmartCommandPalette } from './SmartCommandPalette';
+export { ActivityTimeline, useActivityTimeline } from './ActivityTimeline';
+export type { Activity } from './ActivityTimeline';

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { QueryProvider } from '@/providers';
 
 export const metadata: Metadata = {
   title: 'Wealth Management CRM',
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );
