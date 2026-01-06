@@ -193,3 +193,65 @@ export type {
   ClientHealthData,
   AdvisorPerformance,
 } from './PerformanceAnalytics';
+
+// ============================================
+// Magic Features - v5: Enterprise Integration
+// ============================================
+
+// Custodian Integration Hub - Multi-custodian data sync
+export {
+  CustodianIntegrationHub,
+} from './CustodianIntegrationHub';
+export type {
+  CustodianIntegrationHubProps,
+  CustodianType,
+  ConnectionStatus,
+  SyncFrequency,
+  DataType,
+  CustodianConnection,
+  CustodianAccount,
+  Position,
+  SyncEvent,
+  TradeConfirmation,
+  FeeReconciliation,
+} from './CustodianIntegrationHub';
+
+// Compliance Center - Regulatory compliance management
+export {
+  ComplianceCenter,
+} from './ComplianceCenter';
+export type {
+  ComplianceCenterProps,
+  ComplianceItemType,
+  ComplianceStatus,
+  ComplianceItem,
+  ComplianceDeadline,
+} from './ComplianceCenter';
+
+// Fee Billing Engine - Automated fee management
+export {
+  FeeBillingEngine,
+} from './FeeBillingEngine';
+export type {
+  FeeBillingEngineProps,
+  BillingFrequency,
+  FeeType,
+  InvoiceStatus,
+  FeeSchedule,
+  Invoice,
+  BillingMetrics,
+} from './FeeBillingEngine';
+
+// AI Advisor Assistant - Intelligent copilot
+export {
+  AIAdvisorAssistant,
+} from './AIAdvisorAssistant';
+export type {
+  AIAdvisorAssistantProps,
+  MessageRole,
+  SuggestionType,
+  ChatMessage,
+  QuickSuggestion,
+  ActionCard,
+  ClientResult,
+} from './AIAdvisorAssistant';
