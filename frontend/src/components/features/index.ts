@@ -29,3 +29,7 @@ export type { NextBestAction, NextBestActionsProps } from './NextBestActions';
 // Magic Features - v2: Meeting Prep Brief
 export { MeetingPrepBrief, useMeetingPrepData } from './MeetingPrepBrief';
 export type { MeetingPrepData, MeetingPrepBriefProps } from './MeetingPrepBrief';
+
+// Magic Features - v2: Audit Trail (Trust & Safety)
+export { AuditTrail, AuditBadge } from './AuditTrail';
+export type { AuditTrailProps, AuditBadgeProps } from './AuditTrail';
