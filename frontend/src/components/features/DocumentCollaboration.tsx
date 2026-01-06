@@ -352,14 +352,16 @@ export const DocumentCollaboration: React.FC<DocumentCollaborationProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<DocumentStatus | 'all'>('all');
   const [shareDoc, setShareDoc] = useState<Document | null>(null);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
 
   const filteredDocs = useMemo(() => {
     return data.documents.filter(doc => {
       if (statusFilter !== 'all' && doc.status !== statusFilter) return false;
       if (searchQuery && !doc.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (selectedFolder && doc.folderId !== selectedFolder) return false;
       return true;
     });
-  }, [data.documents, statusFilter, searchQuery]);
+  }, [data.documents, statusFilter, searchQuery, selectedFolder]);
 
   const stats = useMemo(() => ({
     total: data.documents.length,
@@ -418,9 +420,29 @@ export const DocumentCollaboration: React.FC<DocumentCollaborationProps> = ({
       {/* Folders */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {data.folders.map(folder => (
-          <FolderCard key={folder.id} folder={folder} onClick={() => {}} />
+          <FolderCard 
+            key={folder.id} 
+            folder={folder} 
+            onClick={() => setSelectedFolder(selectedFolder === folder.id ? null : folder.id)} 
+          />
         ))}
       </div>
+
+      {/* Selected Folder Indicator */}
+      {selectedFolder && (
+        <div className="mb-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <span>Filtering by folder:</span>
+          <span className="font-medium text-gray-900 dark:text-white">
+            {data.folders.find(f => f.id === selectedFolder)?.name}
+          </span>
+          <button 
+            onClick={() => setSelectedFolder(null)}
+            className="text-blue-600 hover:text-blue-700"
+          >
+            Clear
+          </button>
+        </div>
+      )}
 
       {/* Search & Filter */}
       <div className="flex items-center gap-4 mb-4">

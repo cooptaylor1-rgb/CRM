@@ -33,7 +33,9 @@ import {
   BuildingLibraryIcon,
 } from '@heroicons/react/24/outline';
 import { accountsService, Account } from '@/services/accounts.service';
+import { householdsService, Household } from '@/services/households.service';
 import { AssetAllocationManager, FeeScheduleManager } from '@/components/features';
+import { Modal } from '@/components/ui';
 
 type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'default';
 
@@ -62,17 +64,34 @@ type ExpandedTab = 'allocation' | 'fees' | 'positions' | 'transactions' | 'docum
 export default function AccountsPage() {
   const router = useRouter();
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [households, setHouseholds] = useState<Household[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchValue, setSearchValue] = useState('');
   const [deleteAccountId, setDeleteAccountId] = useState<string | null>(null);
   const [expandedAccount, setExpandedAccount] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ExpandedTab>('allocation');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newAccount, setNewAccount] = useState({
+    accountName: '',
+    accountNumber: '',
+    accountType: 'individual',
+    householdId: '',
+    custodian: '',
+    status: 'active',
+    currentValue: 0,
+    managementStyle: 'discretionary',
+  });
 
   const fetchAccounts = async () => {
     try {
       setLoading(true);
-      const data = await accountsService.getAccounts();
-      setAccounts(data);
+      const [accountsData, householdsData] = await Promise.all([
+        accountsService.getAccounts(),
+        householdsService.getHouseholds(),
+      ]);
+      setAccounts(accountsData);
+      setHouseholds(householdsData);
     } catch (error) {
       console.error('Failed to fetch accounts:', error);
     } finally {
@@ -83,6 +102,30 @@ export default function AccountsPage() {
   useEffect(() => {
     fetchAccounts();
   }, []);
+
+  const handleCreateAccount = async () => {
+    if (!newAccount.accountName || !newAccount.householdId) return;
+    try {
+      setCreating(true);
+      await accountsService.createAccount(newAccount);
+      setShowCreateModal(false);
+      setNewAccount({
+        accountName: '',
+        accountNumber: '',
+        accountType: 'individual',
+        householdId: '',
+        custodian: '',
+        status: 'active',
+        currentValue: 0,
+        managementStyle: 'discretionary',
+      });
+      fetchAccounts();
+    } catch (error) {
+      console.error('Failed to create account:', error);
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const handleDeleteAccount = async () => {
     if (!deleteAccountId) return;
@@ -134,7 +177,7 @@ export default function AccountsPage() {
         actions={
           <Button 
             leftIcon={<PlusIcon className="w-4 h-4" />}
-            onClick={() => {}}
+            onClick={() => setShowCreateModal(true)}
           >
             Add Account
           </Button>
@@ -392,6 +435,128 @@ export default function AccountsPage() {
         confirmText="Delete"
         variant="danger"
       />
+
+      {/* Create Account Modal */}
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Add New Account"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-stone-300 mb-1">Account Name *</label>
+            <input
+              type="text"
+              value={newAccount.accountName}
+              onChange={(e) => setNewAccount({ ...newAccount, accountName: e.target.value })}
+              placeholder="e.g., Smith Family Trust"
+              className="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-white text-sm placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-stone-300 mb-1">Account Number</label>
+            <input
+              type="text"
+              value={newAccount.accountNumber}
+              onChange={(e) => setNewAccount({ ...newAccount, accountNumber: e.target.value })}
+              placeholder="e.g., 1234-5678"
+              className="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-white text-sm placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-stone-300 mb-1">Household *</label>
+            <select
+              value={newAccount.householdId}
+              onChange={(e) => setNewAccount({ ...newAccount, householdId: e.target.value })}
+              className="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            >
+              <option value="">Select a household...</option>
+              {households.map((h) => (
+                <option key={h.id} value={h.id}>{h.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-stone-300 mb-1">Account Type</label>
+              <select
+                value={newAccount.accountType}
+                onChange={(e) => setNewAccount({ ...newAccount, accountType: e.target.value })}
+                className="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              >
+                {Object.entries(accountTypeLabels).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-stone-300 mb-1">Status</label>
+              <select
+                value={newAccount.status}
+                onChange={(e) => setNewAccount({ ...newAccount, status: e.target.value })}
+                className="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              >
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-stone-300 mb-1">Custodian</label>
+              <input
+                type="text"
+                value={newAccount.custodian}
+                onChange={(e) => setNewAccount({ ...newAccount, custodian: e.target.value })}
+                placeholder="e.g., Schwab"
+                className="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-white text-sm placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-stone-300 mb-1">Current Value</label>
+              <input
+                type="number"
+                value={newAccount.currentValue}
+                onChange={(e) => setNewAccount({ ...newAccount, currentValue: parseFloat(e.target.value) || 0 })}
+                placeholder="0.00"
+                className="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-white text-sm placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-stone-300 mb-1">Management Style</label>
+            <select
+              value={newAccount.managementStyle}
+              onChange={(e) => setNewAccount({ ...newAccount, managementStyle: e.target.value })}
+              className="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            >
+              <option value="discretionary">Discretionary</option>
+              <option value="non-discretionary">Non-Discretionary</option>
+              <option value="advisory">Advisory</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-stone-700">
+            <Button variant="ghost" onClick={() => setShowCreateModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateAccount}
+              disabled={creating || !newAccount.accountName || !newAccount.householdId}
+            >
+              {creating ? 'Creating...' : 'Create Account'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }
