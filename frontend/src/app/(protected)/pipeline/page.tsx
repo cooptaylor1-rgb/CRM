@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { 
   PageHeader, 
   PageContent 
@@ -10,8 +10,12 @@ import {
   Card,
   StatusBadge,
   formatCurrency,
+  SkeletonPipeline,
+  ErrorState,
+  DataFreshness,
+  EmptyState,
 } from '@/components/ui';
-import { PlusIcon, ViewColumnsIcon, ListBulletIcon, CalendarIcon } from '@heroicons/react/20/solid';
+import { PlusIcon, ViewColumnsIcon, ListBulletIcon, CalendarIcon, UserPlusIcon } from '@heroicons/react/20/solid';
 import { pipelineService, Prospect, PipelineStage, PipelineStats, CreateProspectDto, MarkLostDto } from '@/services/pipeline.service';
 import { AddProspectModal } from '@/components/modals';
 
@@ -42,13 +46,16 @@ export default function PipelinePage() {
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [stats, setStats] = useState<PipelineStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedProspect, setSelectedProspect] = useState<Prospect | null>(null);
   const [showLostModal, setShowLostModal] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const [prospectsData, statsData] = await Promise.all([
         pipelineService.getAll(),
@@ -56,16 +63,18 @@ export default function PipelinePage() {
       ]);
       setProspects(prospectsData);
       setStats(statsData);
-    } catch (error) {
-      console.error('Failed to fetch pipeline data:', error);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Failed to fetch pipeline data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load pipeline');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const handleStageChange = async (prospectId: string, newStage: PipelineStage) => {
     if (newStage === 'lost') {
@@ -159,12 +168,36 @@ export default function PipelinePage() {
               <ListBulletIcon className="w-4 h-4" /> List
             </button>
           </div>
+
+          <DataFreshness 
+            lastUpdated={lastUpdated} 
+            onRefresh={fetchData}
+            isRefreshing={loading}
+          />
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-primary"></div>
-          </div>
+        {error ? (
+          <ErrorState
+            title="Couldn't load pipeline"
+            message={error}
+            onRetry={fetchData}
+          />
+        ) : loading ? (
+          <SkeletonPipeline columns={5} />
+        ) : prospects.length === 0 ? (
+          <EmptyState
+            icon={<UserPlusIcon className="w-6 h-6" />}
+            title="No prospects yet"
+            description="Add your first prospect to start building your pipeline."
+            action={
+              <Button 
+                leftIcon={<PlusIcon className="w-4 h-4" />}
+                onClick={() => setShowCreateModal(true)}
+              >
+                Add Prospect
+              </Button>
+            }
+          />
         ) : viewMode === 'kanban' ? (
           /* Kanban View */
           <div className="flex gap-4 overflow-x-auto pb-4">

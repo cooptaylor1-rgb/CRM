@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -15,6 +15,10 @@ import {
   ConfirmModal,
   formatCurrency,
   formatDate,
+  SkeletonHouseholds,
+  ErrorState,
+  DataFreshness,
+  EmptyState,
 } from '@/components/ui';
 import { 
   PlusIcon, 
@@ -51,23 +55,28 @@ export default function HouseholdsPage() {
   const router = useRouter();
   const [households, setHouseholds] = useState<Household[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [searchValue, setSearchValue] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteHouseholdId, setDeleteHouseholdId] = useState<string | null>(null);
   const [expandedHousehold, setExpandedHousehold] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ExpandedTab>('allocation');
 
-  const fetchHouseholds = async () => {
+  const fetchHouseholds = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await householdsService.getHouseholds();
       setHouseholds(data);
-    } catch (error) {
-      console.error('Failed to fetch households:', error);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Failed to fetch households:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load households');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchHouseholds();
@@ -117,7 +126,16 @@ export default function HouseholdsPage() {
     <>
       <PageHeader
         title="Households"
-        subtitle={`${filteredData.length} household${filteredData.length !== 1 ? 's' : ''} total`}
+        subtitle={
+          <div className="flex items-center gap-3">
+            <span>{filteredData.length} household{filteredData.length !== 1 ? 's' : ''} total</span>
+            <DataFreshness 
+              lastUpdated={lastUpdated} 
+              onRefresh={fetchHouseholds}
+              isRefreshing={loading}
+            />
+          </div>
+        }
         actions={
           <Button 
             leftIcon={<PlusIcon className="w-4 h-4" />}
@@ -145,17 +163,20 @@ export default function HouseholdsPage() {
           </div>
 
           {/* Households List */}
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
-            </div>
+          {error ? (
+            <ErrorState
+              title="Couldn't load households"
+              message={error}
+              onRetry={fetchHouseholds}
+            />
+          ) : loading ? (
+            <SkeletonHouseholds rows={5} />
           ) : filteredData.length === 0 ? (
-            <div className="text-center py-12">
-              <UserGroupIcon className="w-12 h-12 text-stone-500 mx-auto mb-4" />
-              <p className="text-stone-400 mb-4">
-                {searchValue ? 'No households match your search.' : 'No households found. Click "Add Household" to create one.'}
-              </p>
-              {!searchValue && (
+            <EmptyState
+              icon={<UserGroupIcon className="w-6 h-6" />}
+              title={searchValue ? 'No households match your search' : 'No households yet'}
+              description={searchValue ? 'Try adjusting your search terms.' : 'Create your first household to get started.'}
+              action={!searchValue && (
                 <Button 
                   leftIcon={<PlusIcon className="w-4 h-4" />}
                   onClick={() => setShowAddModal(true)}
@@ -163,7 +184,7 @@ export default function HouseholdsPage() {
                   Add Household
                 </Button>
               )}
-            </div>
+            />
           ) : (
             <div className="divide-y divide-stone-800">
               {filteredData.map((household) => {

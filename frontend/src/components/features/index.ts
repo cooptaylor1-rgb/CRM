@@ -17,7 +17,15 @@ export { default as SchwabIntegration } from '../integrations/SchwabIntegration'
 export { default as AssetAllocationManager } from './AssetAllocationManager';
 export { default as FeeScheduleManager } from './FeeScheduleManager';
 
-// Magic Features
+// Magic Features - v1
 export { SmartCommandPalette, useSmartCommandPalette } from './SmartCommandPalette';
 export { ActivityTimeline, useActivityTimeline } from './ActivityTimeline';
 export type { Activity } from './ActivityTimeline';
+
+// Magic Features - v2: Next Best Actions
+export { NextBestActions, useNextBestActions } from './NextBestActions';
+export type { NextBestAction, NextBestActionsProps } from './NextBestActions';
+
+// Magic Features - v2: Meeting Prep Brief
+export { MeetingPrepBrief, useMeetingPrepData } from './MeetingPrepBrief';
+export type { MeetingPrepData, MeetingPrepBriefProps } from './MeetingPrepBrief';

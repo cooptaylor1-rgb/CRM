@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { analyticsService, AdvisorDashboard } from '@/services/analytics.service';
+import { tasksService, Task } from '@/services/tasks.service';
 import { PageHeader, PageContent, ContentGrid } from '@/components/layout/AppShell';
 import {
   MetricCard,
@@ -25,7 +26,9 @@ import {
   formatCurrency,
   formatDateTime,
   formatRelativeTime,
+  DataFreshness,
 } from '@/components/ui';
+import { NextBestActions, useNextBestActions } from '@/components/features';
 import {
   ExclamationTriangleIcon,
   ClockIcon,
@@ -36,24 +39,51 @@ import {
 
 export default function DashboardPage() {
   const [dashboard, setDashboard] = useState<AdvisorDashboard | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [dashboardData, tasksData] = await Promise.all([
+        analyticsService.getDashboard(),
+        tasksService.getAll({}).catch(() => []),
+      ]);
+      setDashboard(dashboardData);
+      setTasks(tasksData);
+      setLastUpdated(new Date());
+    } catch (err: any) {
+      console.error('Failed to fetch dashboard:', err);
+      setError(err.message || 'Failed to load dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const data = await analyticsService.getDashboard();
-        setDashboard(data);
-      } catch (err: any) {
-        console.error('Failed to fetch dashboard:', err);
-        setError(err.message || 'Failed to load dashboard');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboard();
+    fetchData();
   }, []);
+
+  // Generate next best actions from tasks and dashboard data
+  const nextBestActions = useNextBestActions({
+    tasks: tasks.map(t => ({
+      id: t.id,
+      title: t.title,
+      dueDate: t.dueDate,
+      status: t.status,
+      householdId: t.householdId,
+      householdName: undefined, // Could be enriched
+    })),
+    meetings: dashboard?.upcomingMeetings?.map(m => ({
+      id: m.id,
+      title: m.title,
+      startTime: m.startTime,
+      householdId: m.householdId,
+      householdName: m.householdName,
+    })) || [],
+  });
 
   if (loading) {
     return (
@@ -117,7 +147,16 @@ export default function DashboardPage() {
       {/* Page Header */}
       <PageHeader
         title="Advisor Dashboard"
-        subtitle={`Last updated ${formatRelativeTime(new Date().toISOString())}`}
+        subtitle={
+          <div className="flex items-center gap-3">
+            <span>Welcome back</span>
+            <DataFreshness 
+              lastUpdated={lastUpdated} 
+              onRefresh={fetchData}
+              isRefreshing={loading}
+            />
+          </div>
+        }
       />
 
       <PageContent>
@@ -280,6 +319,13 @@ export default function DashboardPage() {
 
           {/* Right Column - Secondary Content */}
           <div className="space-y-6">
+            {/* Next Best Actions - Magic v2 */}
+            <NextBestActions 
+              actions={nextBestActions} 
+              maxItems={5}
+              compact
+            />
+
             {/* Action Center */}
             {actionItems.length > 0 && (
               <ActionCenter

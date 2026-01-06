@@ -159,3 +159,119 @@ export function SkeletonDashboard() {
     </div>
   );
 }
+
+/**
+ * SkeletonHouseholdRow - Single household row skeleton
+ */
+export function SkeletonHouseholdRow() {
+  return (
+    <div className="flex items-center gap-4 p-4 bg-stone-900/30">
+      <Skeleton className="w-5 h-5" />
+      <SkeletonAvatar size="md" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-3 w-24" />
+      </div>
+      <Skeleton className="h-6 w-16 rounded-full" />
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-4 w-20" />
+    </div>
+  );
+}
+
+/**
+ * SkeletonHouseholds - Households page skeleton
+ */
+export function SkeletonHouseholds({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="divide-y divide-stone-800">
+      {Array.from({ length: rows }).map((_, i) => (
+        <SkeletonHouseholdRow key={i} />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * SkeletonTaskRow - Single task row skeleton
+ */
+export function SkeletonTaskRow() {
+  return (
+    <div className="flex items-start gap-4 p-4">
+      <Skeleton className="w-5 h-5 rounded mt-1" />
+      <div className="flex-1 space-y-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-5 w-14 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+        <Skeleton className="h-3 w-32" />
+      </div>
+      <Skeleton className="h-8 w-20 rounded" />
+    </div>
+  );
+}
+
+/**
+ * SkeletonTasks - Tasks page skeleton
+ */
+export function SkeletonTasks({ rows = 6 }: { rows?: number }) {
+  return (
+    <div className="divide-y divide-border-default">
+      {Array.from({ length: rows }).map((_, i) => (
+        <SkeletonTaskRow key={i} />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * SkeletonProspectCard - Pipeline kanban card skeleton
+ */
+export function SkeletonProspectCard() {
+  return (
+    <div className="bg-surface rounded-lg border border-border p-3 space-y-2">
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-3 w-1/2" />
+      <div className="flex justify-between items-center pt-2">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-3 w-8" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * SkeletonPipelineColumn - Single pipeline column skeleton
+ */
+export function SkeletonPipelineColumn() {
+  return (
+    <div className="flex-shrink-0 w-72">
+      <div className="rounded-t-lg p-3 bg-surface-secondary border-t border-l border-r border-border-default">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-5 w-20 rounded-full" />
+          <Skeleton className="h-4 w-6" />
+        </div>
+        <Skeleton className="h-3 w-16 mt-1" />
+      </div>
+      <div className="bg-surface-secondary/50 rounded-b-lg min-h-[400px] p-2 space-y-2 border-l border-r border-b border-border-default">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonProspectCard key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * SkeletonPipeline - Pipeline page skeleton (kanban view)
+ */
+export function SkeletonPipeline({ columns = 5 }: { columns?: number }) {
+  return (
+    <div className="flex gap-4 overflow-x-auto pb-4">
+      {Array.from({ length: columns }).map((_, i) => (
+        <SkeletonPipelineColumn key={i} />
+      ))}
+    </div>
+  );
+}

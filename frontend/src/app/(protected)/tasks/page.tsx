@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { 
   PageHeader, 
   PageContent 
@@ -11,6 +11,10 @@ import {
   StatusBadge,
   Input,
   Select,
+  SkeletonTasks,
+  ErrorState,
+  DataFreshness,
+  EmptyState,
 } from '@/components/ui';
 import { PlusIcon, CheckIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid';
 import { tasksService, Task, TaskFilter, TaskStats, CreateTaskDto } from '@/services/tasks.service';
@@ -65,12 +69,15 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [stats, setStats] = useState<TaskStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filter, setFilter] = useState<TaskFilter>({});
   const [activeTab, setActiveTab] = useState<'all' | 'my' | 'overdue'>('all');
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       let tasksData: Task[];
       
@@ -88,16 +95,18 @@ export default function TasksPage() {
       setTasks(tasksData);
       const statsData = await tasksService.getStats();
       setStats(statsData);
-    } catch (error) {
-      console.error('Failed to fetch tasks:', error);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Failed to fetch tasks:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load tasks');
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, filter]);
 
   useEffect(() => {
     fetchData();
-  }, [filter, activeTab]);
+  }, [fetchData]);
 
   const handleComplete = async (taskId: string) => {
     try {
@@ -203,27 +212,40 @@ export default function TasksPage() {
               ]}
               className="w-36"
             />
+
+            <DataFreshness 
+              lastUpdated={lastUpdated} 
+              onRefresh={fetchData}
+              isRefreshing={loading}
+              className="ml-auto"
+            />
           </div>
         </div>
 
         {/* Tasks List */}
         <Card noPadding>
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-primary"></div>
-            </div>
+          {error ? (
+            <ErrorState
+              title="Couldn't load tasks"
+              message={error}
+              onRetry={fetchData}
+            />
+          ) : loading ? (
+            <SkeletonTasks rows={6} />
           ) : tasks.length === 0 ? (
-            <div className="text-center py-12">
-              <ClockIcon className="w-12 h-12 text-content-tertiary mx-auto" />
-              <p className="mt-2 text-content-secondary">No tasks found</p>
-              <Button
-                onClick={() => setShowCreateModal(true)}
-                leftIcon={<PlusIcon className="w-4 h-4" />}
-                className="mt-4"
-              >
-                Create your first task
-              </Button>
-            </div>
+            <EmptyState
+              icon={<ClockIcon className="w-6 h-6" />}
+              title="No tasks found"
+              description={activeTab === 'overdue' ? 'Great job! No overdue tasks.' : 'Create a task to track your work.'}
+              action={
+                <Button
+                  onClick={() => setShowCreateModal(true)}
+                  leftIcon={<PlusIcon className="w-4 h-4" />}
+                >
+                  Create your first task
+                </Button>
+              }
+            />
           ) : (
             <div className="divide-y divide-border-default">
               {tasks.map((task) => (
