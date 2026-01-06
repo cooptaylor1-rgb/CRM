@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { analyticsService, AdvisorDashboard } from '@/services/analytics.service';
 import { tasksService, Task } from '@/services/tasks.service';
 import { PageHeader, PageContent, ContentGrid } from '@/components/layout/AppShell';
@@ -28,21 +29,32 @@ import {
   formatRelativeTime,
   DataFreshness,
 } from '@/components/ui';
-import { NextBestActions, useNextBestActions } from '@/components/features';
+import { 
+  NextBestActions, 
+  useNextBestActions,
+  ConversationalSearch,
+  SmartNotifications,
+  SmartNotificationBell,
+  generateMockNotifications,
+} from '@/components/features';
 import {
   ExclamationTriangleIcon,
   ClockIcon,
   ArrowRightIcon,
   CalendarIcon,
   UserGroupIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [dashboard, setDashboard] = useState<AdvisorDashboard | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState(() => generateMockNotifications());
 
   const fetchData = async () => {
     try {
@@ -157,9 +169,68 @@ export default function DashboardPage() {
             />
           </div>
         }
+        actions={
+          <div className="flex items-center gap-2">
+            <SmartNotificationBell 
+              count={notifications.filter(n => !n.read).length}
+              urgentCount={notifications.filter(n => n.priority === 'urgent' && !n.read).length}
+              onClick={() => setShowNotifications(!showNotifications)}
+            />
+          </div>
+        }
       />
 
       <PageContent>
+        {/* Smart Conversational Search - Magic v3 */}
+        <Card className="mb-6 overflow-visible relative">
+          <div className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <SparklesIcon className="w-5 h-5 text-amber-500" />
+              <h3 className="font-semibold text-content-primary">Ask anything about your clients</h3>
+            </div>
+            <ConversationalSearch 
+              onSearch={(query, parsed) => {
+                console.log('Search:', query, parsed);
+              }}
+              onResultSelect={(result) => {
+                if (result.type === 'client' || result.type === 'household') {
+                  router.push(`/households/${result.id}`);
+                } else if (result.type === 'task') {
+                  router.push(`/tasks`);
+                } else if (result.type === 'meeting') {
+                  router.push(`/meetings`);
+                }
+              }}
+            />
+          </div>
+        </Card>
+
+        {/* Notifications Panel (Slide-in) */}
+        {showNotifications && (
+          <div className="fixed top-20 right-4 z-50 w-96">
+            <SmartNotifications
+              notifications={notifications}
+              onDismiss={(id) => setNotifications(prev => 
+                prev.map(n => n.id === id ? { ...n, dismissed: true } : n)
+              )}
+              onMarkRead={(id) => setNotifications(prev => 
+                prev.map(n => n.id === id ? { ...n, read: true } : n)
+              )}
+              onMarkAllRead={() => setNotifications(prev => 
+                prev.map(n => ({ ...n, read: true }))
+              )}
+              onNotificationClick={(notification) => {
+                setShowNotifications(false);
+                if (notification.relatedEntity) {
+                  if (notification.relatedEntity.type === 'client') {
+                    router.push(`/households/${notification.relatedEntity.id}`);
+                  }
+                }
+              }}
+            />
+          </div>
+        )}
+
         {/* Metrics Grid */}
         <MetricGrid columns={4} className="mb-6">
           <MetricCard

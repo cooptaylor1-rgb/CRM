@@ -13,11 +13,19 @@ import {
   CalendarIcon,
   ClockIcon,
   BuildingLibraryIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { PageHeader, PageContent } from '@/components/layout/AppShell';
 import { Button, Card, StatusBadge, formatCurrency, formatDate } from '@/components/ui';
 import { householdsService, Household } from '@/services/households.service';
-import { AssetAllocationManager, FeeScheduleManager } from '@/components/features';
+import { 
+  AssetAllocationManager, 
+  FeeScheduleManager,
+  ClientInsights,
+  generateClientInsights,
+  ClientJourneyTimeline,
+  generateJourneyData,
+} from '@/components/features';
 
 type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'default';
 
@@ -298,6 +306,40 @@ export default function HouseholdDetailPage() {
               />
             </motion.div>
           </div>
+
+          {/* AI-Powered Insights Section - Magic v3 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <SparklesIcon className="w-5 h-5 text-amber-500" />
+              <h2 className="text-lg font-semibold text-content-primary">AI-Powered Insights</h2>
+            </div>
+            <ClientInsights 
+              data={generateClientInsights({
+                name: household.name,
+                aum: household.totalAum,
+                lastContact: household.updatedAt,
+              })}
+            />
+          </motion.div>
+
+          {/* Relationship Journey Timeline - Magic v3 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
+          >
+            <ClientJourneyTimeline 
+              data={generateJourneyData(household.name)}
+              maxEvents={8}
+              onEventClick={(event) => {
+                console.log('Event clicked:', event);
+              }}
+            />
+          </motion.div>
         </div>
       </PageContent>
     </>

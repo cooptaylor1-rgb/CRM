@@ -33,3 +33,77 @@ export type { MeetingPrepData, MeetingPrepBriefProps } from './MeetingPrepBrief'
 // Magic Features - v2: Audit Trail (Trust & Safety)
 export { AuditTrail, AuditBadge } from './AuditTrail';
 export type { AuditTrailProps, AuditBadgeProps } from './AuditTrail';
+
+// ============================================
+// Magic Features - v3: World-Class CRM
+// ============================================
+
+// Smart Client Insights - AI-powered relationship intelligence
+export { 
+  ClientInsights, 
+  generateClientInsights,
+} from './ClientInsights';
+export type { 
+  ClientInsightsProps, 
+  ClientInsightsData,
+  ClientInsight,
+  RelationshipHealth,
+  LifeEvent,
+} from './ClientInsights';
+
+// Conversational Search - Natural language query interface
+export { 
+  ConversationalSearch,
+  QuickSearchBar,
+} from './ConversationalSearch';
+export type {
+  ConversationalSearchProps,
+  SearchResult,
+  ParsedQuery,
+  ParsedFilter,
+} from './ConversationalSearch';
+
+// Client Journey Timeline - Visual relationship story
+export {
+  ClientJourneyTimeline,
+  generateJourneyData,
+} from './ClientJourneyTimeline';
+export type {
+  ClientJourneyTimelineProps,
+  ClientJourneyData,
+  TimelineEvent,
+  TimelineEventType,
+  JourneyMilestone,
+} from './ClientJourneyTimeline';
+
+// Smart Notifications - Intelligent alert system
+export {
+  SmartNotifications,
+  NotificationBell as SmartNotificationBell,
+  generateMockNotifications,
+} from './SmartNotifications';
+export type {
+  SmartNotificationsProps,
+  SmartNotification,
+  NotificationGroup,
+  NotificationPreferences,
+  NotificationType,
+  NotificationPriority,
+} from './SmartNotifications';
+
+// Keyboard First - Vim-style navigation for power users
+export {
+  KeyboardProvider,
+  useKeyboard,
+  KeyboardHints,
+  KeyboardModeIndicator,
+  Navigable,
+  QuickJumpHints,
+  usePageShortcuts,
+  KeyHint,
+} from './KeyboardFirst';
+export type {
+  KeyboardMode,
+  KeyboardShortcut,
+  NavigableItem,
+} from './KeyboardFirst';
