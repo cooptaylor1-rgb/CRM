@@ -328,6 +328,106 @@ export function DonutChart({
 }
 
 /**
+ * SegmentedDonutChart Component
+ * 
+ * Multi-segment donut chart for showing data distribution.
+ */
+
+export interface SegmentedDonutChartData {
+  label: string;
+  value: number;
+  color: string;
+}
+
+export interface SegmentedDonutChartProps {
+  /** Data segments */
+  data: SegmentedDonutChartData[];
+  /** Size in pixels */
+  size?: number;
+  /** Stroke width */
+  strokeWidth?: number;
+  /** Inner label (displayed in center) */
+  innerLabel?: string;
+  /** Inner sublabel (displayed below inner label) */
+  innerSubLabel?: string;
+  /** Custom class */
+  className?: string;
+}
+
+export function SegmentedDonutChart({
+  data,
+  size = 160,
+  strokeWidth = 24,
+  innerLabel,
+  innerSubLabel,
+  className,
+}: SegmentedDonutChartProps) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const total = data.reduce((sum, segment) => sum + segment.value, 0);
+  
+  // Calculate segments
+  let cumulativePercent = 0;
+  const segments = data.map(segment => {
+    const percent = total > 0 ? segment.value / total : 0;
+    const startAngle = cumulativePercent * 360;
+    cumulativePercent += percent;
+    return {
+      ...segment,
+      percent,
+      dashArray: percent * circumference,
+      dashOffset: -((cumulativePercent - percent) * circumference),
+      rotation: startAngle,
+    };
+  });
+
+  return (
+    <div className={cn('relative inline-flex items-center justify-center', className)}>
+      <svg width={size} height={size} className="-rotate-90">
+        {/* Background track */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="var(--surface-secondary)"
+          strokeWidth={strokeWidth}
+        />
+        {/* Segments */}
+        {segments.map((segment, index) => (
+          <circle
+            key={segment.label}
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={segment.color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${segment.dashArray} ${circumference - segment.dashArray}`}
+            strokeDashoffset={segment.dashOffset}
+            className="transition-all duration-slow"
+            style={{ transformOrigin: 'center' }}
+          />
+        ))}
+      </svg>
+
+      {(innerLabel || innerSubLabel) && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center rotate-0">
+          {innerLabel && (
+            <span className="text-lg font-semibold text-content-primary">
+              {innerLabel}
+            </span>
+          )}
+          {innerSubLabel && (
+            <span className="text-xs text-content-tertiary">{innerSubLabel}</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
  * ComparisonBar Component
  * 
  * Side-by-side comparison visualization.

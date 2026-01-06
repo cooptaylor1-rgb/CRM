@@ -86,8 +86,8 @@ export { CommandPalette, useCommandPalette } from './CommandPalette';
 export type { CommandPaletteProps, CommandItem } from './CommandPalette';
 
 // Data Visualization
-export { Sparkline, TrendIndicator, MiniBarChart, DonutChart, ComparisonBar } from './DataViz';
-export type { SparklineProps, TrendIndicatorProps, MiniBarChartProps, DonutChartProps, ComparisonBarProps } from './DataViz';
+export { Sparkline, TrendIndicator, MiniBarChart, DonutChart, SegmentedDonutChart, ComparisonBar } from './DataViz';
+export type { SparklineProps, TrendIndicatorProps, MiniBarChartProps, DonutChartProps, SegmentedDonutChartProps, SegmentedDonutChartData, ComparisonBarProps } from './DataViz';
 
 // DataTable
 export { DataTable } from './DataTable';

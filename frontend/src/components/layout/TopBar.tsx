@@ -3,11 +3,11 @@
 import * as React from 'react';
 import { cn } from '../ui/utils';
 import { useAuthStore } from '@/store/authStore';
+import { useThemeStore } from '@/store/themeStore';
 import { Menu, Transition } from '@headlessui/react';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
-  BellIcon,
   UserCircleIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
@@ -15,27 +15,26 @@ import {
   CalendarDaysIcon,
   ClipboardDocumentCheckIcon,
   DocumentPlusIcon,
+  SunIcon,
+  MoonIcon,
+  ComputerDesktopIcon,
 } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import { NotificationCenter } from './NotificationCenter';
 
 export interface TopBarProps {
   className?: string;
+  onSearchClick?: () => void;
 }
 
-export function TopBar({ className }: TopBarProps) {
+export function TopBar({ className, onSearchClick }: TopBarProps) {
   const { user, logout } = useAuthStore();
+  const { resolvedTheme, toggleTheme, setTheme, theme } = useThemeStore();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = React.useState('');
 
   const handleLogout = async () => {
     await logout();
     router.push('/');
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement global search
-    console.log('Search:', searchQuery);
   };
 
   return (
@@ -46,24 +45,22 @@ export function TopBar({ className }: TopBarProps) {
       )}
     >
       {/* Search */}
-      <form onSubmit={handleSearch} className="flex-1 max-w-md">
-        <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-tertiary" />
-          <input
-            type="search"
-            placeholder="Search households, accounts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn(
-              'w-full h-9 pl-9 pr-4 rounded-md text-sm',
-              'bg-surface-secondary border border-transparent',
-              'text-content-primary placeholder:text-content-tertiary',
-              'focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus',
-              'transition-colors'
-            )}
-          />
-        </div>
-      </form>
+      <button
+        onClick={onSearchClick}
+        className={cn(
+          'flex items-center gap-3 flex-1 max-w-md h-9 px-3 rounded-md text-sm',
+          'bg-surface-secondary border border-transparent',
+          'text-content-tertiary',
+          'hover:border-border transition-colors',
+          'focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus',
+        )}
+      >
+        <MagnifyingGlassIcon className="w-4 h-4" />
+        <span className="flex-1 text-left">Search anything...</span>
+        <kbd className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-content-tertiary bg-surface rounded px-1.5 py-0.5 border border-border">
+          <span className="text-[10px]">⌘</span>K
+        </kbd>
+      </button>
 
       {/* Right actions */}
       <div className="flex items-center gap-2">
@@ -150,19 +147,83 @@ export function TopBar({ className }: TopBarProps) {
           </Transition>
         </Menu>
 
+        {/* Theme Toggle */}
+        <Menu as="div" className="relative">
+          <Menu.Button
+            className={cn(
+              'w-9 h-9 rounded-md flex items-center justify-center',
+              'text-content-secondary hover:text-content-primary hover:bg-surface-secondary',
+              'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus'
+            )}
+            aria-label="Toggle theme"
+          >
+            {resolvedTheme === 'dark' ? (
+              <MoonIcon className="w-5 h-5" />
+            ) : (
+              <SunIcon className="w-5 h-5" />
+            )}
+          </Menu.Button>
+          <Transition
+            as={React.Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right bg-surface rounded-lg border border-border shadow-lg py-1 focus:outline-none z-50">
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    onClick={() => setTheme('light')}
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-2 text-sm',
+                      active ? 'bg-surface-secondary' : '',
+                      theme === 'light' ? 'text-accent-600' : 'text-content-secondary'
+                    )}
+                  >
+                    <SunIcon className="w-4 h-4" />
+                    <span>Light</span>
+                  </button>
+                )}
+              </Menu.Item>
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    onClick={() => setTheme('dark')}
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-2 text-sm',
+                      active ? 'bg-surface-secondary' : '',
+                      theme === 'dark' ? 'text-accent-600' : 'text-content-secondary'
+                    )}
+                  >
+                    <MoonIcon className="w-4 h-4" />
+                    <span>Dark</span>
+                  </button>
+                )}
+              </Menu.Item>
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    onClick={() => setTheme('system')}
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-2 text-sm',
+                      active ? 'bg-surface-secondary' : '',
+                      theme === 'system' ? 'text-accent-600' : 'text-content-secondary'
+                    )}
+                  >
+                    <ComputerDesktopIcon className="w-4 h-4" />
+                    <span>System</span>
+                  </button>
+                )}
+              </Menu.Item>
+            </Menu.Items>
+          </Transition>
+        </Menu>
+
         {/* Notifications */}
-        <button
-          className={cn(
-            'relative w-9 h-9 rounded-md flex items-center justify-center',
-            'text-content-secondary hover:text-content-primary hover:bg-surface-secondary',
-            'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-border-focus'
-          )}
-          aria-label="Notifications"
-        >
-          <BellIcon className="w-5 h-5" />
-          {/* Notification dot */}
-          <span className="absolute top-2 right-2 w-2 h-2 bg-status-error-text rounded-full" />
-        </button>
+        <NotificationCenter />
 
         {/* User Menu */}
         <Menu as="div" className="relative">

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { cn } from '../ui/utils';
 import { SidebarNav } from './SidebarNav';
 import { TopBar } from './TopBar';
+import { GlobalSearch, useGlobalSearch } from '../ui/GlobalSearch';
 
 export interface AppShellProps {
   children: React.ReactNode;
@@ -16,9 +17,11 @@ export interface AppShellProps {
  * - Sidebar navigation
  * - Top bar with search, create, notifications, user
  * - Main content area with proper scrolling
+ * - Global search (⌘K)
  */
 export function AppShell({ children }: AppShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const globalSearch = useGlobalSearch();
 
   return (
     <div className="flex h-screen bg-app overflow-hidden">
@@ -31,13 +34,16 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <TopBar />
+        <TopBar onSearchClick={globalSearch.open} />
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>
+
+      {/* Global Search Modal */}
+      <GlobalSearch isOpen={globalSearch.isOpen} onClose={globalSearch.close} />
     </div>
   );
 }

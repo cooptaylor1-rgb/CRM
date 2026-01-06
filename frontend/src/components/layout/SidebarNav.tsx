@@ -18,6 +18,14 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ArrowRightOnRectangleIcon,
+  UserGroupIcon,
+  DocumentDuplicateIcon,
+  ChartPieIcon,
+  EnvelopeIcon,
+  CubeTransparentIcon,
+  TagIcon,
+  CurrencyDollarIcon,
+  GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 
 export interface SidebarNavProps {
@@ -34,11 +42,19 @@ interface NavItem {
 const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: ChartBarSquareIcon },
   { name: 'Households', href: '/households', icon: BuildingOffice2Icon },
+  { name: 'Clients', href: '/clients', icon: UserGroupIcon },
   { name: 'Accounts', href: '/accounts', icon: BriefcaseIcon },
   { name: 'Pipeline', href: '/pipeline', icon: FunnelIcon },
   { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentCheckIcon },
   { name: 'Meetings', href: '/meetings', icon: CalendarDaysIcon },
+  { name: 'Documents', href: '/documents', icon: DocumentDuplicateIcon },
   { name: 'Workflows', href: '/workflows', icon: BoltIcon },
+  { name: 'Email Templates', href: '/email-templates', icon: EnvelopeIcon },
+  { name: 'Billing', href: '/billing', icon: CurrencyDollarIcon },
+  { name: 'Analytics', href: '/analytics', icon: ChartPieIcon },
+  { name: 'Segmentation', href: '/segmentation', icon: TagIcon },
+  { name: 'Client Portal', href: '/client-portal', icon: GlobeAltIcon },
+  { name: 'Integrations', href: '/integrations/custodian', icon: CubeTransparentIcon },
   { name: 'Compliance', href: '/compliance', icon: ShieldCheckIcon },
   { name: 'Audit Log', href: '/audit', icon: DocumentTextIcon },
 ];
