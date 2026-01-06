@@ -295,3 +295,31 @@ export type {
   StressTest,
   RebalanceAlert,
 } from './RiskAssessmentModule';
+
+// ============================================
+// Magic Features - v6: Enterprise Excellence
+// ============================================
+
+// Client Portal Dashboard - Client-facing portfolio view
+export { ClientPortal } from './ClientPortal';
+
+// Predictive Analytics Engine - AI churn prediction and opportunity scoring
+export { PredictiveAnalytics } from './PredictiveAnalytics';
+
+// Real-time Streaming Dashboard - Live market data and portfolio updates
+export { RealtimeStreamingDashboard } from './RealtimeStreamingDashboard';
+
+// Advanced Report Builder - Drag-drop report designer with scheduling
+export { AdvancedReportBuilder } from './AdvancedReportBuilder';
+
+// Goal Planning & Monte Carlo - Probabilistic financial projections
+export { GoalPlanningMonteCarlo } from './GoalPlanningMonteCarlo';
+
+// Estate Planning Module - Family tree, beneficiaries, trusts
+export { EstatePlanningModule } from './EstatePlanningModule';
+
+// Integration Marketplace - Third-party app connections and data sync
+export { IntegrationMarketplace } from './IntegrationMarketplace';
+
+// Client Segmentation Engine - Automated tiering and service models
+export { ClientSegmentationEngine } from './ClientSegmentationEngine';
