@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { householdsService, Household } from '../services/households.service';
+import { parseApiError } from '../services/api';
 
 interface HouseholdsState {
   households: Household[];
@@ -11,6 +12,7 @@ interface HouseholdsState {
   createHousehold: (data: Partial<Household>) => Promise<void>;
   updateHousehold: (id: string, data: Partial<Household>) => Promise<void>;
   deleteHousehold: (id: string) => Promise<void>;
+  clearError: () => void;
 }
 
 export const useHouseholdsStore = create<HouseholdsState>((set, get) => ({
@@ -19,14 +21,17 @@ export const useHouseholdsStore = create<HouseholdsState>((set, get) => ({
   loading: false,
   error: null,
 
+  clearError: () => set({ error: null }),
+
   fetchHouseholds: async () => {
     set({ loading: true, error: null });
     try {
       const households = await householdsService.getHouseholds();
       set({ households, loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = parseApiError(error);
       set({
-        error: error.response?.data?.message || 'Failed to fetch households',
+        error: apiError.message,
         loading: false,
       });
     }
@@ -37,9 +42,10 @@ export const useHouseholdsStore = create<HouseholdsState>((set, get) => ({
     try {
       const household = await householdsService.getHousehold(id);
       set({ selectedHousehold: household, loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = parseApiError(error);
       set({
-        error: error.response?.data?.message || 'Failed to fetch household',
+        error: apiError.message,
         loading: false,
       });
     }
@@ -51,9 +57,10 @@ export const useHouseholdsStore = create<HouseholdsState>((set, get) => ({
       await householdsService.createHousehold(data);
       await get().fetchHouseholds();
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = parseApiError(error);
       set({
-        error: error.response?.data?.message || 'Failed to create household',
+        error: apiError.message,
         loading: false,
       });
       throw error;
@@ -66,9 +73,10 @@ export const useHouseholdsStore = create<HouseholdsState>((set, get) => ({
       await householdsService.updateHousehold(id, data);
       await get().fetchHouseholds();
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = parseApiError(error);
       set({
-        error: error.response?.data?.message || 'Failed to update household',
+        error: apiError.message,
         loading: false,
       });
       throw error;
@@ -81,9 +89,10 @@ export const useHouseholdsStore = create<HouseholdsState>((set, get) => ({
       await householdsService.deleteHousehold(id);
       await get().fetchHouseholds();
       set({ loading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = parseApiError(error);
       set({
-        error: error.response?.data?.message || 'Failed to delete household',
+        error: apiError.message,
         loading: false,
       });
       throw error;

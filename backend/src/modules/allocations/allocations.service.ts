@@ -3,9 +3,10 @@ import {
   Logger,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import {
   TargetAssetAllocation,
   AllocationLineItem,
@@ -39,7 +40,8 @@ export class AllocationsService {
     @InjectRepository(FeeTier)
     private feeTierRepo: Repository<FeeTier>,
     @InjectRepository(FeeHistory)
-    private feeHistoryRepo: Repository<FeeHistory>
+    private feeHistoryRepo: Repository<FeeHistory>,
+    private dataSource: DataSource,
   ) {}
 
   // ==================== Target Asset Allocations ====================
@@ -60,50 +62,56 @@ export class AllocationsService {
       );
     }
 
-    // Deactivate existing active allocations for this entity
-    await this.allocationRepo.update(
-      {
+    // Use transaction to ensure atomicity
+    return this.dataSource.transaction(async (manager) => {
+      const allocationRepo = manager.getRepository(TargetAssetAllocation);
+      const lineItemRepo = manager.getRepository(AllocationLineItem);
+
+      // Deactivate existing active allocations for this entity
+      await allocationRepo.update(
+        {
+          firmId,
+          entityType: dto.entityType,
+          entityId: dto.entityId,
+          isActive: true,
+        },
+        { isActive: false }
+      );
+
+      // Create allocation
+      const allocation = allocationRepo.create({
         firmId,
         entityType: dto.entityType,
         entityId: dto.entityId,
+        name: dto.name,
+        description: dto.description,
+        effectiveDate: dto.effectiveDate ? new Date(dto.effectiveDate) : undefined,
+        reviewDate: dto.reviewDate ? new Date(dto.reviewDate) : undefined,
+        notes: dto.notes,
+        createdBy: userId,
         isActive: true,
-      },
-      { isActive: false }
-    );
+      });
 
-    // Create allocation
-    const allocation = this.allocationRepo.create({
-      firmId,
-      entityType: dto.entityType,
-      entityId: dto.entityId,
-      name: dto.name,
-      description: dto.description,
-      effectiveDate: dto.effectiveDate ? new Date(dto.effectiveDate) : undefined,
-      reviewDate: dto.reviewDate ? new Date(dto.reviewDate) : undefined,
-      notes: dto.notes,
-      createdBy: userId,
-      isActive: true,
+      const savedAllocation = await allocationRepo.save(allocation);
+
+      // Create line items
+      const lineItems = dto.lineItems.map((item, index) =>
+        lineItemRepo.create({
+          allocationId: savedAllocation.id,
+          assetClass: item.assetClass,
+          customAssetClass: item.customAssetClass,
+          targetPercentage: item.targetPercentage,
+          minPercentage: item.minPercentage,
+          maxPercentage: item.maxPercentage,
+          notes: item.notes,
+          displayOrder: item.displayOrder ?? index,
+        })
+      );
+
+      const savedLineItems = await lineItemRepo.save(lineItems);
+
+      return { ...savedAllocation, lineItems: savedLineItems };
     });
-
-    const savedAllocation = await this.allocationRepo.save(allocation);
-
-    // Create line items
-    const lineItems = dto.lineItems.map((item, index) =>
-      this.lineItemRepo.create({
-        allocationId: savedAllocation.id,
-        assetClass: item.assetClass,
-        customAssetClass: item.customAssetClass,
-        targetPercentage: item.targetPercentage,
-        minPercentage: item.minPercentage,
-        maxPercentage: item.maxPercentage,
-        notes: item.notes,
-        displayOrder: item.displayOrder ?? index,
-      })
-    );
-
-    const savedLineItems = await this.lineItemRepo.save(lineItems);
-
-    return { ...savedAllocation, lineItems: savedLineItems };
   }
 
   async getAllocations(
@@ -112,6 +120,8 @@ export class AllocationsService {
   ): Promise<{ allocations: (TargetAssetAllocation & { lineItems: AllocationLineItem[] })[]; total: number }> {
     const qb = this.allocationRepo
       .createQueryBuilder('allocation')
+      // Use LEFT JOIN to load line items in single query (fixes N+1)
+      .leftJoinAndSelect('allocation.lineItems', 'lineItems')
       .where('allocation.firmId = :firmId', { firmId });
 
     if (query.entityType) {
@@ -128,7 +138,8 @@ export class AllocationsService {
       qb.andWhere('allocation.isActive = true');
     }
 
-    qb.orderBy('allocation.createdAt', 'DESC');
+    qb.orderBy('allocation.createdAt', 'DESC')
+      .addOrderBy('lineItems.displayOrder', 'ASC');
 
     if (query.limit) {
       qb.take(query.limit);
@@ -139,16 +150,11 @@ export class AllocationsService {
 
     const [allocations, total] = await qb.getManyAndCount();
 
-    // Load line items for each allocation
-    const allocationsWithItems = await Promise.all(
-      allocations.map(async (allocation) => {
-        const lineItems = await this.lineItemRepo.find({
-          where: { allocationId: allocation.id },
-          order: { displayOrder: 'ASC' },
-        });
-        return { ...allocation, lineItems };
-      })
-    );
+    // Line items are already loaded via JOIN - map to expected format
+    const allocationsWithItems = allocations.map((allocation) => ({
+      ...allocation,
+      lineItems: allocation.lineItems || [],
+    }));
 
     return { allocations: allocationsWithItems, total };
   }
@@ -204,21 +210,8 @@ export class AllocationsService {
       throw new NotFoundException('Target allocation not found');
     }
 
-    // Update allocation fields
-    if (dto.name !== undefined) allocation.name = dto.name;
-    if (dto.description !== undefined) allocation.description = dto.description;
-    if (dto.isActive !== undefined) allocation.isActive = dto.isActive;
-    if (dto.effectiveDate !== undefined)
-      allocation.effectiveDate = new Date(dto.effectiveDate);
-    if (dto.reviewDate !== undefined)
-      allocation.reviewDate = new Date(dto.reviewDate);
-    if (dto.notes !== undefined) allocation.notes = dto.notes;
-
-    await this.allocationRepo.save(allocation);
-
-    // Update line items if provided
+    // Validate percentages if line items are being updated
     if (dto.lineItems) {
-      // Validate percentages
       const totalPercentage = dto.lineItems.reduce(
         (sum, item) => sum + item.targetPercentage,
         0
@@ -228,28 +221,49 @@ export class AllocationsService {
           `Target percentages must sum to 100% (currently ${totalPercentage}%)`
         );
       }
-
-      // Delete existing line items
-      await this.lineItemRepo.delete({ allocationId });
-
-      // Create new line items
-      const lineItems = dto.lineItems.map((item, index) =>
-        this.lineItemRepo.create({
-          allocationId,
-          assetClass: item.assetClass,
-          customAssetClass: item.customAssetClass,
-          targetPercentage: item.targetPercentage,
-          minPercentage: item.minPercentage,
-          maxPercentage: item.maxPercentage,
-          notes: item.notes,
-          displayOrder: item.displayOrder ?? index,
-        })
-      );
-
-      await this.lineItemRepo.save(lineItems);
     }
 
-    return this.getAllocation(allocationId, firmId);
+    // Use transaction to ensure atomicity
+    return this.dataSource.transaction(async (manager) => {
+      const allocationRepo = manager.getRepository(TargetAssetAllocation);
+      const lineItemRepo = manager.getRepository(AllocationLineItem);
+
+      // Update allocation fields
+      if (dto.name !== undefined) allocation.name = dto.name;
+      if (dto.description !== undefined) allocation.description = dto.description;
+      if (dto.isActive !== undefined) allocation.isActive = dto.isActive;
+      if (dto.effectiveDate !== undefined)
+        allocation.effectiveDate = new Date(dto.effectiveDate);
+      if (dto.reviewDate !== undefined)
+        allocation.reviewDate = new Date(dto.reviewDate);
+      if (dto.notes !== undefined) allocation.notes = dto.notes;
+
+      await allocationRepo.save(allocation);
+
+      // Update line items if provided
+      if (dto.lineItems) {
+        // Delete existing line items
+        await lineItemRepo.delete({ allocationId });
+
+        // Create new line items
+        const lineItems = dto.lineItems.map((item, index) =>
+          lineItemRepo.create({
+            allocationId,
+            assetClass: item.assetClass,
+            customAssetClass: item.customAssetClass,
+            targetPercentage: item.targetPercentage,
+            minPercentage: item.minPercentage,
+            maxPercentage: item.maxPercentage,
+            notes: item.notes,
+            displayOrder: item.displayOrder ?? index,
+          })
+        );
+
+        await lineItemRepo.save(lineItems);
+      }
+
+      return this.getAllocation(allocationId, firmId);
+    });
   }
 
   async deleteAllocation(allocationId: string, firmId: string): Promise<void> {
@@ -260,8 +274,14 @@ export class AllocationsService {
       throw new NotFoundException('Target allocation not found');
     }
 
-    await this.lineItemRepo.delete({ allocationId });
-    await this.allocationRepo.remove(allocation);
+    // Use transaction to ensure atomicity
+    await this.dataSource.transaction(async (manager) => {
+      const allocationRepo = manager.getRepository(TargetAssetAllocation);
+      const lineItemRepo = manager.getRepository(AllocationLineItem);
+
+      await lineItemRepo.delete({ allocationId });
+      await allocationRepo.remove(allocation);
+    });
   }
 
   // ==================== Fee Schedules ====================
@@ -271,55 +291,61 @@ export class AllocationsService {
     userId: string,
     dto: CreateFeeScheduleDto
   ): Promise<FeeSchedule & { tiers: FeeTier[] }> {
-    // Deactivate existing active fee schedules for this entity
-    await this.feeScheduleRepo.update(
-      {
+    // Use transaction to ensure atomicity
+    return this.dataSource.transaction(async (manager) => {
+      const feeScheduleRepo = manager.getRepository(FeeSchedule);
+      const feeTierRepo = manager.getRepository(FeeTier);
+
+      // Deactivate existing active fee schedules for this entity
+      await feeScheduleRepo.update(
+        {
+          firmId,
+          entityType: dto.entityType,
+          entityId: dto.entityId,
+          isActive: true,
+        },
+        { isActive: false }
+      );
+
+      // Create fee schedule
+      const feeSchedule = feeScheduleRepo.create({
         firmId,
         entityType: dto.entityType,
         entityId: dto.entityId,
+        name: dto.name,
+        description: dto.description,
+        effectiveDate: dto.effectiveDate ? new Date(dto.effectiveDate) : undefined,
+        endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+        billingMethod: dto.billingMethod,
+        minimumFee: dto.minimumFee,
+        maximumFee: dto.maximumFee,
+        notes: dto.notes,
+        createdBy: userId,
         isActive: true,
-      },
-      { isActive: false }
-    );
+      });
 
-    // Create fee schedule
-    const feeSchedule = this.feeScheduleRepo.create({
-      firmId,
-      entityType: dto.entityType,
-      entityId: dto.entityId,
-      name: dto.name,
-      description: dto.description,
-      effectiveDate: dto.effectiveDate ? new Date(dto.effectiveDate) : undefined,
-      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-      billingMethod: dto.billingMethod,
-      minimumFee: dto.minimumFee,
-      maximumFee: dto.maximumFee,
-      notes: dto.notes,
-      createdBy: userId,
-      isActive: true,
+      const savedFeeSchedule = await feeScheduleRepo.save(feeSchedule);
+
+      // Create fee tiers
+      const tiers = dto.tiers.map((tier, index) =>
+        feeTierRepo.create({
+          feeScheduleId: savedFeeSchedule.id,
+          feeType: tier.feeType,
+          feeFrequency: tier.feeFrequency,
+          tierName: tier.tierName,
+          minAmount: tier.minAmount,
+          maxAmount: tier.maxAmount,
+          rate: tier.rate,
+          flatAmount: tier.flatAmount,
+          notes: tier.notes,
+          displayOrder: tier.displayOrder ?? index,
+        })
+      );
+
+      const savedTiers = await feeTierRepo.save(tiers);
+
+      return { ...savedFeeSchedule, tiers: savedTiers };
     });
-
-    const savedFeeSchedule = await this.feeScheduleRepo.save(feeSchedule);
-
-    // Create fee tiers
-    const tiers = dto.tiers.map((tier, index) =>
-      this.feeTierRepo.create({
-        feeScheduleId: savedFeeSchedule.id,
-        feeType: tier.feeType,
-        feeFrequency: tier.feeFrequency,
-        tierName: tier.tierName,
-        minAmount: tier.minAmount,
-        maxAmount: tier.maxAmount,
-        rate: tier.rate,
-        flatAmount: tier.flatAmount,
-        notes: tier.notes,
-        displayOrder: tier.displayOrder ?? index,
-      })
-    );
-
-    const savedTiers = await this.feeTierRepo.save(tiers);
-
-    return { ...savedFeeSchedule, tiers: savedTiers };
   }
 
   async getFeeSchedules(
@@ -328,6 +354,8 @@ export class AllocationsService {
   ): Promise<{ feeSchedules: (FeeSchedule & { tiers: FeeTier[] })[]; total: number }> {
     const qb = this.feeScheduleRepo
       .createQueryBuilder('feeSchedule')
+      // Use LEFT JOIN to load tiers in single query (fixes N+1)
+      .leftJoinAndSelect('feeSchedule.tiers', 'tiers')
       .where('feeSchedule.firmId = :firmId', { firmId });
 
     if (query.entityType) {
@@ -344,7 +372,8 @@ export class AllocationsService {
       qb.andWhere('feeSchedule.isActive = true');
     }
 
-    qb.orderBy('feeSchedule.createdAt', 'DESC');
+    qb.orderBy('feeSchedule.createdAt', 'DESC')
+      .addOrderBy('tiers.displayOrder', 'ASC');
 
     if (query.limit) {
       qb.take(query.limit);
@@ -355,16 +384,11 @@ export class AllocationsService {
 
     const [feeSchedules, total] = await qb.getManyAndCount();
 
-    // Load tiers for each fee schedule
-    const schedulesWithTiers = await Promise.all(
-      feeSchedules.map(async (schedule) => {
-        const tiers = await this.feeTierRepo.find({
-          where: { feeScheduleId: schedule.id },
-          order: { displayOrder: 'ASC' },
-        });
-        return { ...schedule, tiers };
-      })
-    );
+    // Tiers are already loaded via JOIN - map to expected format
+    const schedulesWithTiers = feeSchedules.map((schedule) => ({
+      ...schedule,
+      tiers: schedule.tiers || [],
+    }));
 
     return { feeSchedules: schedulesWithTiers, total };
   }
@@ -420,47 +444,53 @@ export class AllocationsService {
       throw new NotFoundException('Fee schedule not found');
     }
 
-    // Update fee schedule fields
-    if (dto.name !== undefined) feeSchedule.name = dto.name;
-    if (dto.description !== undefined) feeSchedule.description = dto.description;
-    if (dto.isActive !== undefined) feeSchedule.isActive = dto.isActive;
-    if (dto.effectiveDate !== undefined)
-      feeSchedule.effectiveDate = new Date(dto.effectiveDate);
-    if (dto.endDate !== undefined)
-      feeSchedule.endDate = new Date(dto.endDate);
-    if (dto.billingMethod !== undefined)
-      feeSchedule.billingMethod = dto.billingMethod;
-    if (dto.minimumFee !== undefined) feeSchedule.minimumFee = dto.minimumFee;
-    if (dto.maximumFee !== undefined) feeSchedule.maximumFee = dto.maximumFee;
-    if (dto.notes !== undefined) feeSchedule.notes = dto.notes;
+    // Use transaction to ensure atomicity
+    return this.dataSource.transaction(async (manager) => {
+      const feeScheduleRepo = manager.getRepository(FeeSchedule);
+      const feeTierRepo = manager.getRepository(FeeTier);
 
-    await this.feeScheduleRepo.save(feeSchedule);
+      // Update fee schedule fields
+      if (dto.name !== undefined) feeSchedule.name = dto.name;
+      if (dto.description !== undefined) feeSchedule.description = dto.description;
+      if (dto.isActive !== undefined) feeSchedule.isActive = dto.isActive;
+      if (dto.effectiveDate !== undefined)
+        feeSchedule.effectiveDate = new Date(dto.effectiveDate);
+      if (dto.endDate !== undefined)
+        feeSchedule.endDate = new Date(dto.endDate);
+      if (dto.billingMethod !== undefined)
+        feeSchedule.billingMethod = dto.billingMethod;
+      if (dto.minimumFee !== undefined) feeSchedule.minimumFee = dto.minimumFee;
+      if (dto.maximumFee !== undefined) feeSchedule.maximumFee = dto.maximumFee;
+      if (dto.notes !== undefined) feeSchedule.notes = dto.notes;
 
-    // Update tiers if provided
-    if (dto.tiers) {
-      // Delete existing tiers
-      await this.feeTierRepo.delete({ feeScheduleId });
+      await feeScheduleRepo.save(feeSchedule);
 
-      // Create new tiers
-      const tiers = dto.tiers.map((tier, index) =>
-        this.feeTierRepo.create({
-          feeScheduleId,
-          feeType: tier.feeType,
-          feeFrequency: tier.feeFrequency,
-          tierName: tier.tierName,
-          minAmount: tier.minAmount,
-          maxAmount: tier.maxAmount,
-          rate: tier.rate,
-          flatAmount: tier.flatAmount,
-          notes: tier.notes,
-          displayOrder: tier.displayOrder ?? index,
-        })
-      );
+      // Update tiers if provided
+      if (dto.tiers) {
+        // Delete existing tiers
+        await feeTierRepo.delete({ feeScheduleId });
 
-      await this.feeTierRepo.save(tiers);
-    }
+        // Create new tiers
+        const tiers = dto.tiers.map((tier, index) =>
+          feeTierRepo.create({
+            feeScheduleId,
+            feeType: tier.feeType,
+            feeFrequency: tier.feeFrequency,
+            tierName: tier.tierName,
+            minAmount: tier.minAmount,
+            maxAmount: tier.maxAmount,
+            rate: tier.rate,
+            flatAmount: tier.flatAmount,
+            notes: tier.notes,
+            displayOrder: tier.displayOrder ?? index,
+          })
+        );
 
-    return this.getFeeSchedule(feeScheduleId, firmId);
+        await feeTierRepo.save(tiers);
+      }
+
+      return this.getFeeSchedule(feeScheduleId, firmId);
+    });
   }
 
   async deleteFeeSchedule(feeScheduleId: string, firmId: string): Promise<void> {
@@ -471,8 +501,14 @@ export class AllocationsService {
       throw new NotFoundException('Fee schedule not found');
     }
 
-    await this.feeTierRepo.delete({ feeScheduleId });
-    await this.feeScheduleRepo.remove(feeSchedule);
+    // Use transaction to ensure atomicity
+    await this.dataSource.transaction(async (manager) => {
+      const feeScheduleRepo = manager.getRepository(FeeSchedule);
+      const feeTierRepo = manager.getRepository(FeeTier);
+
+      await feeTierRepo.delete({ feeScheduleId });
+      await feeScheduleRepo.remove(feeSchedule);
+    });
   }
 
   // ==================== Fee Calculation ====================
@@ -584,14 +620,44 @@ export class AllocationsService {
     firmId: string,
     limit = 12
   ): Promise<FeeHistory[]> {
-    // Verify the entity belongs to the firm by checking if there's a fee schedule
-    // (or we could check the actual entity, but this is simpler)
-    
+    // SECURITY: Verify the entity belongs to the requesting firm
+    // Check if there's any fee schedule or allocation for this entity+firm
+    const hasAccess = await this.verifyEntityAccess(entityType, entityId, firmId);
+    if (!hasAccess) {
+      throw new ForbiddenException('Access denied to this entity\'s fee history');
+    }
+
     return this.feeHistoryRepo.find({
       where: { entityType, entityId },
       order: { billingPeriodEnd: 'DESC' },
       take: limit,
     });
+  }
+
+  /**
+   * Verify that the firm has access to the specified entity
+   * by checking for existing allocations or fee schedules
+   */
+  private async verifyEntityAccess(
+    entityType: AllocationEntityType,
+    entityId: string,
+    firmId: string
+  ): Promise<boolean> {
+    // Check if there's an allocation for this entity belonging to the firm
+    const allocation = await this.allocationRepo.findOne({
+      where: { entityType, entityId, firmId },
+      select: ['id'],
+    });
+    if (allocation) return true;
+
+    // Check if there's a fee schedule for this entity belonging to the firm
+    const feeSchedule = await this.feeScheduleRepo.findOne({
+      where: { entityType, entityId, firmId },
+      select: ['id'],
+    });
+    if (feeSchedule) return true;
+
+    return false;
   }
 
   async markFeeAsBilled(

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import {
   CustodianConnection,
@@ -35,6 +35,7 @@ export class CustodianService {
     private accountRepository: Repository<Account>,
     private schwabAdapter: SchwabAdapter,
     private configService: ConfigService,
+    private dataSource: DataSource,
   ) {}
 
   // ==================== Connection Management ====================
@@ -278,34 +279,52 @@ export class CustodianService {
       let recordsUpdated = 0;
       const errors: string[] = [];
 
+      // OPTIMIZATION: Batch load all existing links for this custodian type (fixes N+1 query)
+      const custodianAccountIds = accounts.map(a => a.accountId);
+      const existingLinks = await this.accountLinkRepository.find({
+        where: {
+          custodianAccountId: In(custodianAccountIds),
+          custodianType,
+        },
+      });
+      const linksByAccountId = new Map(existingLinks.map(l => [l.custodianAccountId, l]));
+
+      // Batch load all linked accounts
+      const linkedAccountIds = existingLinks.map(l => l.accountId);
+      const linkedAccounts = linkedAccountIds.length > 0
+        ? await this.accountRepository.find({
+            where: { id: In(linkedAccountIds) },
+          })
+        : [];
+      const accountsById = new Map(linkedAccounts.map(a => [a.id, a]));
+
+      // Process accounts with pre-loaded data (no N+1)
+      const accountsToUpdate: Account[] = [];
       for (const custodianAccount of accounts) {
         try {
-          // Check if already linked
-          const existingLink = await this.accountLinkRepository.findOne({
-            where: {
-              custodianAccountId: custodianAccount.accountId,
-              custodianType,
-            },
-          });
+          const existingLink = linksByAccountId.get(custodianAccount.accountId);
 
           if (existingLink) {
             // Update existing account
-            const account = await this.accountRepository.findOne({
-              where: { id: existingLink.accountId },
-            });
+            const account = accountsById.get(existingLink.accountId);
 
             if (account) {
               account.currentValue = custodianAccount.currentBalances.totalValue;
-              await this.accountRepository.save(account);
+              accountsToUpdate.push(account);
               recordsUpdated++;
             }
           } else {
             // Log discovered account (don't auto-create, let user link)
             this.logger.log(`Discovered unlinked account: ${custodianAccount.accountNumber}`);
           }
-        } catch (error) {
+        } catch (error: any) {
           errors.push(`Error processing account ${custodianAccount.accountNumber}: ${error.message}`);
         }
+      }
+
+      // Batch save all updated accounts
+      if (accountsToUpdate.length > 0) {
+        await this.accountRepository.save(accountsToUpdate);
       }
 
       // Update sync log

@@ -2,11 +2,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import toast from 'react-hot-toast';
+import {
   Tag as TagIcon, Plus, X, Search, Edit2, Trash2,
   ChevronRight, ChevronDown, Palette, Check, MoreVertical
 } from 'lucide-react';
-import customizationService, { Tag } from '@/services/customization.service';
+import { ConfirmModal } from '@/components/ui';
+import customizationService, { Tag, CreateTagDto } from '@/services/customization.service';
+import { parseApiError } from '@/services/api';
 
 const colorPalette = [
   { name: 'Gray', value: '#6b7280', light: '#f3f4f6' },
@@ -233,6 +236,11 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType }) => {
   const [showEditor, setShowEditor] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
   const [expandedTags, setExpandedTags] = useState<Set<string>>(new Set());
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; tagId: string; tagName: string }>({
+    isOpen: false,
+    tagId: '',
+    tagName: '',
+  });
 
   useEffect(() => {
     loadTags();
@@ -243,8 +251,9 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType }) => {
       setLoading(true);
       const data = await customizationService.getTags();
       setTags(data);
-    } catch (error) {
-      console.error('Failed to load tags:', error);
+    } catch (error: unknown) {
+      const apiError = parseApiError(error);
+      toast.error(`Failed to load tags: ${apiError.message}`);
     } finally {
       setLoading(false);
     }
@@ -254,25 +263,43 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType }) => {
     try {
       if (editingTag) {
         await customizationService.updateTag(editingTag.id, tagData);
+        toast.success(`Tag "${tagData.name}" updated successfully`);
       } else {
-        await customizationService.createTag(tagData as any);
+        const createData: CreateTagDto = {
+          name: tagData.name || '',
+          color: tagData.color,
+          description: tagData.description,
+          parentId: tagData.parentId,
+        };
+        await customizationService.createTag(createData);
+        toast.success(`Tag "${tagData.name}" created successfully`);
       }
       setShowEditor(false);
       setEditingTag(null);
       await loadTags();
-    } catch (error) {
-      console.error('Failed to save tag:', error);
+    } catch (error: unknown) {
+      const apiError = parseApiError(error);
+      toast.error(`Failed to save tag: ${apiError.message}`);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this tag?')) {
-      try {
-        await customizationService.deleteTag(id);
-        await loadTags();
-      } catch (error) {
-        console.error('Failed to delete tag:', error);
-      }
+  const handleDeleteClick = (tag: Tag) => {
+    setDeleteConfirm({
+      isOpen: true,
+      tagId: tag.id,
+      tagName: tag.name,
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await customizationService.deleteTag(deleteConfirm.tagId);
+      toast.success(`Tag "${deleteConfirm.tagName}" deleted`);
+      setDeleteConfirm({ isOpen: false, tagId: '', tagName: '' });
+      await loadTags();
+    } catch (error: unknown) {
+      const apiError = parseApiError(error);
+      toast.error(`Failed to delete tag: ${apiError.message}`);
     }
   };
 
@@ -368,8 +395,9 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType }) => {
               <Edit2 className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => handleDelete(tag.id)}
+              onClick={() => handleDeleteClick(tag)}
               className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+              aria-label={`Delete tag ${tag.name}`}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -456,8 +484,9 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType }) => {
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(tag.id)}
+                    onClick={() => handleDeleteClick(tag)}
                     className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                    aria-label={`Delete tag ${tag.name}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -482,6 +511,18 @@ export const TagManager: React.FC<TagManagerProps> = ({ entityType }) => {
           />
         )}
       </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, tagId: '', tagName: '' })}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Tag"
+        message={`Are you sure you want to delete the tag "${deleteConfirm.tagName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };

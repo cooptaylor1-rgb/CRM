@@ -21,17 +21,27 @@ export class EncryptionService {
   private readonly ivLength = 16; // 128 bits
   private readonly authTagLength = 16; // 128 bits
   private readonly key: Buffer;
+  private readonly isDevelopment: boolean;
 
   constructor(private configService: ConfigService) {
     const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
-    
+    const nodeEnv = this.configService.get<string>('NODE_ENV');
+    this.isDevelopment = nodeEnv !== 'production';
+
+    // Fail fast in production if no encryption key
+    if (nodeEnv === 'production' && !encryptionKey) {
+      throw new Error('CRITICAL: ENCRYPTION_KEY must be set in production environment. PII data cannot be secured without it.');
+    }
+
     if (!encryptionKey) {
-      // Generate a development key - NEVER use in production
-      console.warn('⚠️  ENCRYPTION_KEY not set - using development key. Set ENCRYPTION_KEY in production!');
-      this.key = crypto.scryptSync('dev-encryption-key-change-me', 'salt', this.keyLength);
+      // Generate a random development key (prevents predictable encryption, but data won't persist across restarts)
+      const devKey = crypto.randomBytes(32).toString('hex');
+      console.warn('⚠️  ENCRYPTION_KEY not set - using auto-generated development key.');
+      console.warn('⚠️  Encrypted data will NOT be recoverable after restart. Set ENCRYPTION_KEY for persistence.');
+      this.key = crypto.scryptSync(devKey, 'dev-salt', this.keyLength);
     } else {
-      // Derive key from the provided secret
-      this.key = crypto.scryptSync(encryptionKey, 'wealth-crm-salt', this.keyLength);
+      // Derive key from the provided secret with unique salt
+      this.key = crypto.scryptSync(encryptionKey, 'wealth-crm-salt-v1', this.keyLength);
     }
   }
 
