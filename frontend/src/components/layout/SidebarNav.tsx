@@ -26,6 +26,7 @@ import {
   TagIcon,
   CurrencyDollarIcon,
   GlobeAltIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 export interface SidebarNavProps {
@@ -52,6 +53,7 @@ const navigation: NavItem[] = [
   { name: 'Email Templates', href: '/email-templates', icon: EnvelopeIcon },
   { name: 'Billing', href: '/billing', icon: CurrencyDollarIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartPieIcon },
+  { name: 'Intelligence', href: '/intelligence', icon: SparklesIcon },
   { name: 'Segmentation', href: '/segmentation', icon: TagIcon },
   { name: 'Client Portal', href: '/client-portal', icon: GlobeAltIcon },
   { name: 'Integrations', href: '/integrations/custodian', icon: CubeTransparentIcon },

@@ -68,6 +68,13 @@ import { OutlookModule } from './modules/integrations/outlook/outlook.module';
 import { TargetAssetAllocation, AllocationLineItem, FeeSchedule, FeeTier, FeeHistory } from './modules/allocations/entities/allocation.entity';
 import { AllocationsModule } from './modules/allocations/allocations.module';
 
+// Intelligence (AI-Powered Client Intelligence) module & entities
+import { IntelligenceModule } from './modules/intelligence/intelligence.module';
+import { ClientInsight } from './modules/intelligence/entities/client-insight.entity';
+import { LifeEvent } from './modules/intelligence/entities/life-event.entity';
+import { MeetingBrief } from './modules/intelligence/entities/meeting-brief.entity';
+import { RiskScore } from './modules/intelligence/entities/risk-score.entity';
+
 const entities = [
   // Core entities
   User,
@@ -141,6 +148,11 @@ const entities = [
   FeeSchedule,
   FeeTier,
   FeeHistory,
+  // Intelligence (AI-Powered Client Intelligence)
+  ClientInsight,
+  LifeEvent,
+  MeetingBrief,
+  RiskScore,
 ];
 
 @Module({
@@ -221,6 +233,7 @@ const entities = [
     CustomizationModule,
     OutlookModule,
     AllocationsModule,
+    IntelligenceModule,
   ],
   controllers: [HealthController],
 })
