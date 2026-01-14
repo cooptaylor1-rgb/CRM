@@ -4,10 +4,13 @@ import * as crypto from 'crypto';
 /**
  * TypeORM column transformer for encrypting/decrypting PII data.
  * Uses AES-256-GCM for authenticated encryption.
- * 
+ *
  * Usage:
  * @Column({ type: 'text', transformer: new EncryptedTransformer() })
  * ssn: string;
+ *
+ * IMPORTANT: Set ENCRYPTION_KEY environment variable in production.
+ * The key must be consistent across application restarts to decrypt existing data.
  */
 export class EncryptedTransformer implements ValueTransformer {
   private readonly algorithm = 'aes-256-gcm';
@@ -18,12 +21,21 @@ export class EncryptedTransformer implements ValueTransformer {
 
   constructor() {
     const encryptionKey = process.env.ENCRYPTION_KEY;
-    
+    const nodeEnv = process.env.NODE_ENV;
+
+    // Fail fast in production if no encryption key
+    if (nodeEnv === 'production' && !encryptionKey) {
+      throw new Error('CRITICAL: ENCRYPTION_KEY must be set in production environment for PII encryption.');
+    }
+
     if (!encryptionKey) {
-      // Use development key - logs warning in main.ts
-      this.key = crypto.scryptSync('dev-encryption-key-change-me', 'salt', this.keyLength);
+      // For development/testing: use a consistent dev key so data persists during development
+      // This is NOT secure for production but allows development to work predictably
+      console.warn('⚠️  EncryptedTransformer: Using development encryption key. Set ENCRYPTION_KEY for production!');
+      this.key = crypto.scryptSync('dev-encryption-key-for-testing-only', 'dev-salt', this.keyLength);
     } else {
-      this.key = crypto.scryptSync(encryptionKey, 'wealth-crm-salt', this.keyLength);
+      // Use the same salt as EncryptionService for consistency
+      this.key = crypto.scryptSync(encryptionKey, 'wealth-crm-salt-v1', this.keyLength);
     }
   }
 
