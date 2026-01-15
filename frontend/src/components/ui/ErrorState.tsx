@@ -170,7 +170,7 @@ export function DataFreshness({
     )}>
       <span className={cn(
         'w-1.5 h-1.5 rounded-full',
-        isRefreshing ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'
+        isRefreshing ? 'bg-status-warning-text animate-pulse' : 'bg-status-success-text'
       )} />
       <span>
         {isRefreshing 

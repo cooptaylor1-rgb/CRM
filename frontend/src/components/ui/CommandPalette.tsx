@@ -130,7 +130,7 @@ export function CommandPalette({
             <Dialog.Panel
               className={cn(
                 'mx-auto max-w-xl transform overflow-hidden rounded-lg',
-                'bg-surface shadow-2xl ring-1 ring-border',
+                'bg-surface shadow-lg ring-1 ring-border',
                 'divide-y divide-border',
                 'transition-all',
                 className
