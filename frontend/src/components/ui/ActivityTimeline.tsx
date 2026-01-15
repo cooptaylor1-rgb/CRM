@@ -497,7 +497,7 @@ function ActivityCard({
               <span>• {activity.metadata.duration} min</span>
             )}
             {activity.metadata?.amount && (
-              <span className="text-green-400">
+              <span className="text-status-success-text">
                 • ${activity.metadata.amount.toLocaleString()}
               </span>
             )}
@@ -636,7 +636,7 @@ function ActivityCard({
               {onDelete && (
                 <button
                   onClick={() => onDelete(activity.id)}
-                  className="p-1.5 rounded-lg hover:bg-red-600/20 text-neutral-400 hover:text-red-400 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-status-error-bg text-neutral-400 hover:text-status-error-text transition-colors duration-base"
                   title="Delete"
                 >
                   <TrashIcon className="w-4 h-4" />
@@ -738,7 +738,7 @@ function FilterButton({
       onClick={onClick}
       className={cn(
         'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap',
-        'transition-all duration-200',
+        'transition-all duration-moderate',
         active
           ? 'bg-accent-600 text-white'
           : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white'
@@ -770,9 +770,9 @@ function SentimentBadge({
   sentiment: 'positive' | 'neutral' | 'negative';
 }) {
   const configs = {
-    positive: { color: 'bg-green-900/50 text-green-400', icon: '↑' },
+    positive: { color: 'bg-status-success-bg text-status-success-text', icon: '↑' },
     neutral: { color: 'bg-neutral-700 text-neutral-400', icon: '→' },
-    negative: { color: 'bg-red-900/50 text-red-400', icon: '↓' },
+    negative: { color: 'bg-status-error-bg text-status-error-text', icon: '↓' },
   };
 
   const config = configs[sentiment];
@@ -838,99 +838,99 @@ function getActivityConfig(type: ActivityType) {
   > = {
     email_sent: {
       icon: EmailIcon,
-      bgColor: 'bg-blue-900/30',
-      iconColor: 'text-blue-400',
-      dotColor: 'border-blue-500',
+      bgColor: 'bg-status-info-bg',
+      iconColor: 'text-status-info-text',
+      dotColor: 'border-accent-500',
     },
     email_received: {
       icon: EmailIcon,
-      bgColor: 'bg-blue-900/30',
-      iconColor: 'text-blue-400',
-      dotColor: 'border-blue-500',
+      bgColor: 'bg-status-info-bg',
+      iconColor: 'text-status-info-text',
+      dotColor: 'border-accent-500',
     },
     call_outbound: {
       icon: PhoneIcon,
-      bgColor: 'bg-green-900/30',
-      iconColor: 'text-green-400',
-      dotColor: 'border-green-500',
+      bgColor: 'bg-status-success-bg',
+      iconColor: 'text-status-success-text',
+      dotColor: 'border-status-success-text',
     },
     call_inbound: {
       icon: PhoneIcon,
-      bgColor: 'bg-green-900/30',
-      iconColor: 'text-green-400',
-      dotColor: 'border-green-500',
+      bgColor: 'bg-status-success-bg',
+      iconColor: 'text-status-success-text',
+      dotColor: 'border-status-success-text',
     },
     meeting: {
       icon: CalendarIcon,
-      bgColor: 'bg-purple-900/30',
-      iconColor: 'text-purple-400',
-      dotColor: 'border-purple-500',
+      bgColor: 'bg-accent-900/30',
+      iconColor: 'text-accent-400',
+      dotColor: 'border-accent-500',
     },
     video_call: {
       icon: VideoIcon,
-      bgColor: 'bg-purple-900/30',
-      iconColor: 'text-purple-400',
-      dotColor: 'border-purple-500',
+      bgColor: 'bg-accent-900/30',
+      iconColor: 'text-accent-400',
+      dotColor: 'border-accent-500',
     },
     note: {
       icon: NoteIcon,
-      bgColor: 'bg-yellow-900/30',
-      iconColor: 'text-yellow-400',
-      dotColor: 'border-yellow-500',
+      bgColor: 'bg-status-warning-bg',
+      iconColor: 'text-status-warning-text',
+      dotColor: 'border-status-warning-text',
     },
     task_created: {
       icon: TaskIcon,
-      bgColor: 'bg-orange-900/30',
-      iconColor: 'text-orange-400',
-      dotColor: 'border-orange-500',
+      bgColor: 'bg-status-warning-bg',
+      iconColor: 'text-status-warning-text',
+      dotColor: 'border-status-warning-text',
     },
     task_completed: {
       icon: CheckIcon,
-      bgColor: 'bg-green-900/30',
-      iconColor: 'text-green-400',
-      dotColor: 'border-green-500',
+      bgColor: 'bg-status-success-bg',
+      iconColor: 'text-status-success-text',
+      dotColor: 'border-status-success-text',
     },
     document_uploaded: {
       icon: DocumentIcon,
-      bgColor: 'bg-cyan-900/30',
-      iconColor: 'text-cyan-400',
-      dotColor: 'border-cyan-500',
+      bgColor: 'bg-status-info-bg',
+      iconColor: 'text-status-info-text',
+      dotColor: 'border-accent-500',
     },
     document_signed: {
       icon: SignatureIcon,
-      bgColor: 'bg-emerald-900/30',
-      iconColor: 'text-emerald-400',
-      dotColor: 'border-emerald-500',
+      bgColor: 'bg-status-success-bg',
+      iconColor: 'text-status-success-text',
+      dotColor: 'border-status-success-text',
     },
     trade_executed: {
       icon: TradeIcon,
-      bgColor: 'bg-indigo-900/30',
-      iconColor: 'text-indigo-400',
-      dotColor: 'border-indigo-500',
+      bgColor: 'bg-accent-800/30',
+      iconColor: 'text-accent-400',
+      dotColor: 'border-accent-500',
     },
     account_opened: {
       icon: AccountIcon,
-      bgColor: 'bg-teal-900/30',
-      iconColor: 'text-teal-400',
-      dotColor: 'border-teal-500',
+      bgColor: 'bg-status-success-bg',
+      iconColor: 'text-status-success-text',
+      dotColor: 'border-status-success-text',
     },
     account_funded: {
       icon: FinancialIcon,
-      bgColor: 'bg-green-900/30',
-      iconColor: 'text-green-400',
-      dotColor: 'border-green-500',
+      bgColor: 'bg-status-success-bg',
+      iconColor: 'text-status-success-text',
+      dotColor: 'border-status-success-text',
     },
     transfer: {
       icon: TransferIcon,
-      bgColor: 'bg-blue-900/30',
-      iconColor: 'text-blue-400',
-      dotColor: 'border-blue-500',
+      bgColor: 'bg-status-info-bg',
+      iconColor: 'text-status-info-text',
+      dotColor: 'border-accent-500',
     },
     withdrawal: {
       icon: WithdrawalIcon,
-      bgColor: 'bg-red-900/30',
-      iconColor: 'text-red-400',
-      dotColor: 'border-red-500',
+      bgColor: 'bg-status-error-bg',
+      iconColor: 'text-status-error-text',
+      dotColor: 'border-status-error-text',
     },
     fee_charged: {
       icon: FeeIcon,
@@ -946,33 +946,33 @@ function getActivityConfig(type: ActivityType) {
     },
     compliance_alert: {
       icon: AlertIcon,
-      bgColor: 'bg-red-900/30',
-      iconColor: 'text-red-400',
-      dotColor: 'border-red-500',
+      bgColor: 'bg-status-error-bg',
+      iconColor: 'text-status-error-text',
+      dotColor: 'border-status-error-text',
     },
     milestone: {
       icon: MilestoneIcon,
-      bgColor: 'bg-pink-900/30',
-      iconColor: 'text-pink-400',
-      dotColor: 'border-pink-500',
+      bgColor: 'bg-accent-800/30',
+      iconColor: 'text-accent-300',
+      dotColor: 'border-accent-400',
     },
     birthday: {
       icon: CelebrationIcon,
-      bgColor: 'bg-pink-900/30',
-      iconColor: 'text-pink-400',
-      dotColor: 'border-pink-500',
+      bgColor: 'bg-accent-800/30',
+      iconColor: 'text-accent-300',
+      dotColor: 'border-accent-400',
     },
     anniversary: {
       icon: HeartIcon,
-      bgColor: 'bg-pink-900/30',
-      iconColor: 'text-pink-400',
-      dotColor: 'border-pink-500',
+      bgColor: 'bg-accent-800/30',
+      iconColor: 'text-accent-300',
+      dotColor: 'border-accent-400',
     },
     life_event: {
       icon: StarIcon,
-      bgColor: 'bg-amber-900/30',
-      iconColor: 'text-amber-400',
-      dotColor: 'border-amber-500',
+      bgColor: 'bg-status-warning-bg',
+      iconColor: 'text-status-warning-text',
+      dotColor: 'border-status-warning-text',
     },
     status_change: {
       icon: StatusIcon,

@@ -66,9 +66,9 @@ const buttonVariants = {
     'disabled:text-neutral-600 disabled:bg-transparent',
   ].join(' '),
   destructive: [
-    'bg-red-600/10 text-red-400 border border-red-600/30',
-    'hover:bg-red-600/20 hover:text-red-300',
-    'active:bg-red-600/30',
+    'bg-status-error-bg text-status-error-text border border-status-error-border',
+    'hover:bg-status-error-bg/80 hover:text-status-error-text',
+    'active:bg-status-error-bg/60',
     'disabled:bg-neutral-900 disabled:text-neutral-600 disabled:border-neutral-800',
   ].join(' '),
   outline: [
@@ -140,7 +140,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           // Base styles
           'relative inline-flex items-center justify-center font-medium overflow-hidden',
-          'transition-all duration-200 ease-out',
+          'transition-all duration-moderate ease-out',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-app',
           'disabled:pointer-events-none',
           // Rounded corners
@@ -262,7 +262,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         className={cn(
           'relative inline-flex items-center justify-center',
-          'rounded-lg transition-all duration-200',
+          'rounded-lg transition-all duration-moderate',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-app',
           'disabled:pointer-events-none disabled:opacity-50',
           iconButtonSizes[size],
@@ -366,7 +366,7 @@ export function FAB({
         'bg-accent-600 text-white',
         'hover:bg-accent-500 hover:shadow-xl hover:shadow-accent-500/30',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2',
-        'transition-shadow duration-200',
+        'transition-shadow duration-moderate',
         fabPositions[position],
         fabSizes[size],
         extended && 'px-6',
@@ -459,7 +459,7 @@ export function SplitButton({
             className={cn(
               'absolute top-full right-0 mt-1 z-50',
               'min-w-[160px] p-1',
-              'bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl'
+              'bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg'
             )}
           >
             {menuContent}
@@ -496,9 +496,9 @@ export function MenuItem({
       disabled={disabled}
       className={cn(
         'w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md',
-        'transition-colors duration-150',
+        'transition-colors duration-base',
         destructive
-          ? 'text-red-400 hover:bg-red-600/10'
+          ? 'text-status-error-text hover:bg-status-error-bg'
           : 'text-neutral-300 hover:bg-neutral-700/50 hover:text-white',
         disabled && 'opacity-50 cursor-not-allowed'
       )}

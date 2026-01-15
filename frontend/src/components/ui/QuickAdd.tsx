@@ -277,7 +277,7 @@ function QuickAddModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-modal bg-black/60 backdrop-blur-sm"
           />
 
           {/* Modal */}
@@ -286,9 +286,9 @@ function QuickAddModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed top-[15%] left-1/2 -translate-x-1/2 z-[101] w-full max-w-xl"
+            className="fixed top-[15%] left-1/2 -translate-x-1/2 z-popover w-full max-w-xl"
           >
-            <div className="bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl overflow-hidden">
+            <div className="bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg overflow-hidden">
               {/* Type Selector */}
               <div className="flex items-center gap-1 p-2 border-b border-neutral-800 overflow-x-auto scrollbar-thin">
                 {enabledTypes.map((type) => {
@@ -405,7 +405,7 @@ function QuickAddModal({
                               initial={{ opacity: 0, y: -8 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -8 }}
-                              className="absolute top-full left-0 right-0 mt-1 z-10 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl overflow-hidden"
+                              className="absolute top-full left-0 right-0 mt-1 z-dropdown bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg overflow-hidden"
                             >
                               <div className="max-h-48 overflow-y-auto">
                                 {clientResults.map((client) => (
@@ -539,8 +539,8 @@ function QuickAddModal({
 
                 {/* Error */}
                 {error && (
-                  <div className="px-3 py-2 bg-red-900/20 border border-red-800/30 rounded-lg">
-                    <p className="text-sm text-red-400">{error}</p>
+                  <div className="px-3 py-2 bg-status-error-bg border border-status-error-border rounded-lg">
+                    <p className="text-sm text-status-error-text">{error}</p>
                   </div>
                 )}
 
@@ -626,7 +626,7 @@ export function QuickAddButton({
         'bg-accent-600 text-white',
         'hover:bg-accent-500 hover:shadow-xl hover:shadow-accent-500/30',
         'focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 focus:ring-offset-neutral-900',
-        'transition-shadow duration-200',
+        'transition-shadow duration-moderate',
         className
       )}
     >
@@ -663,7 +663,7 @@ export function InlineQuickAdd({
             className={cn(
               'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium',
               'bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700',
-              'transition-all duration-150'
+              'transition-all duration-base'
             )}
           >
             <config.icon className="w-3.5 h-3.5" />
@@ -813,13 +813,13 @@ const priorityColors = {
     active: 'bg-neutral-600 text-white',
   },
   medium: {
-    active: 'bg-blue-600 text-white',
+    active: 'bg-status-info-text text-white',
   },
   high: {
-    active: 'bg-orange-600 text-white',
+    active: 'bg-status-warning-text text-white',
   },
   urgent: {
-    active: 'bg-red-600 text-white',
+    active: 'bg-status-error-text text-white',
   },
 };
 

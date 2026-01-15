@@ -559,13 +559,13 @@ function RelationshipNodeComponent({
             width={60}
             height={16}
             rx={8}
-            className="fill-green-900/50 stroke-green-700/50"
+            className="fill-status-success-bg stroke-status-success-border"
             strokeWidth={1}
           />
           <text
             textAnchor="middle"
             dominantBaseline="central"
-            className="fill-green-400 text-[10px] font-medium select-none"
+            className="fill-status-success-text text-[10px] font-medium select-none"
           >
             ${formatCompactNumber(node.aum)}
           </text>
@@ -790,9 +790,9 @@ function NodeDetailPanel({
 
         {/* AUM */}
         {node.aum !== undefined && node.aum > 0 && (
-          <div className="mt-3 p-2 bg-green-900/20 border border-green-800/30 rounded-lg">
-            <div className="text-xs text-green-400 mb-0.5">Assets Under Management</div>
-            <div className="text-lg font-semibold text-green-300">
+          <div className="mt-3 p-2 bg-status-success-bg border border-status-success-border rounded-lg">
+            <div className="text-xs text-status-success-text mb-0.5">Assets Under Management</div>
+            <div className="text-lg font-semibold text-status-success-text">
               ${node.aum.toLocaleString()}
             </div>
           </div>
@@ -848,7 +848,7 @@ function NodeDetailPanel({
             </button>
             <button
               onClick={() => onDeleteNode?.(node.id)}
-              className="px-3 py-2 text-sm font-medium text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/10 transition-colors"
+              className="px-3 py-2 text-sm font-medium text-status-error-text border border-status-error-border rounded-lg hover:bg-status-error-bg transition-colors"
             >
               Delete
             </button>

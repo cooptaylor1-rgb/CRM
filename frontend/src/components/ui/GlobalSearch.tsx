@@ -224,10 +224,10 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         {/* Backdrop */}
         <Transition.Child
           as={React.Fragment}
-          enter="ease-out duration-200"
+          enter="ease-out duration-moderate"
           enterFrom="opacity-0"
           enterTo="opacity-100"
-          leave="ease-in duration-150"
+          leave="ease-in duration-base"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
@@ -238,17 +238,17 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         <div className="fixed inset-0 overflow-y-auto p-4 sm:p-6 md:p-20">
           <Transition.Child
             as={React.Fragment}
-            enter="ease-out duration-200"
+            enter="ease-out duration-moderate"
             enterFrom="opacity-0 scale-95"
             enterTo="opacity-100 scale-100"
-            leave="ease-in duration-150"
+            leave="ease-in duration-base"
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
             <Dialog.Panel
               className={cn(
                 'mx-auto max-w-2xl transform overflow-hidden rounded-xl',
-                'bg-surface-primary shadow-2xl ring-1 ring-border',
+                'bg-surface-primary shadow-lg ring-1 ring-border',
                 'transition-all'
               )}
             >

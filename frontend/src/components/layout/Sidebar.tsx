@@ -27,8 +27,8 @@ export function Sidebar() {
   };
 
   return (
-    <div className="flex flex-col h-full w-64 bg-gray-900 text-white">
-      <div className="flex items-center justify-center h-16 bg-gray-800">
+    <div className="flex flex-col h-full w-64 bg-sidebar text-content-inverse">
+      <div className="flex items-center justify-center h-16 bg-neutral-800">
         <span className="text-xl font-bold">Wealth CRM</span>
       </div>
 
@@ -39,10 +39,10 @@ export function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+              className={`flex items-center px-4 py-3 rounded-lg transition-colors duration-base ${
                 isActive
-                  ? 'bg-gray-800 text-white'
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  ? 'bg-neutral-800 text-content-inverse'
+                  : 'text-neutral-300 hover:bg-neutral-800 hover:text-content-inverse'
               }`}
             >
               <span className="mr-3 text-xl">{item.icon}</span>
@@ -52,14 +52,14 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-neutral-700">
         <div className="mb-3">
-          <p className="text-sm text-gray-400">Logged in as</p>
+          <p className="text-sm text-neutral-400">Logged in as</p>
           <p className="text-sm font-medium truncate">{user?.email}</p>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+          className="w-full px-4 py-2 text-sm font-medium text-content-inverse bg-status-error-text rounded-lg hover:opacity-90 transition-opacity duration-base"
         >
           Logout
         </button>

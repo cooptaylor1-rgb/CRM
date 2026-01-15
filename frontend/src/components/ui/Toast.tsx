@@ -234,7 +234,7 @@ function ToastContainer({ position }: ToastContainerProps) {
   return (
     <div
       className={cn(
-        'fixed z-[100] flex flex-col gap-2 pointer-events-none max-w-sm w-full',
+        'fixed z-toast flex flex-col gap-2 pointer-events-none max-w-sm w-full',
         positionClasses[position]
       )}
       aria-live="polite"
@@ -264,23 +264,23 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
   const typeConfig: Record<ToastType, { icon: React.ReactNode; className: string; iconClassName: string }> = {
     success: {
       icon: icon || <CheckCircleIcon className="w-5 h-5" />,
-      className: 'bg-green-500/10 border-green-500/20',
-      iconClassName: 'text-green-500',
+      className: 'bg-status-success-bg/50 border-status-success-border',
+      iconClassName: 'text-status-success-text',
     },
     error: {
       icon: icon || <ExclamationCircleIcon className="w-5 h-5" />,
-      className: 'bg-red-500/10 border-red-500/20',
-      iconClassName: 'text-red-500',
+      className: 'bg-status-error-bg/50 border-status-error-border',
+      iconClassName: 'text-status-error-text',
     },
     warning: {
       icon: icon || <ExclamationTriangleIcon className="w-5 h-5" />,
-      className: 'bg-amber-500/10 border-amber-500/20',
-      iconClassName: 'text-amber-500',
+      className: 'bg-status-warning-bg/50 border-status-warning-border',
+      iconClassName: 'text-status-warning-text',
     },
     info: {
       icon: icon || <InformationCircleIcon className="w-5 h-5" />,
-      className: 'bg-blue-500/10 border-blue-500/20',
-      iconClassName: 'text-blue-500',
+      className: 'bg-status-info-bg/50 border-status-info-border',
+      iconClassName: 'text-status-info-text',
     },
   };
 

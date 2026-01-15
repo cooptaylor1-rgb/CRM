@@ -369,7 +369,7 @@ function SmartListItem({
         onClick={onSelect}
         className={cn(
           'w-full flex items-center gap-3 px-4 py-2 text-left',
-          'transition-colors duration-150',
+          'transition-colors duration-base',
           isActive
             ? 'bg-accent-600/20 text-white border-l-2 border-accent-500'
             : 'text-neutral-300 hover:bg-neutral-800/50 hover:text-white border-l-2 border-transparent'
@@ -428,7 +428,7 @@ function SmartListItem({
               initial={{ opacity: 0, scale: 0.95, y: -4 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -4 }}
-              className="absolute right-0 top-full mt-1 z-50 w-40 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl overflow-hidden"
+              className="absolute right-0 top-full mt-1 z-dropdown w-40 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg overflow-hidden"
             >
               <button
                 onClick={() => {
@@ -468,7 +468,7 @@ function SmartListItem({
                       onDelete();
                       setShowMenu(false);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-600/10"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-status-error-text hover:bg-status-error-bg"
                   >
                     <TrashIcon className="w-4 h-4" />
                     Delete
@@ -621,7 +621,7 @@ export function FilterBuilder({
                   </div>
                   <button
                     onClick={() => removeGroup(group.id)}
-                    className="p-1 rounded hover:bg-neutral-700 text-neutral-500 hover:text-red-400"
+                    className="p-1 rounded hover:bg-neutral-700 text-neutral-500 hover:text-status-error-text"
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
@@ -744,7 +744,7 @@ function FilterConditionRow({
       {/* Remove button */}
       <button
         onClick={onRemove}
-        className="p-2 rounded-lg hover:bg-neutral-700 text-neutral-500 hover:text-red-400"
+        className="p-2 rounded-lg hover:bg-neutral-700 text-neutral-500 hover:text-status-error-text"
       >
         <CloseIcon className="w-4 h-4" />
       </button>
@@ -916,7 +916,7 @@ export function SavedViewHeader({
               </span>
             )}
             {hasChanges && (
-              <span className="px-2 py-0.5 text-xs bg-yellow-900/50 text-yellow-400 rounded">
+              <span className="px-2 py-0.5 text-xs bg-status-warning-bg text-status-warning-text rounded">
                 Unsaved changes
               </span>
             )}

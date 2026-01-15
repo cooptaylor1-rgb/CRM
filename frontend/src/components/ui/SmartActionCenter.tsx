@@ -214,7 +214,7 @@ export function SmartActionCenter({
             </div>
             <div className="w-px h-8 bg-neutral-700" />
             <div className="text-center">
-              <p className="text-lg font-semibold text-green-400">{stats.avgCompletionTime}</p>
+              <p className="text-lg font-semibold text-status-success-text">{stats.avgCompletionTime}</p>
               <p className="text-xs text-neutral-500">Avg time</p>
             </div>
           </div>
@@ -270,8 +270,8 @@ export function SmartActionCenter({
       {criticalActions.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <FireIcon className="w-4 h-4 text-red-400" />
-            <h3 className="text-sm font-semibold text-red-400">Requires Immediate Attention</h3>
+            <FireIcon className="w-4 h-4 text-status-error-text" />
+            <h3 className="text-sm font-semibold text-status-error-text">Requires Immediate Attention</h3>
           </div>
           <div className="space-y-3">
             {criticalActions.map((action) => (
@@ -311,8 +311,8 @@ export function SmartActionCenter({
       {/* Empty State */}
       {visibleActions.length === 0 && (
         <div className="py-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-            <CheckIcon className="w-8 h-8 text-green-400" />
+          <div className="w-16 h-16 rounded-full bg-status-success-bg flex items-center justify-center mx-auto mb-4">
+            <CheckIcon className="w-8 h-8 text-status-success-text" />
           </div>
           <h3 className="text-lg font-semibold text-white mb-1">All caught up!</h3>
           <p className="text-sm text-neutral-400">
@@ -367,8 +367,8 @@ function ActionCard({
   };
 
   const priorityStyles: Record<ActionPriority, string> = {
-    critical: 'border-red-500/30 bg-red-500/5',
-    high: 'border-amber-500/30 bg-amber-500/5',
+    critical: 'border-status-error-border bg-status-error-bg/30',
+    high: 'border-status-warning-border bg-status-warning-bg/30',
     medium: 'border-neutral-700',
     low: 'border-neutral-800',
   };
@@ -408,12 +408,12 @@ function ActionCard({
 
             {/* Priority Badge */}
             {action.priority === 'critical' && (
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-500/20 text-red-400 rounded-full">
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-status-error-bg text-status-error-text rounded-full">
                 Urgent
               </span>
             )}
             {action.priority === 'high' && (
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 rounded-full">
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-status-warning-bg text-status-warning-text rounded-full">
                 High
               </span>
             )}
@@ -521,7 +521,7 @@ function ActionCard({
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
-                  className="absolute right-0 bottom-full mb-2 w-40 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl overflow-hidden z-10"
+                  className="absolute right-0 bottom-full mb-2 w-40 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg overflow-hidden z-dropdown"
                 >
                   {['1 hour', '4 hours', 'Tomorrow', 'Next week'].map((duration) => (
                     <button
@@ -543,7 +543,7 @@ function ActionCard({
           {/* Dismiss */}
           <button
             onClick={onDismiss}
-            className="p-2 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            className="p-2 rounded-lg text-neutral-400 hover:text-status-error-text hover:bg-status-error-bg transition-colors"
             title="Dismiss"
           >
             <XMarkIcon className="w-4 h-4" />
@@ -552,7 +552,7 @@ function ActionCard({
           {/* Complete */}
           <button
             onClick={onComplete}
-            className="p-2 rounded-lg text-neutral-400 hover:text-green-400 hover:bg-green-500/10 transition-colors"
+            className="p-2 rounded-lg text-neutral-400 hover:text-status-success-text hover:bg-status-success-bg transition-colors"
             title="Mark complete"
           >
             <CheckIcon className="w-4 h-4" />

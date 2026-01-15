@@ -149,9 +149,9 @@ const progressSizes = {
 
 const progressColors = {
   primary: 'bg-accent-500',
-  success: 'bg-green-500',
-  warning: 'bg-amber-500',
-  error: 'bg-red-500',
+  success: 'bg-status-success-text',
+  warning: 'bg-status-warning-text',
+  error: 'bg-status-error-text',
 };
 
 export function ProgressBar({
@@ -235,7 +235,7 @@ export function PageLoading({
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center gap-4 p-8 rounded-2xl bg-surface border border-neutral-800 shadow-2xl"
+        className="flex flex-col items-center gap-4 p-8 rounded-2xl bg-surface border border-neutral-800 shadow-lg"
       >
         {type === 'spinner' && <Spinner size="xl" />}
         {type === 'dots' && <DotsLoader size="lg" />}

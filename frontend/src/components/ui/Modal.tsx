@@ -224,9 +224,9 @@ export function ConfirmModal({
   const confirmRef = React.useRef<HTMLButtonElement>(null);
 
   const variantStyles = {
-    danger: 'bg-status-error-bg text-status-error-text hover:bg-red-600 hover:text-white',
-    warning: 'bg-status-warning-bg text-status-warning-text hover:bg-amber-600 hover:text-white',
-    info: 'bg-accent-50 text-accent-700 hover:bg-accent-600 hover:text-white',
+    danger: 'bg-status-error-bg text-status-error-text hover:bg-status-error-text hover:text-white',
+    warning: 'bg-status-warning-bg text-status-warning-text hover:bg-status-warning-text hover:text-white',
+    info: 'bg-accent-100 text-accent-700 hover:bg-accent-600 hover:text-white',
   };
 
   return (

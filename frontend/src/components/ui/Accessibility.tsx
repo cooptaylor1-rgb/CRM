@@ -29,7 +29,7 @@ export interface SkipLinksProps {
 export function SkipLinks({ links = defaultSkipLinks, className }: SkipLinksProps) {
   return (
     <nav className={cn('sr-only focus-within:not-sr-only', className)} aria-label="Skip links">
-      <ul className="fixed top-0 left-0 z-[200] flex flex-col gap-1 p-2">
+      <ul className="fixed top-0 left-0 z-max flex flex-col gap-1 p-2">
         {links.map((link) => (
           <li key={link.id}>
             <a

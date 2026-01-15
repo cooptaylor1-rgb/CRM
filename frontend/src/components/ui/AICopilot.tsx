@@ -313,7 +313,7 @@ export function AICopilotPanel({
           exit={{ opacity: 0, x: position === 'right' ? 20 : 0, y: position === 'bottom' ? 20 : 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           className={cn(
-            'z-50 bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl flex flex-col overflow-hidden',
+            'z-popover bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg flex flex-col overflow-hidden',
             positionClasses[position],
             isMinimized && 'h-14',
             className
@@ -589,7 +589,7 @@ function SuggestionCard({
           {/* Confidence */}
           {suggestion.confidence >= 80 && (
             <div className="flex-shrink-0">
-              <span className="text-[10px] text-green-400 font-medium">
+              <span className="text-[10px] text-status-success-text font-medium">
                 {suggestion.confidence}%
               </span>
             </div>
@@ -664,11 +664,11 @@ export function CopilotTrigger({
       onClick={toggle}
       className={cn(
         positionClasses[position],
-        'z-40 w-14 h-14 rounded-full shadow-lg',
-        'bg-gradient-to-br from-accent-500 to-purple-600',
-        'hover:shadow-xl hover:shadow-accent-500/30',
+        'z-fixed w-14 h-14 rounded-full shadow-lg',
+        'bg-gradient-to-br from-accent-500 to-accent-700',
+        'hover:shadow-lg hover:shadow-accent-500/30',
         'focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 focus:ring-offset-neutral-900',
-        'transition-shadow duration-200',
+        'transition-shadow duration-moderate',
         'flex items-center justify-center',
         isOpen && 'ring-2 ring-accent-500 ring-offset-2 ring-offset-neutral-900',
         className
@@ -678,7 +678,7 @@ export function CopilotTrigger({
 
       {/* Badge */}
       {displayBadge && displayCount > 0 && (
-        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+        <span className="absolute -top-1 -right-1 w-5 h-5 bg-status-error-text text-content-inverse text-[10px] font-bold rounded-full flex items-center justify-center">
           {displayCount > 9 ? '9+' : displayCount}
         </span>
       )}
@@ -785,38 +785,38 @@ function getSuggestionTypeConfig(type: SuggestionType) {
   > = {
     action: {
       icon: ActionIcon,
-      bgColor: 'bg-blue-900/30',
-      iconColor: 'text-blue-400',
+      bgColor: 'bg-accent-900/30',
+      iconColor: 'text-accent-400',
     },
     insight: {
       icon: InsightIcon,
-      bgColor: 'bg-purple-900/30',
-      iconColor: 'text-purple-400',
+      bgColor: 'bg-accent-800/30',
+      iconColor: 'text-accent-300',
     },
     reminder: {
       icon: ReminderIcon,
-      bgColor: 'bg-yellow-900/30',
-      iconColor: 'text-yellow-400',
+      bgColor: 'bg-status-warning-bg',
+      iconColor: 'text-status-warning-text',
     },
     question: {
       icon: QuestionIcon,
-      bgColor: 'bg-green-900/30',
-      iconColor: 'text-green-400',
+      bgColor: 'bg-status-success-bg',
+      iconColor: 'text-status-success-text',
     },
     template: {
       icon: TemplateIcon,
-      bgColor: 'bg-cyan-900/30',
-      iconColor: 'text-cyan-400',
+      bgColor: 'bg-status-info-bg',
+      iconColor: 'text-status-info-text',
     },
     draft: {
       icon: DraftIcon,
-      bgColor: 'bg-orange-900/30',
-      iconColor: 'text-orange-400',
+      bgColor: 'bg-status-warning-bg',
+      iconColor: 'text-status-warning-text',
     },
     follow_up: {
       icon: FollowUpIcon,
-      bgColor: 'bg-pink-900/30',
-      iconColor: 'text-pink-400',
+      bgColor: 'bg-accent-700/30',
+      iconColor: 'text-accent-400',
     },
   };
 

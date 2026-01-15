@@ -212,7 +212,7 @@ function KeyboardShortcutsHelp() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeHelp}
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-modal bg-black/60 backdrop-blur-sm"
           />
 
           {/* Dialog */}
@@ -221,9 +221,9 @@ function KeyboardShortcutsHelp() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-[101] w-full sm:max-w-2xl max-h-[80vh] overflow-hidden"
+            className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-popover w-full sm:max-w-2xl max-h-[80vh] overflow-hidden"
           >
-            <div className="bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl flex flex-col max-h-[80vh]">
+            <div className="bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg flex flex-col max-h-[80vh]">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-neutral-800">
                 <h2 className="text-lg font-semibold text-white">Keyboard Shortcuts</h2>

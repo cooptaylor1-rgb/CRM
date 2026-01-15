@@ -212,7 +212,7 @@ function MobileHeader({ onMenuOpen, onSearchOpen, notificationCount = 0 }: Mobil
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-1 right-1 w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center"
+                className="absolute top-1 right-1 w-4 h-4 text-[10px] font-bold text-white bg-status-error-text rounded-full flex items-center justify-center"
               >
                 {notificationCount > 9 ? '9+' : notificationCount}
               </motion.span>
@@ -369,7 +369,7 @@ function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           leaveFrom="translate-x-0"
           leaveTo="-translate-x-full"
         >
-          <Dialog.Panel className="fixed inset-y-0 left-0 w-[300px] bg-sidebar shadow-2xl safe-area-left flex flex-col">
+          <Dialog.Panel className="fixed inset-y-0 left-0 w-[300px] bg-sidebar shadow-lg safe-area-left flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between h-14 px-4 border-b border-neutral-800">
               <div className="flex items-center gap-3">
