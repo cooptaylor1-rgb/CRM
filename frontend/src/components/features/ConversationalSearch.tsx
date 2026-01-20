@@ -24,9 +24,9 @@ import { cn } from '../ui/utils';
 
 /**
  * ConversationalSearch - Natural Language Query Interface
- * 
- * The magical search that understands what advisors actually mean.
- * "Show me clients who haven't been contacted in 30 days with over $1M AUM"
+ *
+ * Interprets advisor intent from natural language queries.
+ * Example: "Show me clients who haven't been contacted in 30 days with over $1M AUM"
  * becomes a structured, actionable query with instant results.
  */
 

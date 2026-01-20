@@ -181,7 +181,7 @@ export default function DashboardPage() {
       />
 
       <PageContent>
-        {/* Smart Conversational Search - Magic v3 */}
+        {/* Smart Conversational Search */}
         <Card className="mb-6 overflow-visible relative">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-4">
@@ -390,7 +390,7 @@ export default function DashboardPage() {
 
           {/* Right Column - Secondary Content */}
           <div className="space-y-6">
-            {/* Next Best Actions - Magic v2 */}
+            {/* Next Best Actions */}
             <NextBestActions 
               actions={nextBestActions} 
               maxItems={5}

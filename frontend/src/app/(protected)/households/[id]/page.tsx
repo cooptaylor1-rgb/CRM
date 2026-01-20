@@ -307,7 +307,7 @@ export default function HouseholdDetailPage() {
             </motion.div>
           </div>
 
-          {/* AI-Powered Insights Section - Magic v3 */}
+          {/* AI-Powered Insights Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -326,7 +326,7 @@ export default function HouseholdDetailPage() {
             />
           </motion.div>
 
-          {/* Relationship Journey Timeline - Magic v3 */}
+          {/* Relationship Journey Timeline */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

@@ -33,11 +33,11 @@ import {
 import { cn } from '../ui/utils';
 
 /**
- * ClientJourneyTimeline - Visual Relationship Story
- * 
- * A magical timeline that tells the complete story of your relationship
- * with each client. Milestones, interactions, life events, and portfolio
- * changes - all in one beautiful, scrollable narrative.
+ * ClientJourneyTimeline - Visual Relationship History
+ *
+ * Comprehensive timeline displaying the complete client relationship history.
+ * Includes milestones, interactions, life events, and portfolio changes
+ * in a consolidated, chronological view.
  */
 
 export type TimelineEventType =
