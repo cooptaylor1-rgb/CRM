@@ -284,8 +284,6 @@ export function useOfflineQueue() {
             }
           }, 500);
         });
-
-        console.log(`Processed offline action: ${item.action}`, item.data);
       } catch (error) {
         item.retries += 1;
         if (item.retries < item.maxRetries) {
