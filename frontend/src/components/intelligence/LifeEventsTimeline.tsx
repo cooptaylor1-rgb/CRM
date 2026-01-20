@@ -11,6 +11,21 @@ import {
   ChevronRightIcon,
   FilterIcon,
   PlusIcon,
+  BriefcaseIcon,
+  HomeIcon,
+  GiftIcon,
+  TrendingUpIcon,
+  UserPlusIcon,
+  GraduationCapIcon,
+  CakeIcon,
+  AlertCircleIcon,
+  ClockIcon,
+  BuildingIcon,
+  UsersIcon,
+  FileTextIcon,
+  DollarSignIcon,
+  HeartPulseIcon,
+  TrophyIcon,
 } from 'lucide-react';
 import { Card, Badge, Button, Select, Skeleton } from '@/components/ui';
 import {
@@ -18,8 +33,58 @@ import {
   LifeEvent,
   LifeEventType,
   lifeEventTypeLabels,
-  lifeEventTypeIcons,
 } from '@/services/intelligence.service';
+
+// =============================================================================
+// Life Event Icon Mapping
+// =============================================================================
+
+const getLifeEventIcon = (eventType: LifeEventType): React.ReactNode => {
+  const iconClass = "w-5 h-5";
+  switch (eventType) {
+    case 'marriage':
+    case 'divorce':
+      return <HeartIcon className={iconClass} />;
+    case 'birth_of_child':
+      return <UserPlusIcon className={iconClass} />;
+    case 'death_in_family':
+      return <HeartPulseIcon className={iconClass} />;
+    case 'child_graduation':
+    case 'child_college':
+      return <GraduationCapIcon className={iconClass} />;
+    case 'retirement':
+      return <CalendarIcon className={iconClass} />;
+    case 'job_change':
+    case 'promotion':
+      return <BriefcaseIcon className={iconClass} />;
+    case 'business_sale':
+      return <BuildingIcon className={iconClass} />;
+    case 'inheritance':
+    case 'large_withdrawal':
+    case 'large_deposit':
+      return <DollarSignIcon className={iconClass} />;
+    case 'home_purchase':
+    case 'home_sale':
+      return <HomeIcon className={iconClass} />;
+    case 'major_illness':
+    case 'disability':
+    case 'long_term_care':
+      return <AlertCircleIcon className={iconClass} />;
+    case 'birthday_milestone':
+      return <CakeIcon className={iconClass} />;
+    case 'account_anniversary':
+    case 'aum_milestone':
+      return <TrophyIcon className={iconClass} />;
+    case 'estate_plan_update':
+      return <FileTextIcon className={iconClass} />;
+    case 'beneficiary_change':
+      return <UsersIcon className={iconClass} />;
+    case 'rmd_approaching':
+      return <ClockIcon className={iconClass} />;
+    default:
+      return <CalendarIcon className={iconClass} />;
+  }
+};
 
 // =============================================================================
 // Types
@@ -224,7 +289,6 @@ function EventItem({
   onToggle: () => void;
   onAcknowledge: () => void;
 }) {
-  const icon = lifeEventTypeIcons[event.eventType] || '📌';
   const impactColors = {
     critical: 'border-red-500 bg-red-50 dark:bg-red-900/10',
     high: 'border-orange-500 bg-orange-50 dark:bg-orange-900/10',
@@ -248,7 +312,9 @@ function EventItem({
         className="p-3 cursor-pointer flex items-start gap-3"
         onClick={onToggle}
       >
-        <span className="text-2xl">{icon}</span>
+        <div className="p-2 bg-white/50 dark:bg-white/10 rounded-lg text-current">
+          {getLifeEventIcon(event.eventType)}
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h4 className="font-medium text-foreground truncate">{event.title}</h4>
