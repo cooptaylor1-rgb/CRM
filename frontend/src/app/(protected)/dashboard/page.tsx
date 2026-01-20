@@ -188,9 +188,9 @@ export default function DashboardPage() {
               <SparklesIcon className="w-5 h-5 text-amber-500" />
               <h3 className="font-semibold text-content-primary">Ask anything about your clients</h3>
             </div>
-            <ConversationalSearch 
-              onSearch={(query, parsed) => {
-                console.log('Search:', query, parsed);
+            <ConversationalSearch
+              onSearch={(_query, _parsed) => {
+                // Search intent is handled via onResultSelect
               }}
               onResultSelect={(result) => {
                 if (result.type === 'client' || result.type === 'household') {

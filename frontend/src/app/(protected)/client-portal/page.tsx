@@ -233,9 +233,8 @@ export default function ClientPortalPage() {
     ? users
     : users.filter(u => u.status === statusFilter);
 
-  const handleResendInvite = async (userId: string) => {
-    // Mock implementation
-    console.log('Resending invite to', userId);
+  const handleResendInvite = async (_userId: string) => {
+    // TODO: Implement portal invite resend via portalService.resendInvite(userId)
   };
 
   const handleDisableUser = (userId: string) => {

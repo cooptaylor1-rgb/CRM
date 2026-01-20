@@ -332,11 +332,11 @@ export default function HouseholdDetailPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
           >
-            <ClientJourneyTimeline 
+            <ClientJourneyTimeline
               data={generateJourneyData(household.name)}
               maxEvents={8}
-              onEventClick={(event) => {
-                console.log('Event clicked:', event);
+              onEventClick={(_event) => {
+                // TODO: Navigate to event detail or show event modal
               }}
             />
           </motion.div>
