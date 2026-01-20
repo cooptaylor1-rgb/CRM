@@ -153,14 +153,17 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ member, onEdit, onRemov
 
       {/* Permissions */}
       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-        <span className={`text-xs ${member.canEdit ? 'text-emerald-600' : 'text-gray-400'}`}>
-          {member.canEdit ? '✓' : '✗'} Edit
+        <span className={`flex items-center gap-1 text-xs ${member.canEdit ? 'text-emerald-600' : 'text-gray-400'}`}>
+          {member.canEdit ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+          Edit
         </span>
-        <span className={`text-xs ${member.canDelete ? 'text-emerald-600' : 'text-gray-400'}`}>
-          {member.canDelete ? '✓' : '✗'} Delete
+        <span className={`flex items-center gap-1 text-xs ${member.canDelete ? 'text-emerald-600' : 'text-gray-400'}`}>
+          {member.canDelete ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+          Delete
         </span>
-        <span className={`text-xs ${member.canShare ? 'text-emerald-600' : 'text-gray-400'}`}>
-          {member.canShare ? '✓' : '✗'} Share
+        <span className={`flex items-center gap-1 text-xs ${member.canShare ? 'text-emerald-600' : 'text-gray-400'}`}>
+          {member.canShare ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+          Share
         </span>
       </div>
     </motion.div>
