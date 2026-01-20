@@ -6,7 +6,8 @@ import {
   Target, TrendingUp, TrendingDown, DollarSign, Calendar, Play,
   RefreshCw, Settings, Download, ChevronRight, ChevronDown, Info,
   AlertCircle, CheckCircle, Plus, Edit2, Trash2, BarChart3, Activity,
-  Zap, Shield, Clock, Eye, Calculator, PieChart, Sliders
+  Zap, Shield, Clock, Eye, Calculator, PieChart, Sliders,
+  Briefcase, GraduationCap, Home, Gem,
 } from 'lucide-react';
 
 // Types
@@ -438,12 +439,12 @@ const GoalCard: React.FC<{
   const progress = goal.currentAmount / goal.targetAmount;
   const yearsRemaining = Math.max(0, (goal.targetDate.getTime() - Date.now()) / (365 * 24 * 60 * 60 * 1000));
   
-  const typeIcons = {
-    retirement: '🏖️',
-    education: '🎓',
-    home: '🏠',
-    legacy: '💎',
-    custom: '🎯'
+  const typeIcons: Record<string, React.ReactNode> = {
+    retirement: <Briefcase className="w-5 h-5" />,
+    education: <GraduationCap className="w-5 h-5" />,
+    home: <Home className="w-5 h-5" />,
+    legacy: <Gem className="w-5 h-5" />,
+    custom: <Target className="w-5 h-5" />,
   };
   
   const priorityColors = {
@@ -462,7 +463,9 @@ const GoalCard: React.FC<{
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{typeIcons[goal.type]}</span>
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+            {typeIcons[goal.type]}
+          </div>
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white">{goal.name}</h4>
             <p className="text-xs text-gray-500">{formatDate(goal.targetDate)} • {yearsRemaining.toFixed(1)} years</p>
