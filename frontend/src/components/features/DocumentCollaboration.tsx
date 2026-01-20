@@ -19,6 +19,9 @@ import {
   DocumentDuplicateIcon,
   UserGroupIcon,
   LinkIcon,
+  TableCellsIcon,
+  PhotoIcon,
+  PaperClipIcon,
 } from '@heroicons/react/24/outline';
 
 // ============================================
@@ -85,12 +88,12 @@ export interface DocumentCollaborationProps {
 // Constants & Mock Data
 // ============================================
 
-const TYPE_ICONS: Record<DocumentType, { icon: string; color: string }> = {
-  pdf: { icon: '📄', color: 'bg-red-100 text-red-600' },
-  docx: { icon: '📝', color: 'bg-blue-100 text-blue-600' },
-  xlsx: { icon: '📊', color: 'bg-green-100 text-green-600' },
-  image: { icon: '🖼️', color: 'bg-purple-100 text-purple-600' },
-  other: { icon: '📎', color: 'bg-gray-100 text-gray-600' },
+const TYPE_ICONS: Record<DocumentType, { icon: React.ReactNode; color: string }> = {
+  pdf: { icon: <DocumentTextIcon className="w-5 h-5" />, color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+  docx: { icon: <DocumentTextIcon className="w-5 h-5" />, color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+  xlsx: { icon: <TableCellsIcon className="w-5 h-5" />, color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+  image: { icon: <PhotoIcon className="w-5 h-5" />, color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+  other: { icon: <PaperClipIcon className="w-5 h-5" />, color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
 };
 
 const STATUS_CONFIG: Record<DocumentStatus, { label: string; color: string }> = {

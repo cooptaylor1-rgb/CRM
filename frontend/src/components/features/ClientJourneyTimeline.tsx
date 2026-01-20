@@ -328,7 +328,7 @@ function MilestoneMarker({ milestone }: { milestone: JourneyMilestone }) {
       </div>
       <div className="ml-4 px-4 py-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
         <div className="flex items-center gap-2">
-          {milestone.celebration && <span className="text-lg">🎉</span>}
+          {milestone.celebration && <SparklesIcon className="w-5 h-5 text-amber-500" />}
           <h4 className="font-semibold text-amber-600 dark:text-amber-400">{milestone.title}</h4>
         </div>
         <p className="text-sm text-content-secondary mt-1">{milestone.description}</p>

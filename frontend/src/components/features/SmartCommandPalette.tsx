@@ -286,11 +286,11 @@ export function SmartCommandPalette({ isOpen, onClose, currentContext }: SmartCo
 
     switch (type) {
       case 'call':
-        toast.success(`Opening phone for ${target}...`, { icon: '📞' });
+        toast.success(`Opening phone for ${target}...`);
         // In a real app, this would open a dialer or VOIP
         break;
       case 'email':
-        toast.success(`Opening email composer for ${target}...`, { icon: '✉️' });
+        toast.success(`Opening email composer for ${target}...`);
         // In a real app, this would open email composer
         break;
       case 'schedule':

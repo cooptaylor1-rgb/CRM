@@ -27,6 +27,10 @@ import {
   LightBulbIcon,
   MagnifyingGlassIcon,
   TagIcon,
+  PhoneIcon,
+  CalendarDaysIcon,
+  ChartBarIcon,
+  TrophyIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '../ui/utils';
 
@@ -177,10 +181,10 @@ Best regards,
 
 This email confirms our upcoming meeting:
 
-📅 Date: {{meeting.date}}
-🕐 Time: {{meeting.time}}
-📍 Location: {{meeting.location}}
-📋 Agenda: {{meeting.agenda}}
+Date: {{meeting.date}}
+Time: {{meeting.time}}
+Location: {{meeting.location}}
+Agenda: {{meeting.agenda}}
 
 Please let me know if you need to reschedule or if there's anything specific you'd like to discuss.
 
@@ -228,7 +232,7 @@ Best regards,
   {
     id: 'birthday',
     name: 'Birthday Wishes',
-    subject: 'Happy Birthday, {{client.firstName}}! 🎂',
+    subject: 'Happy Birthday, {{client.firstName}}!',
     body: `Dear {{client.firstName}},
 
 On behalf of everyone at {{firm.name}}, I wanted to wish you a very happy birthday!
@@ -282,9 +286,9 @@ Could you please provide the following at your earliest convenience:
 • [List specific documents needed]
 
 You can:
-📧 Reply to this email with attachments
-📱 Upload through our client portal
-📞 Drop them off at our office
+• Reply to this email with attachments
+• Upload through our client portal
+• Drop them off at our office
 
 Please let me know if you have any questions.
 
@@ -310,12 +314,12 @@ const TONE_CONFIG: Record<ToneType, { label: string; description: string; color:
 };
 
 const AI_PROMPTS = [
-  { icon: '📞', label: 'Follow-up call', prompt: 'Write a follow-up email after a phone call with' },
-  { icon: '📅', label: 'Schedule meeting', prompt: 'Write an email to schedule a meeting with' },
-  { icon: '📊', label: 'Portfolio update', prompt: 'Write an email about recent portfolio performance for' },
-  { icon: '🎉', label: 'Milestone', prompt: 'Write a congratulations email for achieving a milestone to' },
-  { icon: '📝', label: 'Document reminder', prompt: 'Write a reminder about pending documents for' },
-  { icon: '💡', label: 'Market insights', prompt: 'Write an email sharing market insights for' },
+  { icon: <PhoneIcon className="w-4 h-4" />, label: 'Follow-up call', prompt: 'Write a follow-up email after a phone call with' },
+  { icon: <CalendarDaysIcon className="w-4 h-4" />, label: 'Schedule meeting', prompt: 'Write an email to schedule a meeting with' },
+  { icon: <ChartBarIcon className="w-4 h-4" />, label: 'Portfolio update', prompt: 'Write an email about recent portfolio performance for' },
+  { icon: <TrophyIcon className="w-4 h-4" />, label: 'Milestone', prompt: 'Write a congratulations email for achieving a milestone to' },
+  { icon: <DocumentTextIcon className="w-4 h-4" />, label: 'Document reminder', prompt: 'Write a reminder about pending documents for' },
+  { icon: <LightBulbIcon className="w-4 h-4" />, label: 'Market insights', prompt: 'Write an email sharing market insights for' },
 ];
 
 // ============================================

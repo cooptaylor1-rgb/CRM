@@ -272,33 +272,6 @@ export const lifeEventTypeLabels: Record<LifeEventType, string> = {
   rmd_approaching: 'RMD Approaching',
 };
 
-export const lifeEventTypeIcons: Record<LifeEventType, string> = {
-  marriage: '💍',
-  divorce: '💔',
-  birth_of_child: '👶',
-  death_in_family: '🕯️',
-  child_graduation: '🎓',
-  child_college: '🏫',
-  retirement: '🏖️',
-  job_change: '💼',
-  business_sale: '🏢',
-  promotion: '📈',
-  inheritance: '📜',
-  large_withdrawal: '💸',
-  large_deposit: '💰',
-  home_purchase: '🏠',
-  home_sale: '🏡',
-  major_illness: '🏥',
-  disability: '♿',
-  long_term_care: '🏥',
-  birthday_milestone: '🎂',
-  account_anniversary: '🎉',
-  aum_milestone: '🏆',
-  estate_plan_update: '📋',
-  beneficiary_change: '👥',
-  rmd_approaching: '⏰',
-};
-
 export const riskLevelLabels: Record<RiskLevel, string> = {
   very_low: 'Very Low',
   low: 'Low',

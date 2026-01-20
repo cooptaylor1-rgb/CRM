@@ -214,7 +214,7 @@ Best regards,
   {
     id: 'tpl-006',
     name: 'Birthday Greeting',
-    subject: 'Happy Birthday, {{first_name}}! 🎂',
+    subject: 'Happy Birthday, {{first_name}}!',
     body: `Dear {{first_name}},
 
 Wishing you a wonderful birthday filled with joy and celebration!
