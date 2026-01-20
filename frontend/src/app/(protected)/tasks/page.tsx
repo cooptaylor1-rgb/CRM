@@ -16,7 +16,7 @@ import {
   DataFreshness,
   EmptyState,
 } from '@/components/ui';
-import { PlusIcon, CheckIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid';
+import { PlusIcon, CheckIcon, ClockIcon, ExclamationTriangleIcon, FolderIcon, CalendarIcon, TagIcon } from '@heroicons/react/20/solid';
 import { tasksService, Task, TaskFilter, TaskStats, CreateTaskDto } from '@/services/tasks.service';
 import { CreateTaskModal } from '@/components/modals';
 
@@ -287,18 +287,21 @@ export default function TasksPage() {
                           <p className="text-sm text-content-secondary mt-1">{task.description}</p>
                         )}
                         <div className="flex items-center gap-4 mt-2 text-xs text-content-tertiary">
-                          <span className="flex items-center">
-                            📁 {categoryLabels[task.category] || task.category}
+                          <span className="flex items-center gap-1">
+                            <FolderIcon className="w-3.5 h-3.5" />
+                            {categoryLabels[task.category] || task.category}
                           </span>
                           {task.dueDate && (
-                            <span className={`flex items-center ${isOverdue(task.dueDate, task.status) ? 'text-status-error-text font-medium' : ''}`}>
-                              📅 Due: {formatDate(task.dueDate)}
+                            <span className={`flex items-center gap-1 ${isOverdue(task.dueDate, task.status) ? 'text-status-error-text font-medium' : ''}`}>
+                              <CalendarIcon className="w-3.5 h-3.5" />
+                              Due: {formatDate(task.dueDate)}
                               {isOverdue(task.dueDate, task.status) && ' (Overdue)'}
                             </span>
                           )}
                           {task.tags && task.tags.length > 0 && (
                             <span className="flex items-center gap-1">
-                              🏷️ {task.tags.join(', ')}
+                              <TagIcon className="w-3.5 h-3.5" />
+                              {task.tags.join(', ')}
                             </span>
                           )}
                         </div>
