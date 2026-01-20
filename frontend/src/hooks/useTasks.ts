@@ -330,8 +330,7 @@ export function useCompleteTask() {
       toast.error('Failed to complete task');
     },
     onSuccess: (data) => {
-      toast.success(`✅ "${data.title}" completed!`, {
-        icon: '🎉',
+      toast.success(`"${data.title}" completed`, {
         duration: 3000,
       });
     },
