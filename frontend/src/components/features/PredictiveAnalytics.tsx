@@ -715,6 +715,13 @@ export const PredictiveAnalytics: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Compliance Disclaimer */}
+      <div className="mt-6 p-4 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+          <strong className="text-neutral-600 dark:text-neutral-300">Important Disclosure:</strong> The analytics and projections displayed are based on historical patterns and statistical models for internal operational use only. These are not predictions of future results, investment advice, or guarantees of any outcomes. Past performance and model outputs do not guarantee future results. All business decisions should involve independent analysis and professional judgment. Model accuracy metrics reflect historical backtesting and may not indicate future performance.
+        </p>
+      </div>
     </div>
   );
 };

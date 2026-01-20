@@ -666,6 +666,16 @@ export const GoalPlanningMonteCarlo: React.FC = () => {
               <ScenarioSliders goal={selectedGoal} onChange={handleGoalUpdate} />
             </>
           )}
+
+          {/* Compliance Disclaimer */}
+          <div className="mt-8 p-4 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700">
+            <div className="flex gap-2">
+              <Info className="w-4 h-4 text-neutral-500 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                <strong className="text-neutral-600 dark:text-neutral-300">Important Disclosure:</strong> Monte Carlo simulations are hypothetical illustrations based on assumed rates of return, volatility, and other factors. Results shown are statistical projections, not predictions or guarantees. Actual results will vary and may be significantly different from simulated outcomes. Success probabilities represent historical statistical likelihood, not certainty of achieving goals. Investment decisions should not be based solely on these projections. Past performance does not guarantee future results. Please consult with your financial advisor and consider all relevant factors before making investment decisions.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
