@@ -387,7 +387,7 @@ export default function ClientsPage() {
                     {/* Tier */}
                     <div className="w-28 hidden lg:block">
                       {client.tier && (
-                        <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${tierConfig[client.tier]?.color || 'bg-gray-100 text-gray-700'}`}>
+                        <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${tierConfig[client.tier]?.color || 'bg-surface-secondary text-content-secondary'}`}>
                           {tierConfig[client.tier]?.label || client.tier}
                         </span>
                       )}
