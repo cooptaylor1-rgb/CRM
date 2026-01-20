@@ -7,11 +7,12 @@ import {
   ChevronRight, Plus, Trash2, Settings, ExternalLink, Shield,
   ArrowRight, Loader2
 } from 'lucide-react';
-import custodianService, { 
-  CustodianConnection, 
-  CustodianAccountLink, 
-  DiscoveredAccount 
+import custodianService, {
+  CustodianConnection,
+  CustodianAccountLink,
+  DiscoveredAccount
 } from '@/services/custodian.service';
+import { toast } from 'react-hot-toast';
 
 // Schwab brand colors
 const schwabColors = {
@@ -334,7 +335,7 @@ export default function SchwabIntegrationPage() {
     try {
       setLoading(true);
       const result = await custodianService.autoLinkAccounts(selectedConnection);
-      alert(`Auto-linked ${result.linked} accounts. ${result.skipped} skipped.`);
+      toast.success(`Auto-linked ${result.linked} accounts. ${result.skipped} skipped.`);
       await loadLinkedAccounts(selectedConnection);
       await discoverAccounts();
     } catch (error) {
