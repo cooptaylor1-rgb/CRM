@@ -164,10 +164,10 @@ const mockEvents: CalendarEvent[] = [
   },
 ];
 
-const providerConfig: Record<string, { name: string; color: string; icon: string }> = {
-  google: { name: 'Google Calendar', color: 'bg-red-100 text-red-700', icon: '🔴' },
-  outlook: { name: 'Microsoft Outlook', color: 'bg-blue-100 text-blue-700', icon: '🔵' },
-  apple: { name: 'Apple Calendar', color: 'bg-gray-100 text-gray-700', icon: '⚪' },
+const providerConfig: Record<string, { name: string; color: string; dotColor: string }> = {
+  google: { name: 'Google Calendar', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', dotColor: 'bg-red-500' },
+  outlook: { name: 'Microsoft Outlook', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', dotColor: 'bg-blue-500' },
+  apple: { name: 'Apple Calendar', color: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300', dotColor: 'bg-neutral-400' },
 };
 
 const meetingTypeIcons: Record<string, React.ReactNode> = {
@@ -466,10 +466,10 @@ export default function CalendarSyncPage() {
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className={cn(
-                        'p-3 rounded-lg text-2xl',
+                        'p-3 rounded-lg flex items-center justify-center',
                         providerConfig[connection.provider]?.color
                       )}>
-                        {providerConfig[connection.provider]?.icon}
+                        <CalendarIcon className="w-6 h-6" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-content-primary">
@@ -643,9 +643,9 @@ export default function CalendarSyncPage() {
           
           <div className="space-y-3">
             {[
-              { id: 'outlook', name: 'Microsoft Outlook', icon: '🔵', description: 'Connect your Outlook or Microsoft 365 calendar' },
-              { id: 'google', name: 'Google Calendar', icon: '🔴', description: 'Connect your Google Calendar' },
-              { id: 'apple', name: 'Apple Calendar', icon: '⚪', description: 'Connect your iCloud Calendar' },
+              { id: 'outlook', name: 'Microsoft Outlook', color: 'bg-blue-500', description: 'Connect your Outlook or Microsoft 365 calendar' },
+              { id: 'google', name: 'Google Calendar', color: 'bg-red-500', description: 'Connect your Google Calendar' },
+              { id: 'apple', name: 'Apple Calendar', color: 'bg-neutral-400', description: 'Connect your iCloud Calendar' },
             ].map(provider => (
               <button
                 key={provider.id}
@@ -654,7 +654,9 @@ export default function CalendarSyncPage() {
                   'hover:border-accent-500 hover:bg-surface-secondary transition-colors text-left'
                 )}
               >
-                <span className="text-3xl">{provider.icon}</span>
+                <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', provider.color)}>
+                  <CalendarIcon className="w-5 h-5 text-white" />
+                </div>
                 <div className="flex-1">
                   <p className="font-medium text-content-primary">{provider.name}</p>
                   <p className="text-sm text-content-tertiary">{provider.description}</p>
