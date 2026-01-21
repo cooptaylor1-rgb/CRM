@@ -11,6 +11,7 @@ import { Response } from 'express';
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger('ExceptionFilter');
+  private readonly isProduction = process.env.NODE_ENV === 'production';
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -28,7 +29,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
           ? exceptionResponse
           : (exceptionResponse as any).message || exceptionResponse;
     } else if (exception instanceof Error) {
-      message = exception.message;
+      // In production, don't expose internal error details to clients
+      // Log the full error server-side but return generic message
+      if (this.isProduction) {
+        message = 'An unexpected error occurred';
+      } else {
+        message = exception.message;
+      }
     }
 
     const errorResponse = {

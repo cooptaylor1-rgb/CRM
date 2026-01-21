@@ -3,6 +3,7 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  Index,
 } from 'typeorm';
 
 export enum AuditEventType {
@@ -15,6 +16,10 @@ export enum AuditEventType {
 }
 
 @Entity('audit_events')
+@Index(['userId'])
+@Index(['timestamp'])
+@Index(['eventType'])
+@Index(['entityType', 'entityId'])
 export class AuditEvent {
   @PrimaryGeneratedColumn('uuid')
   id: string;

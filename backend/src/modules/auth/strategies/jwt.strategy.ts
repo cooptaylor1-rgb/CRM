@@ -28,7 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const secret = jwtSecret || 'dev-jwt-' + crypto.randomBytes(16).toString('hex');
 
     if (!jwtSecret) {
-      console.warn('⚠️  JWT_SECRET not set - using auto-generated development secret. Tokens will invalidate on restart.');
+      this.logger.warn('JWT_SECRET not set - using auto-generated development secret. Tokens will invalidate on restart.');
     }
 
     super({
