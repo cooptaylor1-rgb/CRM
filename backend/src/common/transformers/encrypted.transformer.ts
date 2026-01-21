@@ -31,7 +31,7 @@ export class EncryptedTransformer implements ValueTransformer {
     if (!encryptionKey) {
       // For development/testing: use a consistent dev key so data persists during development
       // This is NOT secure for production but allows development to work predictably
-      console.warn('⚠️  EncryptedTransformer: Using development encryption key. Set ENCRYPTION_KEY for production!');
+      console.warn('EncryptedTransformer: Using development encryption key. Set ENCRYPTION_KEY for production.');
       this.key = crypto.scryptSync('dev-encryption-key-for-testing-only', 'dev-salt', this.keyLength);
     } else {
       // Use the same salt as EncryptionService for consistency

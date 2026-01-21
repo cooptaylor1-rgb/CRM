@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
 async function bootstrap() {
-  console.log('🚀 Starting CRM Backend...');
+  console.log('Starting CRM Backend...');
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Database URL configured: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
   
@@ -46,19 +46,23 @@ async function bootstrap() {
   
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, etc)
-      if (!origin) return callback(null, true);
-      
+      // Allow requests with no origin (mobile apps, curl, etc) only in development
+      if (!origin) {
+        const isDev = process.env.NODE_ENV !== 'production';
+        return callback(isDev ? null : new Error('Origin required'), isDev);
+      }
+
       // Check if origin matches allowed origins or Railway/GitHub patterns
       const isAllowed = allowedOrigins.some(allowed => origin === allowed) ||
         /\.up\.railway\.app$/.test(origin) ||
         /\.railway\.app$/.test(origin) ||
         /\.app\.github\.dev$/.test(origin);
-      
+
       if (isAllowed) {
         callback(null, true);
       } else {
-        callback(null, true); // Allow all for now, tighten in production
+        console.warn(`CORS: Blocked request from origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'), false);
       }
     },
     credentials: true,
@@ -101,8 +105,8 @@ async function bootstrap() {
   const port = process.env.PORT || 3001;
   await app.listen(port, '0.0.0.0');
   
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
+  console.log(`Application is running on: http://localhost:${port}`);
+  console.log(`API Documentation: http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

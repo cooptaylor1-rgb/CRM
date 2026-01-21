@@ -41,7 +41,7 @@ export class AuthService implements OnModuleInit {
     this.refreshSecret = refreshSecret || 'dev-refresh-secret-' + require('crypto').randomBytes(16).toString('hex');
 
     if (!jwtSecret || !refreshSecret) {
-      this.logger.warn('⚠️  Using auto-generated development secrets. Set JWT_SECRET and REFRESH_TOKEN_SECRET for production!');
+      this.logger.warn('Using auto-generated development secrets. Set JWT_SECRET and REFRESH_TOKEN_SECRET for production.');
     }
   }
 

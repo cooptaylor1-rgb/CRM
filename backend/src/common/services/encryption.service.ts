@@ -36,8 +36,8 @@ export class EncryptionService {
     if (!encryptionKey) {
       // Generate a random development key (prevents predictable encryption, but data won't persist across restarts)
       const devKey = crypto.randomBytes(32).toString('hex');
-      console.warn('⚠️  ENCRYPTION_KEY not set - using auto-generated development key.');
-      console.warn('⚠️  Encrypted data will NOT be recoverable after restart. Set ENCRYPTION_KEY for persistence.');
+      console.warn('ENCRYPTION_KEY not set - using auto-generated development key.');
+      console.warn('Encrypted data will NOT be recoverable after restart. Set ENCRYPTION_KEY for persistence.');
       this.key = crypto.scryptSync(devKey, 'dev-salt', this.keyLength);
     } else {
       // Derive key from the provided secret with unique salt
