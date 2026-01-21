@@ -168,6 +168,15 @@ const entities = [
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const logger = new Logger('DatabaseConfig');
+        const nodeEnv = configService.get('NODE_ENV');
+        const isProduction = nodeEnv === 'production';
+
+        // CRITICAL: Never auto-sync in production - use migrations instead
+        const shouldSynchronize = !isProduction && configService.get('DB_SYNCHRONIZE') !== 'false';
+
+        if (isProduction && configService.get('DB_SYNCHRONIZE') === 'true') {
+          logger.warn('DB_SYNCHRONIZE=true is ignored in production for safety. Use migrations.');
+        }
 
         // Railway provides DATABASE_URL automatically when Postgres is linked
         // It may also be available as POSTGRES_URL or similar
@@ -176,6 +185,7 @@ const entities = [
                            configService.get('POSTGRESQL_URL');
 
         logger.log('Configuring database connection...');
+        logger.log(`Environment: ${nodeEnv || 'development'}, Synchronize: ${shouldSynchronize}`);
 
         // If DATABASE_URL is provided (Railway), use it directly
         if (databaseUrl) {
@@ -184,7 +194,7 @@ const entities = [
             type: 'postgres',
             url: databaseUrl,
             entities: entities,
-            synchronize: true, // Auto-create tables
+            synchronize: shouldSynchronize,
             logging: false,
             ssl: { rejectUnauthorized: false },
           };
@@ -200,8 +210,8 @@ const entities = [
           password: configService.get('DB_PASSWORD') || 'postgres',
           database: configService.get('DB_NAME') || 'crm_db',
           entities: entities,
-          synchronize: true, // Auto-sync in development
-          logging: configService.get('NODE_ENV') === 'development',
+          synchronize: shouldSynchronize,
+          logging: !isProduction,
           ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
         };
       },
