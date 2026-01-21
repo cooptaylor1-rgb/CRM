@@ -5,6 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 // ==================== Enums ====================
@@ -106,6 +109,9 @@ export class TargetAssetAllocation {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  @OneToMany('AllocationLineItem', 'allocation')
+  lineItems: AllocationLineItem[];
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -123,6 +129,10 @@ export class AllocationLineItem {
 
   @Column({ name: 'allocation_id' })
   allocationId: string;
+
+  @ManyToOne('TargetAssetAllocation', 'lineItems')
+  @JoinColumn({ name: 'allocation_id' })
+  allocation: TargetAssetAllocation;
 
   @Column({
     type: 'enum',
@@ -236,6 +246,9 @@ export class FeeSchedule {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  @OneToMany('FeeTier', 'feeSchedule')
+  tiers: FeeTier[];
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -253,6 +266,10 @@ export class FeeTier {
 
   @Column({ name: 'fee_schedule_id' })
   feeScheduleId: string;
+
+  @ManyToOne('FeeSchedule', 'tiers')
+  @JoinColumn({ name: 'fee_schedule_id' })
+  feeSchedule: FeeSchedule;
 
   @Column({
     type: 'enum',

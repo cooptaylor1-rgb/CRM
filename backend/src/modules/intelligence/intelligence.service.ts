@@ -49,9 +49,9 @@ export class IntelligenceService {
   async createInsight(dto: CreateInsightDto): Promise<ClientInsight> {
     const insight = this.insightRepository.create({
       ...dto,
-      expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
+      expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
     });
-    return this.insightRepository.save(insight);
+    return this.insightRepository.save(insight) as Promise<ClientInsight>;
   }
 
   async getInsights(filter: InsightFilterDto): Promise<ClientInsight[]> {
@@ -114,16 +114,20 @@ export class IntelligenceService {
       take: 100,
     });
 
-    const byPriority = { critical: 0, high: 0, medium: 0, low: 0 };
+    const byPriority = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
     const byType: Record<string, number> = {};
 
     for (const insight of insights) {
-      byPriority[insight.priority] = (byPriority[insight.priority] || 0) + 1;
+      const priority = insight.priority as keyof typeof byPriority;
+      byPriority[priority] = (byPriority[priority] || 0) + 1;
       byType[insight.type] = (byType[insight.type] || 0) + 1;
     }
 
     return {
-      ...byPriority,
+      critical: byPriority.critical,
+      high: byPriority.high,
+      medium: byPriority.medium,
+      low: byPriority.low,
       byType,
       recentInsights: insights.slice(0, 10),
     };

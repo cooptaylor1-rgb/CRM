@@ -8,11 +8,20 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-interface AuthenticatedSocket extends Socket {
+interface AuthenticatedSocket {
   userId?: string;
+  id: string;
+  handshake: {
+    auth?: { token?: string };
+    headers?: { authorization?: string };
+  };
+  disconnect: () => void;
+  join: (room: string) => void;
+  leave: (room: string) => void;
+  emit: (event: string, data: any) => void;
 }
 
 /**

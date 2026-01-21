@@ -725,6 +725,8 @@ export function NotificationBell({
   return (
     <button
       onClick={onClick}
+      aria-label={`Notifications${count > 0 ? ` (${count} unread)` : ''}`}
+      data-testid="notification-bell"
       className={cn(
         'relative p-2 rounded-lg transition-colors',
         'hover:bg-surface-secondary text-content-secondary hover:text-content-primary',
@@ -741,6 +743,7 @@ export function NotificationBell({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
+          data-testid="notification-badge"
           className={cn(
             'absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-medium px-1',
             urgentCount && urgentCount > 0

@@ -16,8 +16,8 @@ import { NotificationsService, NotificationFilter, NotificationStats } from './n
 import { CreateNotificationDto, BroadcastNotificationDto } from './dto/create-notification.dto';
 import { UpdatePreferencesDto } from './dto/update-preferences.dto';
 import { Notification, NotificationPreference, NotificationType, NotificationPriority, EntityType } from './entities/notification.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../modules/auth/decorators/current-user.decorator';
 
 interface JwtPayload {
   sub: string;

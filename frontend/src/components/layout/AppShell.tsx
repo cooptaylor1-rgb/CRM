@@ -646,22 +646,22 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <div className={cn('border-b border-border bg-surface', className)}>
+    <div className={cn('border-b border-border bg-surface', className)} data-testid="page-header">
       <div className="container-page py-4 md:py-5">
-        {breadcrumb && <div className="mb-2">{breadcrumb}</div>}
+        {breadcrumb && <div className="mb-2" data-testid="breadcrumb">{breadcrumb}</div>}
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
           <div className="min-w-0">
-            <h1 className="text-xl md:text-display text-content-primary font-semibold truncate">
+            <h1 className="text-xl md:text-display text-content-primary font-semibold truncate" data-testid="page-title">
               {title}
             </h1>
             {subtitle && (
-              <div className="text-sm text-content-secondary mt-1 line-clamp-2">
+              <div className="text-sm text-content-secondary mt-1 line-clamp-2" data-testid="page-subtitle">
                 {subtitle}
               </div>
             )}
           </div>
           {actions && (
-            <div className="flex items-center gap-2 shrink-0 overflow-x-auto pb-1 md:pb-0">
+            <div className="flex items-center gap-2 shrink-0 overflow-x-auto pb-1 md:pb-0" data-testid="page-actions">
               {actions}
             </div>
           )}

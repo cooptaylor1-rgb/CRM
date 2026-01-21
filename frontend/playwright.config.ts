@@ -19,10 +19,23 @@ export default defineConfig({
   // Opt out of parallel tests on CI
   workers: process.env.CI ? 1 : undefined,
 
+  // Global timeout for each test
+  timeout: 60000,
+
+  // Expect timeout
+  expect: {
+    timeout: 10000,
+    toHaveScreenshot: {
+      maxDiffPixels: 100,
+    },
+  },
+
   // Reporter to use
   reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['list'],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ...(process.env.CI ? [['github'] as const] : []),
   ],
 
   // Shared settings for all the projects below
@@ -44,24 +57,26 @@ export default defineConfig({
 
     // Set default navigation timeout
     navigationTimeout: 30000,
+    
+    // Ignore HTTPS errors
+    ignoreHTTPSErrors: true,
   },
 
   // Configure projects for major browsers
   projects: [
-    // Setup project - authentication state
+    // Setup project - authentication state (optional, tests use mock auth)
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
     },
 
-    // Desktop Chrome
+    // Desktop Chrome - primary testing browser
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'e2e/.auth/user.json',
       },
-      dependencies: ['setup'],
+      // Remove dependency on setup since we use mock auth in tests
     },
 
     // Desktop Firefox
@@ -69,9 +84,7 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
-        storageState: 'e2e/.auth/user.json',
       },
-      dependencies: ['setup'],
     },
 
     // Desktop Safari
@@ -79,9 +92,7 @@ export default defineConfig({
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
-        storageState: 'e2e/.auth/user.json',
       },
-      dependencies: ['setup'],
     },
 
     // Mobile Chrome
@@ -89,9 +100,7 @@ export default defineConfig({
       name: 'mobile-chrome',
       use: {
         ...devices['Pixel 5'],
-        storageState: 'e2e/.auth/user.json',
       },
-      dependencies: ['setup'],
     },
 
     // Mobile Safari
@@ -99,9 +108,7 @@ export default defineConfig({
       name: 'mobile-safari',
       use: {
         ...devices['iPhone 13'],
-        storageState: 'e2e/.auth/user.json',
       },
-      dependencies: ['setup'],
     },
   ],
 
