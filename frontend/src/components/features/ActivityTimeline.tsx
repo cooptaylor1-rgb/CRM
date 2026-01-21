@@ -22,11 +22,10 @@ import { Card, CardHeader, Button, Badge, EmptyState, Skeleton } from '../ui';
 
 /**
  * ActivityTimeline Component
- * 
- * A beautiful, interactive timeline showing all touchpoints with a client.
- * This is a "magic" feature that gives advisors instant context about
- * their relationship with any client.
- * 
+ *
+ * Interactive timeline displaying all client touchpoints. Provides advisors
+ * with comprehensive context about their relationship with any client.
+ *
  * Features:
  * - Grouped by time period (Today, This Week, This Month, etc.)
  * - Filterable by activity type

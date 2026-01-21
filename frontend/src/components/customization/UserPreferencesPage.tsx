@@ -16,12 +16,12 @@ const themeOptions = [
 ];
 
 const languageOptions = [
-  { value: 'en', label: 'English', flag: '🇺🇸' },
-  { value: 'es', label: 'Español', flag: '🇪🇸' },
-  { value: 'fr', label: 'Français', flag: '🇫🇷' },
-  { value: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { value: 'zh', label: '中文', flag: '🇨🇳' },
-  { value: 'ja', label: '日本語', flag: '🇯🇵' },
+  { value: 'en', label: 'English', region: 'US' },
+  { value: 'es', label: 'Español', region: 'ES' },
+  { value: 'fr', label: 'Français', region: 'FR' },
+  { value: 'de', label: 'Deutsch', region: 'DE' },
+  { value: 'zh', label: '中文', region: 'CN' },
+  { value: 'ja', label: '日本語', region: 'JP' },
 ];
 
 const dateFormatOptions = [
@@ -303,7 +303,7 @@ export const UserPreferencesPage: React.FC = () => {
               >
                 {languageOptions.map((option) => (
                   <option key={option.value} value={option.value}>
-                    {option.flag} {option.label}
+                    {option.label} ({option.region})
                   </option>
                 ))}
               </select>

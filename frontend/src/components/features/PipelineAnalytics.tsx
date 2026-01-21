@@ -1232,6 +1232,14 @@ export function PipelineAnalyticsDashboard({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Compliance Disclaimer */}
+      <div className="mt-6 p-4 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+          <InformationCircleIcon className="w-4 h-4 inline-block mr-1 -mt-0.5" />
+          <strong className="text-neutral-600 dark:text-neutral-300">Disclosure:</strong> Pipeline projections and revenue forecasts are estimates based on historical conversion rates and current deal values. Actual outcomes may vary significantly. These metrics are for internal business planning purposes only and should not be construed as guaranteed revenue or relied upon for financial reporting.
+        </p>
+      </div>
     </div>
   );
 }

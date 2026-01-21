@@ -233,9 +233,8 @@ export default function ClientPortalPage() {
     ? users
     : users.filter(u => u.status === statusFilter);
 
-  const handleResendInvite = async (userId: string) => {
-    // Mock implementation
-    console.log('Resending invite to', userId);
+  const handleResendInvite = async (_userId: string) => {
+    // TODO: Implement portal invite resend via portalService.resendInvite(userId)
   };
 
   const handleDisableUser = (userId: string) => {
@@ -709,9 +708,9 @@ export default function ClientPortalPage() {
                 {Object.entries(selectedUser.permissions).map(([key, value]) => (
                   <div key={key} className="flex items-center gap-2">
                     {value ? (
-                      <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                      <CheckCircleIcon className="w-4 h-4 text-status-success-text" />
                     ) : (
-                      <XCircleIcon className="w-4 h-4 text-gray-400" />
+                      <XCircleIcon className="w-4 h-4 text-content-tertiary" />
                     )}
                     <span className="text-sm text-content-secondary capitalize">
                       {key.replace(/([A-Z])/g, ' $1').trim()}

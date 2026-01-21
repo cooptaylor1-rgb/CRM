@@ -16,6 +16,7 @@ import {
   EmptyState,
 } from '@/components/ui';
 import { PlusIcon, ViewColumnsIcon, ListBulletIcon, CalendarIcon, UserPlusIcon } from '@heroicons/react/20/solid';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { pipelineService, Prospect, PipelineStage, PipelineStats, CreateProspectDto, MarkLostDto } from '@/services/pipeline.service';
 import { AddProspectModal } from '@/components/modals';
 
@@ -390,7 +391,9 @@ function ProspectDetailModal({ prospect, onClose, onUpdate }: { prospect: Prospe
               <h2 className="text-xl font-semibold text-content-primary">{prospect.firstName} {prospect.lastName}</h2>
               <p className="text-sm text-content-secondary">{prospect.company}</p>
             </div>
-            <button onClick={onClose} className="text-content-tertiary hover:text-content-secondary">✕</button>
+            <button onClick={onClose} className="p-1.5 rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
+              <XMarkIcon className="w-5 h-5" />
+            </button>
           </div>
         </div>
         

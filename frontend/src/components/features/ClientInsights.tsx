@@ -25,9 +25,9 @@ import { cn } from '../ui/utils';
 
 /**
  * ClientInsights - AI-Powered Relationship Intelligence
- * 
- * The "magic" that makes advisors feel like they have superpowers.
- * Analyzes patterns, predicts needs, and surfaces actionable insights.
+ *
+ * Analyzes client patterns, predicts needs, and surfaces actionable insights
+ * to help advisors maintain proactive client relationships.
  */
 
 export interface ClientInsight {

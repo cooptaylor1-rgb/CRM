@@ -33,11 +33,11 @@ import {
 import { cn } from '../ui/utils';
 
 /**
- * ClientJourneyTimeline - Visual Relationship Story
- * 
- * A magical timeline that tells the complete story of your relationship
- * with each client. Milestones, interactions, life events, and portfolio
- * changes - all in one beautiful, scrollable narrative.
+ * ClientJourneyTimeline - Visual Relationship History
+ *
+ * Comprehensive timeline displaying the complete client relationship history.
+ * Includes milestones, interactions, life events, and portfolio changes
+ * in a consolidated, chronological view.
  */
 
 export type TimelineEventType =
@@ -328,7 +328,7 @@ function MilestoneMarker({ milestone }: { milestone: JourneyMilestone }) {
       </div>
       <div className="ml-4 px-4 py-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
         <div className="flex items-center gap-2">
-          {milestone.celebration && <span className="text-lg">🎉</span>}
+          {milestone.celebration && <SparklesIcon className="w-5 h-5 text-amber-500" />}
           <h4 className="font-semibold text-amber-600 dark:text-amber-400">{milestone.title}</h4>
         </div>
         <p className="text-sm text-content-secondary mt-1">{milestone.description}</p>

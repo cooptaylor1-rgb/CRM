@@ -799,6 +799,14 @@ export function PerformanceAnalytics({ className }: PerformanceAnalyticsProps) {
           </div>
         </div>
       </Card>
+
+      {/* Compliance Disclaimer */}
+      <div className="mt-6 p-4 bg-surface-secondary rounded-lg border border-border">
+        <p className="text-xs text-content-tertiary leading-relaxed">
+          <InformationCircleIcon className="w-4 h-4 inline-block mr-1 -mt-0.5" />
+          <strong className="text-content-secondary">Disclosure:</strong> Performance metrics and projections shown are for internal business planning purposes only. Revenue forecasts are estimates based on current fee schedules and AUM trends, and actual results may vary. Historical performance data is not indicative of future results. All figures are unaudited and should not be relied upon for financial reporting.
+        </p>
+      </div>
     </div>
   );
 }

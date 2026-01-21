@@ -6,7 +6,8 @@ import {
   Target, TrendingUp, TrendingDown, DollarSign, Calendar, Play,
   RefreshCw, Settings, Download, ChevronRight, ChevronDown, Info,
   AlertCircle, CheckCircle, Plus, Edit2, Trash2, BarChart3, Activity,
-  Zap, Shield, Clock, Eye, Calculator, PieChart, Sliders
+  Zap, Shield, Clock, Eye, Calculator, PieChart, Sliders,
+  Briefcase, GraduationCap, Home, Gem,
 } from 'lucide-react';
 
 // Types
@@ -438,12 +439,12 @@ const GoalCard: React.FC<{
   const progress = goal.currentAmount / goal.targetAmount;
   const yearsRemaining = Math.max(0, (goal.targetDate.getTime() - Date.now()) / (365 * 24 * 60 * 60 * 1000));
   
-  const typeIcons = {
-    retirement: '🏖️',
-    education: '🎓',
-    home: '🏠',
-    legacy: '💎',
-    custom: '🎯'
+  const typeIcons: Record<string, React.ReactNode> = {
+    retirement: <Briefcase className="w-5 h-5" />,
+    education: <GraduationCap className="w-5 h-5" />,
+    home: <Home className="w-5 h-5" />,
+    legacy: <Gem className="w-5 h-5" />,
+    custom: <Target className="w-5 h-5" />,
   };
   
   const priorityColors = {
@@ -462,7 +463,9 @@ const GoalCard: React.FC<{
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{typeIcons[goal.type]}</span>
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+            {typeIcons[goal.type]}
+          </div>
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white">{goal.name}</h4>
             <p className="text-xs text-gray-500">{formatDate(goal.targetDate)} • {yearsRemaining.toFixed(1)} years</p>
@@ -666,6 +669,16 @@ export const GoalPlanningMonteCarlo: React.FC = () => {
               <ScenarioSliders goal={selectedGoal} onChange={handleGoalUpdate} />
             </>
           )}
+
+          {/* Compliance Disclaimer */}
+          <div className="mt-8 p-4 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg border border-neutral-200 dark:border-neutral-700">
+            <div className="flex gap-2">
+              <Info className="w-4 h-4 text-neutral-500 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                <strong className="text-neutral-600 dark:text-neutral-300">Important Disclosure:</strong> Monte Carlo simulations are hypothetical illustrations based on assumed rates of return, volatility, and other factors. Results shown are statistical projections, not predictions or guarantees. Actual results will vary and may be significantly different from simulated outcomes. Success probabilities represent historical statistical likelihood, not certainty of achieving goals. Investment decisions should not be based solely on these projections. Past performance does not guarantee future results. Please consult with your financial advisor and consider all relevant factors before making investment decisions.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

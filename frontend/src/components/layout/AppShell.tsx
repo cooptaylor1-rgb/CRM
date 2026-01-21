@@ -581,7 +581,7 @@ export function AppShell({ children }: AppShellProps) {
         <MobileHeader
           onMenuOpen={() => setMobileMenuOpen(true)}
           onSearchOpen={globalSearch.open}
-          notificationCount={3}
+          notificationCount={0}
         />
       )}
 

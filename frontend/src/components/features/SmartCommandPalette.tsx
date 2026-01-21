@@ -41,15 +41,15 @@ import { toast } from 'react-hot-toast';
 
 /**
  * SmartCommandPalette Component
- * 
+ *
  * An intelligent command palette that understands context and suggests
- * relevant actions. This is the "magical" upgrade to GlobalSearch.
- * 
- * Magic Features:
- * - Context-aware smart suggestions based on current page
+ * relevant actions. Enhanced replacement for GlobalSearch.
+ *
+ * Key Features:
+ * - Context-aware suggestions based on current page
  * - Natural language commands ("schedule meeting with John")
  * - Inline quick actions (complete task without navigation)
- * - Smart entity recognition
+ * - Entity recognition
  * - Predictive suggestions based on usage patterns
  */
 
@@ -286,11 +286,11 @@ export function SmartCommandPalette({ isOpen, onClose, currentContext }: SmartCo
 
     switch (type) {
       case 'call':
-        toast.success(`Opening phone for ${target}...`, { icon: '📞' });
+        toast.success(`Opening phone for ${target}...`);
         // In a real app, this would open a dialer or VOIP
         break;
       case 'email':
-        toast.success(`Opening email composer for ${target}...`, { icon: '✉️' });
+        toast.success(`Opening email composer for ${target}...`);
         // In a real app, this would open email composer
         break;
       case 'schedule':
@@ -404,7 +404,7 @@ export function SmartCommandPalette({ isOpen, onClose, currentContext }: SmartCo
               )}
             >
               <Combobox onChange={handleSelect}>
-                {/* Search Input with Magic Indicator */}
+                {/* Search Input with Command Indicator */}
                 <div className="relative border-b border-border">
                   <div className="absolute left-4 top-4 flex items-center gap-2">
                     {commandPreview ? (

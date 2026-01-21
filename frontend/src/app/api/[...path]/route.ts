@@ -33,9 +33,7 @@ async function proxyRequest(request: NextRequest, pathSegments: string[], method
   // Get the search params
   const searchParams = request.nextUrl.searchParams.toString();
   const fullUrl = searchParams ? `${url}?${searchParams}` : url;
-  
-  console.log(`[API Proxy] ${method} ${fullUrl}`);
-  
+
   try {
     // Prepare headers - forward most headers but not host
     const headers = new Headers();

@@ -426,7 +426,7 @@ const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
     trigger: { type: 'aum_milestone', config: { threshold: 1000000, direction: 'above' } },
     conditions: [],
     actions: [
-      { type: 'send_notification', config: { message: '🎉 {{client.name}} just crossed $1M AUM!', priority: 'high' }, order: 1 },
+      { type: 'send_notification', config: { message: '{{client.name}} just crossed $1M AUM!', priority: 'high' }, order: 1 },
       { type: 'create_task', config: { title: 'Send congratulations to {{client.name}}', dueInDays: 1, priority: 'high' }, order: 2 },
       { type: 'add_tag', config: { tag: 'HNW' }, order: 3 },
     ],

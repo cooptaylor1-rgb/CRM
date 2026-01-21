@@ -307,7 +307,7 @@ export default function HouseholdDetailPage() {
             </motion.div>
           </div>
 
-          {/* AI-Powered Insights Section - Magic v3 */}
+          {/* AI-Powered Insights Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -326,17 +326,17 @@ export default function HouseholdDetailPage() {
             />
           </motion.div>
 
-          {/* Relationship Journey Timeline - Magic v3 */}
+          {/* Relationship Journey Timeline */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
           >
-            <ClientJourneyTimeline 
+            <ClientJourneyTimeline
               data={generateJourneyData(household.name)}
               maxEvents={8}
-              onEventClick={(event) => {
-                console.log('Event clicked:', event);
+              onEventClick={(_event) => {
+                // TODO: Navigate to event detail or show event modal
               }}
             />
           </motion.div>

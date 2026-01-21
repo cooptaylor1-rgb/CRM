@@ -10,7 +10,8 @@ import {
   Card,
   StatusBadge,
 } from '@/components/ui';
-import { PlusIcon, Cog6ToothIcon, PlayIcon, XCircleIcon } from '@heroicons/react/20/solid';
+import { PlusIcon, Cog6ToothIcon, PlayIcon, XCircleIcon, HandRaisedIcon, ClockIcon, BoltIcon, ArrowPathIcon } from '@heroicons/react/20/solid';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { workflowsService, WorkflowTemplate, WorkflowInstance, WorkflowStats } from '@/services/workflows.service';
 
 type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'default';
@@ -78,13 +79,19 @@ export default function WorkflowsPage() {
   };
 
   const getTriggerIcon = (triggerType: string) => {
-    const icons: Record<string, string> = {
-      manual: '👆',
-      scheduled: '⏰',
-      event: '⚡',
-      condition: '🔄',
-    };
-    return icons[triggerType] || '📋';
+    const iconClass = "w-5 h-5 text-content-tertiary";
+    switch (triggerType) {
+      case 'manual':
+        return <HandRaisedIcon className={iconClass} />;
+      case 'scheduled':
+        return <ClockIcon className={iconClass} />;
+      case 'event':
+        return <BoltIcon className={iconClass} />;
+      case 'condition':
+        return <ArrowPathIcon className={iconClass} />;
+      default:
+        return <Cog6ToothIcon className={iconClass} />;
+    }
   };
 
   if (loading) {
@@ -188,7 +195,9 @@ export default function WorkflowsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{getTriggerIcon(template.trigger)}</span>
+                        <div className="p-2 bg-surface-secondary rounded-lg">
+                          {getTriggerIcon(template.trigger)}
+                        </div>
                         <div>
                           <h3 className="font-medium text-content-primary">{template.name}</h3>
                           <p className="text-sm text-content-secondary">{template.description}</p>
@@ -422,40 +431,48 @@ function CreateTemplateModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Create Workflow Template</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-surface border border-border rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-content-primary">Create Workflow Template</h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Name</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-surface-secondary border border-border rounded-lg text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
               placeholder="e.g., New Client Onboarding"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Description</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-surface-secondary border border-border rounded-lg text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
               rows={2}
               placeholder="Describe what this workflow does..."
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Trigger Type</label>
+            <label className="block text-sm font-medium text-content-secondary mb-1">Trigger Type</label>
             <select
               value={formData.trigger}
               onChange={(e) => setFormData({ ...formData, trigger: e.target.value as any })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-surface-secondary border border-border rounded-lg text-content-primary focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent"
             >
               <option value="manual">Manual</option>
               <option value="scheduled">Scheduled</option>
@@ -471,31 +488,31 @@ function CreateTemplateModal({
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-700">Steps</label>
+              <label className="text-sm font-medium text-content-secondary">Steps</label>
               <button
                 type="button"
                 onClick={handleAddStep}
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-accent-400 hover:text-accent-300"
               >
                 + Add Step
               </button>
             </div>
             <div className="space-y-3">
               {formData.steps.map((step, index) => (
-                <div key={step.id} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-500 w-6">{index + 1}.</span>
+                <div key={step.id} className="flex items-center gap-2 p-3 bg-surface-secondary rounded-lg">
+                  <span className="text-sm font-medium text-content-tertiary w-6">{index + 1}.</span>
                   <input
                     type="text"
                     value={step.name}
                     onChange={(e) => handleStepChange(index, 'name', e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="flex-1 px-3 py-2 bg-surface border border-border rounded-lg text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent-500"
                     placeholder="Step name"
                     required
                   />
                   <select
                     value={step.type}
                     onChange={(e) => handleStepChange(index, 'type', e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-accent-500"
                   >
                     <option value="task">Create Task</option>
                     <option value="email">Send Email</option>
@@ -508,33 +525,36 @@ function CreateTemplateModal({
                     <button
                       type="button"
                       onClick={() => handleRemoveStep(index)}
-                      className="p-2 text-red-500 hover:text-red-700"
+                      className="p-2 text-status-error-text hover:bg-status-error-bg rounded-lg transition-colors"
                     >
-                      ✕
+                      <XMarkIcon className="w-4 h-4" />
                     </button>
                   )}
                 </div>
               ))}
             </div>
           </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            >
-              {saving ? 'Creating...' : 'Create Template'}
-            </button>
-          </div>
         </form>
+
+        <div className="flex justify-end gap-3 p-4 border-t border-border">
+          <Button
+            variant="ghost"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={(e) => {
+              const form = (e.target as HTMLElement).closest('.bg-surface')?.querySelector('form');
+              if (form) form.requestSubmit();
+            }}
+            loading={saving}
+            loadingText="Creating..."
+          >
+            Create Template
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -550,9 +570,9 @@ function TemplateDetailModal({
   onUpdated: () => void;
 }) {
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this template?')) return;
     try {
       setDeleting(true);
       await workflowsService.deleteTemplate(template.id);
@@ -561,6 +581,7 @@ function TemplateDetailModal({
       console.error('Failed to delete template:', error);
     } finally {
       setDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -574,35 +595,43 @@ function TemplateDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">{template.name}</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-surface border border-border rounded-lg w-full max-w-lg">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-content-primary">{template.name}</h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        </div>
 
-        <div className="space-y-4">
+        <div className="p-4 space-y-4">
           <div>
-            <div className="text-sm text-gray-500">Description</div>
-            <div className="text-gray-900">{template.description || 'No description'}</div>
+            <div className="text-sm text-content-tertiary">Description</div>
+            <div className="text-content-primary">{template.description || 'No description'}</div>
           </div>
 
           <div>
-            <div className="text-sm text-gray-500">Trigger</div>
-            <div className="text-gray-900 capitalize">{template.trigger.replace(/_/g, ' ')}</div>
+            <div className="text-sm text-content-tertiary">Trigger</div>
+            <div className="text-content-primary capitalize">{template.trigger.replace(/_/g, ' ')}</div>
           </div>
 
           <div>
-            <div className="text-sm text-gray-500 mb-2">Steps ({template.steps.length})</div>
+            <div className="text-sm text-content-tertiary mb-2">Steps ({template.steps.length})</div>
             <div className="space-y-2">
               {template.steps.map((step, index) => (
                 <div
                   key={step.id}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-surface-secondary rounded-lg"
                 >
-                  <span className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-sm font-medium">
+                  <span className="w-6 h-6 bg-accent-500/20 text-accent-400 rounded-full flex items-center justify-center text-sm font-medium">
                     {index + 1}
                   </span>
                   <div>
-                    <div className="font-medium text-gray-900">{step.name}</div>
-                    <div className="text-sm text-gray-500 capitalize">{step.type}</div>
+                    <div className="font-medium text-content-primary">{step.name}</div>
+                    <div className="text-sm text-content-tertiary capitalize">{step.type}</div>
                   </div>
                 </div>
               ))}
@@ -610,31 +639,41 @@ function TemplateDetailModal({
           </div>
         </div>
 
-        <div className="flex justify-between gap-3 pt-6 border-t mt-6">
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg"
-          >
-            {deleting ? 'Deleting...' : 'Delete'}
-          </button>
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-            >
-              Close
-            </button>
-            {template.trigger === 'manual' && (
-              <button
-                onClick={handleTrigger}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Run Now
-              </button>
-            )}
+        {showDeleteConfirm ? (
+          <div className="p-4 border-t border-border bg-status-error-bg/20">
+            <p className="text-sm text-content-primary mb-3">
+              Are you sure you want to delete this template? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" size="sm" onClick={handleDelete} loading={deleting}>
+                {deleting ? 'Deleting...' : 'Delete Template'}
+              </Button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex justify-between gap-3 p-4 border-t border-border">
+            <Button
+              variant="ghost"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-status-error-text"
+            >
+              Delete
+            </Button>
+            <div className="flex gap-3">
+              <Button variant="ghost" onClick={onClose}>
+                Close
+              </Button>
+              {template.trigger === 'manual' && (
+                <Button variant="primary" onClick={handleTrigger}>
+                  Run Now
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

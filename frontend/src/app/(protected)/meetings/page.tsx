@@ -11,6 +11,7 @@ import {
   StatusBadge,
 } from '@/components/ui';
 import { PlusIcon, CalendarIcon, VideoCameraIcon, BuildingOfficeIcon } from '@heroicons/react/20/solid';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { meetingsService, Meeting, MeetingStats, MeetingType, CreateMeetingDto } from '@/services/meetings.service';
 import { ScheduleMeetingModal } from '@/components/modals';
 
@@ -376,7 +377,9 @@ function MeetingDetailModal({ meeting, onClose, onUpdate }: { meeting: Meeting; 
                 <p className="text-sm text-content-secondary">{meetingTypeLabels[meeting.type]}</p>
               </div>
             </div>
-            <button onClick={onClose} className="text-content-tertiary hover:text-content-secondary">✕</button>
+            <button onClick={onClose} className="p-1.5 rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
+              <XMarkIcon className="w-5 h-5" />
+            </button>
           </div>
         </div>
         

@@ -33,6 +33,7 @@ import {
   PlusIcon,
   CheckIcon,
   FolderIcon,
+  EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import { MicrophoneIcon as MicrophoneIconSolid } from '@heroicons/react/24/solid';
 import { cn } from '../ui/utils';
@@ -229,11 +230,11 @@ Robert will prepare estimated tax impact analysis by next week.`,
 ];
 
 const AI_INSIGHT_PROMPTS = [
-  { icon: '📋', label: 'Generate summary', action: 'summarize' },
-  { icon: '✅', label: 'Extract action items', action: 'actions' },
-  { icon: '💡', label: 'Identify opportunities', action: 'opportunities' },
-  { icon: '📧', label: 'Draft follow-up email', action: 'email' },
-  { icon: '⚠️', label: 'Flag concerns', action: 'concerns' },
+  { icon: <ClipboardDocumentIcon className="w-4 h-4" />, label: 'Generate summary', action: 'summarize' },
+  { icon: <CheckCircleIcon className="w-4 h-4" />, label: 'Extract action items', action: 'actions' },
+  { icon: <LightBulbIcon className="w-4 h-4" />, label: 'Identify opportunities', action: 'opportunities' },
+  { icon: <EnvelopeIcon className="w-4 h-4" />, label: 'Draft follow-up email', action: 'email' },
+  { icon: <ExclamationCircleIcon className="w-4 h-4" />, label: 'Flag concerns', action: 'concerns' },
 ];
 
 // ============================================

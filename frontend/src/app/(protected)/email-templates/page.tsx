@@ -61,7 +61,7 @@ const categoryColors: Record<EmailTemplateCategory, string> = {
   marketing: 'bg-purple-100 text-purple-700',
   meeting: 'bg-cyan-100 text-cyan-700',
   document: 'bg-orange-100 text-orange-700',
-  system: 'bg-gray-100 text-gray-700',
+  system: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
 };
 
 export default function EmailTemplatesPage() {

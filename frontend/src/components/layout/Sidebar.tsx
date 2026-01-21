@@ -3,6 +3,17 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
+import {
+  ChartBarSquareIcon,
+  BuildingOffice2Icon,
+  BriefcaseIcon,
+  FunnelIcon,
+  ClipboardDocumentCheckIcon,
+  CalendarDaysIcon,
+  BoltIcon,
+  ShieldCheckIcon,
+  DocumentTextIcon,
+} from '@heroicons/react/24/outline';
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -10,15 +21,15 @@ export function Sidebar() {
   const { user, logout } = useAuthStore();
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: '📊' },
-    { name: 'Households', href: '/households', icon: '🏠' },
-    { name: 'Accounts', href: '/accounts', icon: '💼' },
-    { name: 'Pipeline', href: '/pipeline', icon: '🎯' },
-    { name: 'Tasks', href: '/tasks', icon: '✓' },
-    { name: 'Meetings', href: '/meetings', icon: '📅' },
-    { name: 'Workflows', href: '/workflows', icon: '⚡' },
-    { name: 'Compliance', href: '/compliance', icon: '✅' },
-    { name: 'Audit Log', href: '/audit', icon: '📝' },
+    { name: 'Dashboard', href: '/dashboard', icon: ChartBarSquareIcon },
+    { name: 'Households', href: '/households', icon: BuildingOffice2Icon },
+    { name: 'Accounts', href: '/accounts', icon: BriefcaseIcon },
+    { name: 'Pipeline', href: '/pipeline', icon: FunnelIcon },
+    { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentCheckIcon },
+    { name: 'Meetings', href: '/meetings', icon: CalendarDaysIcon },
+    { name: 'Workflows', href: '/workflows', icon: BoltIcon },
+    { name: 'Compliance', href: '/compliance', icon: ShieldCheckIcon },
+    { name: 'Audit Log', href: '/audit', icon: DocumentTextIcon },
   ];
 
   const handleLogout = async () => {
@@ -35,6 +46,7 @@ export function Sidebar() {
       <nav className="flex-1 px-4 py-4 space-y-2">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
+          const Icon = item.icon;
           return (
             <Link
               key={item.name}
@@ -45,7 +57,7 @@ export function Sidebar() {
                   : 'text-neutral-300 hover:bg-neutral-800 hover:text-content-inverse'
               }`}
             >
-              <span className="mr-3 text-xl">{item.icon}</span>
+              <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-accent-400' : 'text-neutral-500'}`} />
               <span>{item.name}</span>
             </Link>
           );

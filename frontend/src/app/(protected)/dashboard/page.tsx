@@ -181,16 +181,16 @@ export default function DashboardPage() {
       />
 
       <PageContent>
-        {/* Smart Conversational Search - Magic v3 */}
+        {/* Smart Conversational Search */}
         <Card className="mb-6 overflow-visible relative">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <SparklesIcon className="w-5 h-5 text-amber-500" />
               <h3 className="font-semibold text-content-primary">Ask anything about your clients</h3>
             </div>
-            <ConversationalSearch 
-              onSearch={(query, parsed) => {
-                console.log('Search:', query, parsed);
+            <ConversationalSearch
+              onSearch={(_query, _parsed) => {
+                // Search intent is handled via onResultSelect
               }}
               onResultSelect={(result) => {
                 if (result.type === 'client' || result.type === 'household') {
@@ -390,7 +390,7 @@ export default function DashboardPage() {
 
           {/* Right Column - Secondary Content */}
           <div className="space-y-6">
-            {/* Next Best Actions - Magic v2 */}
+            {/* Next Best Actions */}
             <NextBestActions 
               actions={nextBestActions} 
               maxItems={5}
