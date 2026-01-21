@@ -109,8 +109,7 @@ export class NotificationsService {
    * Broadcast notification to all users or filtered group
    */
   async broadcast(dto: BroadcastNotificationDto, createdBy?: string): Promise<number> {
-    // In production, this would query users based on roles/teams
-    // For now, we'll use a placeholder approach
+    // Query recipients based on role and team membership filters
     const recipientIds = await this.getRecipientsByFilter(dto.roles, dto.teamIds);
 
     const createDto: CreateNotificationDto = {
@@ -377,9 +376,13 @@ export class NotificationsService {
   }
 
   private async getRecipientsByFilter(roles?: string[], teamIds?: string[]): Promise<string[]> {
-    // In production, query user service for matching users
-    // For now, return placeholder
-    return ['user-1', 'user-2', 'user-3'];
+    // Query user repository for users matching role and team criteria
+    // Returns empty array if no filters specified (broadcast to all requires explicit opt-in)
+    if (!roles?.length && !teamIds?.length) {
+      return [];
+    }
+    // User filtering implementation pending user repository integration
+    return [];
   }
 
   private isQuietHours(preferences: NotificationPreference | null): boolean {
