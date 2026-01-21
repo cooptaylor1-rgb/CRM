@@ -15,8 +15,32 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
-  // Security middleware
-  app.use(helmet());
+  // Security middleware - configured for financial services compliance
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          frameAncestors: ["'none'"],
+        },
+      },
+      hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true,
+      },
+      noSniff: true,
+      frameguard: { action: 'deny' },
+      xssFilter: true,
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    }),
+  );
 
   // Global rate limiting - general API protection
   app.use(
@@ -116,11 +140,27 @@ async function bootstrap() {
     logger.log('Swagger documentation disabled in production');
   }
 
+  // Enable graceful shutdown
+  app.enableShutdownHooks();
+
   const port = process.env.PORT || 3001;
   await app.listen(port, '0.0.0.0');
 
   logger.log(`Application is running on: http://localhost:${port}`);
-  logger.log(`API Documentation: http://localhost:${port}/api/docs`);
+  if (!isProduction || enableSwaggerInProd) {
+    logger.log(`API Documentation: http://localhost:${port}/api/docs`);
+  }
+
+  // Graceful shutdown handlers
+  const shutdown = async (signal: string) => {
+    logger.log(`Received ${signal}, starting graceful shutdown...`);
+    await app.close();
+    logger.log('Application shut down gracefully');
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 bootstrap();
