@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
@@ -16,6 +16,7 @@ import * as crypto from 'crypto';
  */
 @Injectable()
 export class EncryptionService {
+  private readonly logger = new Logger(EncryptionService.name);
   private readonly algorithm = 'aes-256-gcm';
   private readonly keyLength = 32; // 256 bits
   private readonly ivLength = 16; // 128 bits
@@ -36,8 +37,8 @@ export class EncryptionService {
     if (!encryptionKey) {
       // Generate a random development key (prevents predictable encryption, but data won't persist across restarts)
       const devKey = crypto.randomBytes(32).toString('hex');
-      console.warn('ENCRYPTION_KEY not set - using auto-generated development key.');
-      console.warn('Encrypted data will NOT be recoverable after restart. Set ENCRYPTION_KEY for persistence.');
+      this.logger.warn('ENCRYPTION_KEY not set - using auto-generated development key.');
+      this.logger.warn('Encrypted data will NOT be recoverable after restart. Set ENCRYPTION_KEY for persistence.');
       this.key = crypto.scryptSync(devKey, 'dev-salt', this.keyLength);
     } else {
       // Derive key from the provided secret with unique salt

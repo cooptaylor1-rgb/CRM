@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
@@ -167,17 +167,19 @@ const entities = [
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        const logger = new Logger('DatabaseConfig');
+
         // Railway provides DATABASE_URL automatically when Postgres is linked
         // It may also be available as POSTGRES_URL or similar
-        const databaseUrl = configService.get('DATABASE_URL') || 
+        const databaseUrl = configService.get('DATABASE_URL') ||
                            configService.get('POSTGRES_URL') ||
                            configService.get('POSTGRESQL_URL');
-        
-        console.log('Configuring database connection...');
+
+        logger.log('Configuring database connection...');
 
         // If DATABASE_URL is provided (Railway), use it directly
         if (databaseUrl) {
-          console.log('Using DATABASE_URL for connection');
+          logger.log('Using DATABASE_URL for connection');
           return {
             type: 'postgres',
             url: databaseUrl,
@@ -187,8 +189,8 @@ const entities = [
             ssl: { rejectUnauthorized: false },
           };
         }
-        
-        console.log('Using individual DB_* environment variables');
+
+        logger.log('Using individual DB_* environment variables');
         // Otherwise use individual environment variables
         return {
           type: 'postgres',
