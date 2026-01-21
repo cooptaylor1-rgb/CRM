@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, UnauthorizedExcepti
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Like, In } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
 import {
   UserIntegration,
   SyncedCalendarEvent,
@@ -92,11 +93,16 @@ export class IntegrationsService {
     const { userId, provider } = JSON.parse(Buffer.from(state, 'base64').toString());
 
     if (provider === IntegrationProvider.MICROSOFT) {
-      // In production, exchange code for tokens via Microsoft Graph API
-      // For now, simulate the token exchange
-      const mockTokens = {
-        access_token: 'mock_access_token_' + Date.now(),
-        refresh_token: 'mock_refresh_token_' + Date.now(),
+      // Development mode: simulate token exchange
+      // Production requires actual Microsoft Graph API integration
+      const isProduction = this.configService.get('NODE_ENV') === 'production';
+      if (isProduction) {
+        throw new BadRequestException('Microsoft integration requires production OAuth configuration');
+      }
+
+      const simulatedTokens = {
+        access_token: `dev_access_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`,
+        refresh_token: `dev_refresh_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`,
         expires_in: 3600,
         scope: 'Calendars.ReadWrite Mail.ReadWrite Mail.Send',
       };
@@ -106,20 +112,20 @@ export class IntegrationsService {
       });
 
       if (integration) {
-        integration.accessToken = mockTokens.access_token;
-        integration.refreshToken = mockTokens.refresh_token;
-        integration.tokenExpiresAt = new Date(Date.now() + mockTokens.expires_in * 1000);
+        integration.accessToken = simulatedTokens.access_token;
+        integration.refreshToken = simulatedTokens.refresh_token;
+        integration.tokenExpiresAt = new Date(Date.now() + simulatedTokens.expires_in * 1000);
         integration.status = IntegrationStatus.ACTIVE;
-        integration.scopes = mockTokens.scope.split(' ');
+        integration.scopes = simulatedTokens.scope.split(' ');
       } else {
         integration = this.integrationRepository.create({
           userId,
           provider,
-          accessToken: mockTokens.access_token,
-          refreshToken: mockTokens.refresh_token,
-          tokenExpiresAt: new Date(Date.now() + mockTokens.expires_in * 1000),
+          accessToken: simulatedTokens.access_token,
+          refreshToken: simulatedTokens.refresh_token,
+          tokenExpiresAt: new Date(Date.now() + simulatedTokens.expires_in * 1000),
           status: IntegrationStatus.ACTIVE,
-          scopes: mockTokens.scope.split(' '),
+          scopes: simulatedTokens.scope.split(' '),
           settings: {
             syncCalendar: true,
             syncEmail: true,

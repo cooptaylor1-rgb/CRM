@@ -7,12 +7,29 @@ import {
 } from 'typeorm';
 
 export enum AuditEventType {
+  // Data operations
   CREATE = 'create',
   UPDATE = 'update',
   DELETE = 'delete',
   ACCESS = 'access',
+  EXPORT = 'export',
+
+  // Authentication
   LOGIN = 'login',
   LOGOUT = 'logout',
+  LOGIN_FAILED = 'login_failed',
+  PASSWORD_CHANGE = 'password_change',
+
+  // Compliance (SEC/FINRA)
+  DOCUMENT_VIEW = 'document_view',
+  DOCUMENT_DOWNLOAD = 'document_download',
+  COMPLIANCE_REVIEW = 'compliance_review',
+  APPROVAL = 'approval',
+
+  // Integration
+  SYNC_START = 'sync_start',
+  SYNC_COMPLETE = 'sync_complete',
+  SYNC_FAILED = 'sync_failed',
 }
 
 @Entity('audit_events')

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
@@ -167,28 +167,40 @@ const entities = [
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        const logger = new Logger('DatabaseConfig');
+        const nodeEnv = configService.get('NODE_ENV');
+        const isProduction = nodeEnv === 'production';
+
+        // CRITICAL: Never auto-sync in production - use migrations instead
+        const shouldSynchronize = !isProduction && configService.get('DB_SYNCHRONIZE') !== 'false';
+
+        if (isProduction && configService.get('DB_SYNCHRONIZE') === 'true') {
+          logger.warn('DB_SYNCHRONIZE=true is ignored in production for safety. Use migrations.');
+        }
+
         // Railway provides DATABASE_URL automatically when Postgres is linked
         // It may also be available as POSTGRES_URL or similar
-        const databaseUrl = configService.get('DATABASE_URL') || 
+        const databaseUrl = configService.get('DATABASE_URL') ||
                            configService.get('POSTGRES_URL') ||
                            configService.get('POSTGRESQL_URL');
-        
-        console.log('Configuring database connection...');
+
+        logger.log('Configuring database connection...');
+        logger.log(`Environment: ${nodeEnv || 'development'}, Synchronize: ${shouldSynchronize}`);
 
         // If DATABASE_URL is provided (Railway), use it directly
         if (databaseUrl) {
-          console.log('Using DATABASE_URL for connection');
+          logger.log('Using DATABASE_URL for connection');
           return {
             type: 'postgres',
             url: databaseUrl,
             entities: entities,
-            synchronize: true, // Auto-create tables
+            synchronize: shouldSynchronize,
             logging: false,
             ssl: { rejectUnauthorized: false },
           };
         }
-        
-        console.log('Using individual DB_* environment variables');
+
+        logger.log('Using individual DB_* environment variables');
         // Otherwise use individual environment variables
         return {
           type: 'postgres',
@@ -198,8 +210,8 @@ const entities = [
           password: configService.get('DB_PASSWORD') || 'postgres',
           database: configService.get('DB_NAME') || 'crm_db',
           entities: entities,
-          synchronize: true, // Auto-sync in development
-          logging: configService.get('NODE_ENV') === 'development',
+          synchronize: shouldSynchronize,
+          logging: !isProduction,
           ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
         };
       },
