@@ -9,6 +9,7 @@ import {
   Index,
 } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
+import { encryptedTransformer } from '../../../common/transformers/encrypted.transformer';
 
 export enum IntegrationProvider {
   MICROSOFT = 'microsoft',
@@ -40,10 +41,10 @@ export class UserIntegration extends BaseEntity {
   @Column({ type: 'enum', enum: IntegrationStatus, default: IntegrationStatus.ACTIVE })
   status: IntegrationStatus;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, transformer: encryptedTransformer })
   accessToken?: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, transformer: encryptedTransformer })
   refreshToken?: string;
 
   @Column({ type: 'timestamp', nullable: true })

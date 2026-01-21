@@ -7,6 +7,7 @@ import {
   DeleteDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Household } from '../../households/entities/household.entity';
 import { encryptedTransformer } from '../../../common/transformers/encrypted.transformer';
@@ -18,6 +19,9 @@ export enum KycStatus {
 }
 
 @Entity('persons')
+@Index(['householdId'])
+@Index(['lastName'])
+@Index(['kycStatus'])
 export class Person {
   @PrimaryGeneratedColumn('uuid')
   id: string;

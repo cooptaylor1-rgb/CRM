@@ -8,6 +8,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Person } from '../../persons/entities/person.entity';
 import { Account } from '../../accounts/entities/account.entity';
@@ -33,6 +34,9 @@ export enum InvestmentObjective {
 }
 
 @Entity('households')
+@Index(['advisorId'])
+@Index(['status'])
+@Index(['primaryContactPersonId'])
 export class Household {
   @PrimaryGeneratedColumn('uuid')
   id: string;

@@ -173,14 +173,11 @@ const entities = [
                            configService.get('POSTGRES_URL') ||
                            configService.get('POSTGRESQL_URL');
         
-        console.log('📦 Configuring database connection...');
-        console.log('📦 DATABASE_URL exists:', !!configService.get('DATABASE_URL'));
-        console.log('📦 POSTGRES_URL exists:', !!configService.get('POSTGRES_URL'));
-        console.log('📦 DB_HOST value:', configService.get('DB_HOST'));
-        
+        console.log('Configuring database connection...');
+
         // If DATABASE_URL is provided (Railway), use it directly
         if (databaseUrl) {
-          console.log('📦 Using DATABASE_URL for connection');
+          console.log('Using DATABASE_URL for connection');
           return {
             type: 'postgres',
             url: databaseUrl,
@@ -191,7 +188,7 @@ const entities = [
           };
         }
         
-        console.log('📦 Using individual DB_* environment variables');
+        console.log('Using individual DB_* environment variables');
         // Otherwise use individual environment variables
         return {
           type: 'postgres',

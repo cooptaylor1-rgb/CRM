@@ -8,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 
 export enum TaskStatus {
@@ -39,6 +40,11 @@ export enum TaskCategory {
 }
 
 @Entity('tasks')
+@Index(['assignedTo'])
+@Index(['status'])
+@Index(['dueDate'])
+@Index(['householdId'])
+@Index(['priority'])
 export class Task {
   @PrimaryGeneratedColumn('uuid')
   id: string;

@@ -6,10 +6,14 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Account } from './account.entity';
 
 @Entity('positions')
+@Index(['accountId'])
+@Index(['symbol'])
+@Index(['asOfDate'])
 export class Position {
   @PrimaryGeneratedColumn('uuid')
   id: string;

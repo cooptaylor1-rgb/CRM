@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   DeleteDateColumn,
+  Index,
 } from 'typeorm';
 
 export enum DocumentType {
@@ -29,6 +30,11 @@ export enum DocumentStatus {
  * Updates create amendments, originals are preserved.
  */
 @Entity('documents')
+@Index(['householdId'])
+@Index(['accountId'])
+@Index(['documentType'])
+@Index(['status'])
+@Index(['uploadedBy'])
 export class Document {
   @PrimaryGeneratedColumn('uuid')
   id: string;

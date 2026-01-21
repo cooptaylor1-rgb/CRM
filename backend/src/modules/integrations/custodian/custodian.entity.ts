@@ -8,6 +8,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
+import { encryptedTransformer } from '../../../common/transformers/encrypted.transformer';
 
 export enum CustodianType {
   SCHWAB = 'schwab',
@@ -52,16 +53,16 @@ export class CustodianConnection {
   @Column({ type: 'text', nullable: true, name: 'client_id' })
   clientId?: string;
 
-  @Column({ type: 'text', nullable: true, name: 'client_secret' })
+  @Column({ type: 'text', nullable: true, name: 'client_secret', transformer: encryptedTransformer })
   clientSecret?: string;
 
-  @Column({ type: 'text', nullable: true, name: 'api_key' })
+  @Column({ type: 'text', nullable: true, name: 'api_key', transformer: encryptedTransformer })
   apiKey?: string;
 
-  @Column({ type: 'text', nullable: true, name: 'access_token' })
+  @Column({ type: 'text', nullable: true, name: 'access_token', transformer: encryptedTransformer })
   accessToken?: string;
 
-  @Column({ type: 'text', nullable: true, name: 'refresh_token' })
+  @Column({ type: 'text', nullable: true, name: 'refresh_token', transformer: encryptedTransformer })
   refreshToken?: string;
 
   @Column({ type: 'timestamp', nullable: true, name: 'token_expires_at' })
