@@ -370,12 +370,24 @@ const mockTemplates: DocumentTemplate[] = [
   },
 ];
 
+// Helper to ensure array response
+const ensureArray = <T>(data: unknown): T[] => {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.documents)) return obj.documents as T[];
+    if (Array.isArray(obj.items)) return obj.items as T[];
+  }
+  return [];
+};
+
 export const documentsService = {
   // Get all documents with filtering
   async getAll(filter?: DocumentFilter): Promise<Document[]> {
     try {
       const response = await api.get('/api/documents', { params: filter });
-      return response.data;
+      return ensureArray<Document>(response.data);
     } catch {
       let docs = [...mockDocuments];
       

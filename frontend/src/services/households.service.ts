@@ -16,10 +16,22 @@ export interface Household {
   updatedAt: string;
 }
 
+// Helper to ensure array response
+const ensureArray = <T>(data: unknown): T[] => {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.households)) return obj.households as T[];
+    if (Array.isArray(obj.items)) return obj.items as T[];
+  }
+  return [];
+};
+
 export const householdsService = {
   async getHouseholds(): Promise<Household[]> {
     const response = await api.get('/households');
-    return response.data;
+    return ensureArray<Household>(response.data);
   },
 
   async getHousehold(id: string): Promise<Household> {

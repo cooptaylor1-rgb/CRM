@@ -110,10 +110,12 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
           notificationsService.getAll({ unreadOnly: false }),
           notificationsService.getStats(),
         ]);
-        setNotifications(data);
+        // Ensure data is always an array
+        setNotifications(Array.isArray(data) ? data : []);
         setStats(statsData);
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
+        setNotifications([]);
       } finally {
         setLoading(false);
       }
@@ -125,9 +127,11 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
   const unreadCount = stats?.unreadCount ?? 0;
   const hasUrgent = (stats?.byPriority?.urgent ?? 0) > 0;
 
+  // Ensure displayNotifications is always an array
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
   const displayNotifications = activeTab === 'unread' 
-    ? notifications.filter(n => !n.isRead)
-    : notifications;
+    ? safeNotifications.filter(n => !n.isRead)
+    : safeNotifications;
 
   const handleMarkAsRead = async (id: string) => {
     await notificationsService.markAsRead(id);

@@ -59,9 +59,11 @@ export default function BillingPage() {
       setLoading(true);
       try {
         const data = await billingService.getAll();
-        setInvoices(data);
+        // Ensure data is always an array
+        setInvoices(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch invoices:', error);
+        setInvoices([]);
       } finally {
         setLoading(false);
       }
@@ -70,23 +72,29 @@ export default function BillingPage() {
     fetchData();
   }, []);
 
+  // Ensure invoices is always an array for safe array operations
+  const safeInvoices = Array.isArray(invoices) ? invoices : [];
+  
   const filteredInvoices = statusFilter === 'all' 
-    ? invoices 
-    : invoices.filter(i => i.status === statusFilter);
+    ? safeInvoices 
+    : safeInvoices.filter(i => i.status === statusFilter);
 
   const stats = {
-    totalOutstanding: invoices.filter(i => ['sent', 'viewed', 'partial', 'overdue'].includes(i.status))
+    totalOutstanding: safeInvoices.filter(i => ['sent', 'viewed', 'partial', 'overdue'].includes(i.status))
       .reduce((s, i) => s + i.amountDue - i.amountPaid, 0),
-    totalCollected: invoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.amountPaid, 0),
-    overdueCount: invoices.filter(i => i.status === 'overdue').length,
-    pendingCount: invoices.filter(i => ['sent', 'viewed'].includes(i.status)).length,
+    totalCollected: safeInvoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.amountPaid, 0),
+    overdueCount: safeInvoices.filter(i => i.status === 'overdue').length,
+    pendingCount: safeInvoices.filter(i => ['sent', 'viewed'].includes(i.status)).length,
   };
 
   const handleSendInvoice = async (invoiceId: string) => {
     await billingService.send(invoiceId);
-    setInvoices(prev => prev.map(i => 
-      i.id === invoiceId ? { ...i, status: 'sent' as InvoiceStatus, sentAt: new Date().toISOString() } : i
-    ));
+    setInvoices(prev => {
+      const safePrev = Array.isArray(prev) ? prev : [];
+      return safePrev.map(i => 
+        i.id === invoiceId ? { ...i, status: 'sent' as InvoiceStatus, sentAt: new Date().toISOString() } : i
+      );
+    });
   };
 
   if (loading) {

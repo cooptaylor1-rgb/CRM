@@ -73,25 +73,37 @@ export interface UpdateTaskDto {
   actualMinutes?: number;
 }
 
+// Helper to ensure array response
+const ensureArray = <T>(data: unknown): T[] => {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.tasks)) return obj.tasks as T[];
+    if (Array.isArray(obj.items)) return obj.items as T[];
+  }
+  return [];
+};
+
 export const tasksService = {
   async getAll(filter?: TaskFilter): Promise<Task[]> {
     const response = await api.get('/api/tasks', { params: filter });
-    return response.data;
+    return ensureArray<Task>(response.data);
   },
 
   async getMyTasks(): Promise<Task[]> {
     const response = await api.get('/api/tasks/my-tasks');
-    return response.data;
+    return ensureArray<Task>(response.data);
   },
 
   async getOverdue(): Promise<Task[]> {
     const response = await api.get('/api/tasks/overdue');
-    return response.data;
+    return ensureArray<Task>(response.data);
   },
 
   async getDueSoon(days: number = 7): Promise<Task[]> {
     const response = await api.get('/api/tasks/due-soon', { params: { days } });
-    return response.data;
+    return ensureArray<Task>(response.data);
   },
 
   async getStats(userId?: string): Promise<TaskStats> {

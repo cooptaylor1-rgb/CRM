@@ -92,13 +92,15 @@ export default function TasksPage() {
           tasksData = await tasksService.getAll(filter);
       }
       
-      setTasks(tasksData);
+      // Ensure tasksData is always an array
+      setTasks(Array.isArray(tasksData) ? tasksData : []);
       const statsData = await tasksService.getStats();
       setStats(statsData);
       setLastUpdated(new Date());
     } catch (err) {
       console.error('Failed to fetch tasks:', err);
       setError(err instanceof Error ? err.message : 'Failed to load tasks');
+      setTasks([]);
     } finally {
       setLoading(false);
     }

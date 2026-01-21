@@ -64,11 +64,13 @@ export default function DashboardPage() {
         tasksService.getAll({}).catch(() => []),
       ]);
       setDashboard(dashboardData);
-      setTasks(tasksData);
+      // Ensure tasks is always an array
+      setTasks(Array.isArray(tasksData) ? tasksData : []);
       setLastUpdated(new Date());
     } catch (err: any) {
       console.error('Failed to fetch dashboard:', err);
       setError(err.message || 'Failed to load dashboard');
+      setTasks([]);
     } finally {
       setLoading(false);
     }
@@ -79,8 +81,9 @@ export default function DashboardPage() {
   }, []);
 
   // Generate next best actions from tasks and dashboard data
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
   const nextBestActions = useNextBestActions({
-    tasks: tasks.map(t => ({
+    tasks: safeTasks.map(t => ({
       id: t.id,
       title: t.title,
       dueDate: t.dueDate,

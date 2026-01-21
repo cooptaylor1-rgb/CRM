@@ -125,10 +125,12 @@ export default function DocumentsPage() {
         documentsService.getAll({ ...filter, search: searchQuery }),
         documentsService.getStats(),
       ]);
-      setDocuments(docsData);
+      // Ensure documents is always an array
+      setDocuments(Array.isArray(docsData) ? docsData : []);
       setStats(statsData);
     } catch (error) {
       console.error('Failed to fetch documents:', error);
+      setDocuments([]);
     } finally {
       setLoading(false);
     }
@@ -139,8 +141,10 @@ export default function DocumentsPage() {
   }, [filter, searchQuery]);
 
   const filteredDocuments = useMemo(() => {
-    if (activeCategory === 'all') return documents;
-    return documents.filter(d => d.category === activeCategory);
+    // Ensure documents is always an array
+    const safeDocs = Array.isArray(documents) ? documents : [];
+    if (activeCategory === 'all') return safeDocs;
+    return safeDocs.filter(d => d.category === activeCategory);
   }, [documents, activeCategory]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {

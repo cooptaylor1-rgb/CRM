@@ -272,7 +272,19 @@ export const notificationsService = {
   }): Promise<Notification[]> {
     try {
       const response = await api.get('/api/notifications', { params: options });
-      return response.data;
+      // Ensure we always return an array
+      const data = response.data;
+      if (Array.isArray(data)) {
+        return data;
+      }
+      // Handle case where API returns { data: [...] } or { notifications: [...] }
+      if (data && typeof data === 'object') {
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data.notifications)) return data.notifications;
+        if (Array.isArray(data.items)) return data.items;
+      }
+      // Fallback to mock data if response is not in expected format
+      throw new Error('Invalid response format');
     } catch {
       let notifications = [...mockNotifications]
         .filter(n => !n.isArchived)

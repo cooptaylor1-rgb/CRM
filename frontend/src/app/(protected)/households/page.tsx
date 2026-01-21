@@ -68,11 +68,13 @@ export default function HouseholdsPage() {
       setLoading(true);
       setError(null);
       const data = await householdsService.getHouseholds();
-      setHouseholds(data);
+      // Ensure data is always an array
+      setHouseholds(Array.isArray(data) ? data : []);
       setLastUpdated(new Date());
     } catch (err) {
       console.error('Failed to fetch households:', err);
       setError(err instanceof Error ? err.message : 'Failed to load households');
+      setHouseholds([]);
     } finally {
       setLoading(false);
     }
@@ -95,9 +97,11 @@ export default function HouseholdsPage() {
   };
 
   const filteredData = useMemo(() => {
-    if (!searchValue) return households;
+    // Ensure households is always an array
+    const safeHouseholds = Array.isArray(households) ? households : [];
+    if (!searchValue) return safeHouseholds;
     const query = searchValue.toLowerCase();
-    return households.filter(
+    return safeHouseholds.filter(
       (h) =>
         h.name.toLowerCase().includes(query) ||
         h.status.toLowerCase().includes(query)
