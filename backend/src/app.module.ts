@@ -75,6 +75,10 @@ import { LifeEvent } from './modules/intelligence/entities/life-event.entity';
 import { MeetingBrief } from './modules/intelligence/entities/meeting-brief.entity';
 import { RiskScore } from './modules/intelligence/entities/risk-score.entity';
 
+// Money movements (core workflow)
+import { MoneyMovementsModule } from './modules/money-movements/money-movements.module';
+import { MoneyMovementRequest } from './modules/money-movements/entities/money-movement.entity';
+
 const entities = [
   // Core entities
   User,
@@ -153,6 +157,8 @@ const entities = [
   LifeEvent,
   MeetingBrief,
   RiskScore,
+  // Money movements
+  MoneyMovementRequest,
 ];
 
 @Module({
@@ -243,6 +249,9 @@ const entities = [
     OutlookModule,
     AllocationsModule,
     IntelligenceModule,
+
+    // Core workflow: money movements
+    MoneyMovementsModule,
   ],
   controllers: [HealthController],
 })
