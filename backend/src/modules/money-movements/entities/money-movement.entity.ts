@@ -69,6 +69,10 @@ export class MoneyMovementRequest {
   @Column({ type: 'jsonb', nullable: true })
   initiationArtifacts?: any;
 
+  // Idempotency key for initiation. Used to safely handle retries.
+  @Column({ type: 'text', nullable: true })
+  initiationIdempotencyKey?: string;
+
   @Column({ type: 'uuid', nullable: true })
   requestedBy?: string;
 

@@ -120,8 +120,19 @@ export class MoneyMovementsService {
     return saved;
   }
 
-  async initiate(id: string, dto: InitiateMoneyMovementDto, userId: string) {
+  async initiate(id: string, dto: InitiateMoneyMovementDto, userId: string, idempotencyKey?: string) {
     const mm = await this.findOne(id);
+
+    // Idempotency: if already initiated (or beyond), return existing if key matches.
+    if ([MoneyMovementStatus.INITIATED, MoneyMovementStatus.SUBMITTED, MoneyMovementStatus.CONFIRMED, MoneyMovementStatus.CLOSED].includes(mm.status)) {
+      if (mm.initiationIdempotencyKey && idempotencyKey && mm.initiationIdempotencyKey === idempotencyKey) {
+        return mm; // idempotent replay
+      }
+      throw new BadRequestException(
+        `Money movement already initiated (status=${mm.status}). Use the same Idempotency-Key to safely retry.`,
+      );
+    }
+
     if (![MoneyMovementStatus.APPROVED].includes(mm.status)) {
       throw new BadRequestException(`Cannot initiate from status: ${mm.status}`);
     }
@@ -129,6 +140,9 @@ export class MoneyMovementsService {
     mm.status = MoneyMovementStatus.INITIATED;
     mm.initiatedBy = userId;
     mm.initiatedAt = new Date();
+    if (idempotencyKey) {
+      mm.initiationIdempotencyKey = idempotencyKey;
+    }
     if (dto.notes) {
       mm.notes = mm.notes ? `${mm.notes}\n\n${dto.notes}` : dto.notes;
     }
@@ -143,7 +157,7 @@ export class MoneyMovementsService {
       entityType: 'money_movement_request',
       entityId: saved.id,
       action: 'Initiated money movement request (package + prefill)',
-      changes: dto,
+      changes: { ...dto, idempotencyKey: idempotencyKey ? '[provided]' : undefined },
     });
     return saved;
   }

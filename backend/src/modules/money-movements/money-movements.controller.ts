@@ -9,6 +9,7 @@ import {
   Request,
   UseGuards,
   ParseUUIDPipe,
+  Headers,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -28,7 +29,7 @@ interface RequestWithUser {
 @ApiTags('MoneyMovements')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('api/money-movements')
+@Controller('money-movements')
 export class MoneyMovementsController {
   constructor(private readonly service: MoneyMovementsService) {}
 
@@ -73,8 +74,9 @@ export class MoneyMovementsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: InitiateMoneyMovementDto,
     @Request() req: RequestWithUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    return this.service.initiate(id, dto, req.user.id);
+    return this.service.initiate(id, dto, req.user.id, idempotencyKey);
   }
 
   @Post(':id/confirm')

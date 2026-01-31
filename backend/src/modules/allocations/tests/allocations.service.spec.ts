@@ -34,6 +34,11 @@ const mockAllocation: TargetAssetAllocation = {
   name: 'Growth Portfolio',
   description: 'Aggressive growth allocation',
   isActive: true,
+  effectiveDate: null as any,
+  reviewDate: null as any,
+  approvedBy: null as any,
+  approvedAt: null as any,
+  notes: null as any,
   createdBy: mockUserId,
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -44,10 +49,13 @@ const mockLineItems: AllocationLineItem[] = [
   {
     id: 'line-1',
     allocationId: 'allocation-1',
-    assetClass: AssetClass.US_EQUITY,
+    allocation: mockAllocation,
+    assetClass: AssetClass.US_LARGE_CAP,
+    customAssetClass: null as any,
     targetPercentage: 60,
-    minPercentage: 55,
-    maxPercentage: 65,
+    minPercentage: 55 as any,
+    maxPercentage: 65 as any,
+    notes: null as any,
     displayOrder: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -55,10 +63,13 @@ const mockLineItems: AllocationLineItem[] = [
   {
     id: 'line-2',
     allocationId: 'allocation-1',
-    assetClass: AssetClass.FIXED_INCOME,
+    allocation: mockAllocation,
+    assetClass: AssetClass.US_BONDS,
+    customAssetClass: null as any,
     targetPercentage: 30,
-    minPercentage: 25,
-    maxPercentage: 35,
+    minPercentage: 25 as any,
+    maxPercentage: 35 as any,
+    notes: null as any,
     displayOrder: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -66,10 +77,13 @@ const mockLineItems: AllocationLineItem[] = [
   {
     id: 'line-3',
     allocationId: 'allocation-1',
+    allocation: mockAllocation,
     assetClass: AssetClass.CASH,
+    customAssetClass: null as any,
     targetPercentage: 10,
-    minPercentage: 5,
-    maxPercentage: 15,
+    minPercentage: 5 as any,
+    maxPercentage: 15 as any,
+    notes: null as any,
     displayOrder: 2,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -82,7 +96,16 @@ const mockFeeSchedule: FeeSchedule = {
   entityType: AllocationEntityType.HOUSEHOLD,
   entityId: mockEntityId,
   name: 'Standard Fee',
+  description: null as any,
   isActive: true,
+  effectiveDate: null as any,
+  endDate: null as any,
+  billingMethod: null as any,
+  minimumFee: null as any,
+  maximumFee: null as any,
+  approvedBy: null as any,
+  approvedAt: null as any,
+  notes: null as any,
   createdBy: mockUserId,
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -93,10 +116,15 @@ const mockFeeTiers: FeeTier[] = [
   {
     id: 'tier-1',
     feeScheduleId: 'fee-schedule-1',
+    feeSchedule: mockFeeSchedule,
+    feeType: null as any,
+    feeFrequency: null as any,
     tierName: 'First $1M',
     minAmount: 0,
-    maxAmount: 1000000,
+    maxAmount: 1000000 as any,
     rate: 1.0,
+    flatAmount: null as any,
+    notes: null as any,
     displayOrder: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -104,10 +132,15 @@ const mockFeeTiers: FeeTier[] = [
   {
     id: 'tier-2',
     feeScheduleId: 'fee-schedule-1',
+    feeSchedule: mockFeeSchedule,
+    feeType: null as any,
+    feeFrequency: null as any,
     tierName: 'Next $4M',
     minAmount: 1000000,
-    maxAmount: 5000000,
+    maxAmount: 5000000 as any,
     rate: 0.75,
+    flatAmount: null as any,
+    notes: null as any,
     displayOrder: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -115,9 +148,15 @@ const mockFeeTiers: FeeTier[] = [
   {
     id: 'tier-3',
     feeScheduleId: 'fee-schedule-1',
+    feeSchedule: mockFeeSchedule,
+    feeType: null as any,
+    feeFrequency: null as any,
     tierName: 'Over $5M',
     minAmount: 5000000,
+    maxAmount: null as any,
     rate: 0.5,
+    flatAmount: null as any,
+    notes: null as any,
     displayOrder: 2,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -228,8 +267,8 @@ describe('AllocationsService', () => {
       entityId: mockEntityId,
       name: 'Test Allocation',
       lineItems: [
-        { assetClass: AssetClass.US_EQUITY, targetPercentage: 60 },
-        { assetClass: AssetClass.FIXED_INCOME, targetPercentage: 30 },
+        { assetClass: AssetClass.US_LARGE_CAP, targetPercentage: 60 },
+        { assetClass: AssetClass.US_BONDS, targetPercentage: 30 },
         { assetClass: AssetClass.CASH, targetPercentage: 10 },
       ],
     };
@@ -269,8 +308,8 @@ describe('AllocationsService', () => {
       const invalidDto: CreateTargetAllocationDto = {
         ...validDto,
         lineItems: [
-          { assetClass: AssetClass.US_EQUITY, targetPercentage: 50 },
-          { assetClass: AssetClass.FIXED_INCOME, targetPercentage: 30 },
+          { assetClass: AssetClass.US_LARGE_CAP, targetPercentage: 50 },
+          { assetClass: AssetClass.US_BONDS, targetPercentage: 30 },
           // Missing 20%
         ],
       };
@@ -285,8 +324,8 @@ describe('AllocationsService', () => {
       const dtoWithFloatingPoint: CreateTargetAllocationDto = {
         ...validDto,
         lineItems: [
-          { assetClass: AssetClass.US_EQUITY, targetPercentage: 33.33 },
-          { assetClass: AssetClass.FIXED_INCOME, targetPercentage: 33.33 },
+          { assetClass: AssetClass.US_LARGE_CAP, targetPercentage: 33.33 },
+          { assetClass: AssetClass.US_BONDS, targetPercentage: 33.33 },
           { assetClass: AssetClass.CASH, targetPercentage: 33.34 },
         ],
       };
@@ -415,8 +454,8 @@ describe('AllocationsService', () => {
     beforeEach(() => {
       feeScheduleRepo.findOne.mockResolvedValue({
         ...mockFeeSchedule,
-        minimumFee: null,
-        maximumFee: null,
+        minimumFee: undefined as any,
+        maximumFee: undefined as any,
       });
       feeTierRepo.find.mockResolvedValue(mockFeeTiers);
     });
@@ -440,7 +479,7 @@ describe('AllocationsService', () => {
       feeScheduleRepo.findOne.mockResolvedValue({
         ...mockFeeSchedule,
         minimumFee: 5000,
-        maximumFee: null,
+        maximumFee: undefined as any,
       });
 
       const dto: CalculateFeeDto = {
@@ -456,7 +495,7 @@ describe('AllocationsService', () => {
     it('should apply maximum fee when calculated fee exceeds', async () => {
       feeScheduleRepo.findOne.mockResolvedValue({
         ...mockFeeSchedule,
-        minimumFee: null,
+        minimumFee: undefined as any,
         maximumFee: 50000,
       });
 
