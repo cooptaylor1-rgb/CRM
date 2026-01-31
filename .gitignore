@@ -13,6 +13,9 @@ build/
 out/
 .nuxt/
 
+# TypeScript build info
+*.tsbuildinfo
+
 # Environment variables
 .env
 .env.local

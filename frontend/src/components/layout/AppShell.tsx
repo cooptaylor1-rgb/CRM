@@ -40,6 +40,7 @@ import {
   UsersIcon,
   ClipboardDocumentListIcon,
   WrenchScrewdriverIcon,
+  BanknotesIcon,
   HomeIcon,
 } from '@heroicons/react/24/outline';
 import {
@@ -110,6 +111,7 @@ const navigationGroups: NavGroup[] = [
       { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentCheckIcon, badge: 5 },
       { name: 'Meetings', href: '/meetings', icon: CalendarDaysIcon },
       { name: 'Documents', href: '/documents', icon: DocumentDuplicateIcon },
+      { name: 'Money Movements', href: '/money-movements', icon: BanknotesIcon },
       { name: 'Workflows', href: '/workflows', icon: BoltIcon },
       { name: 'Email Templates', href: '/email-templates', icon: EnvelopeIcon },
     ],

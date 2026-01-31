@@ -13,6 +13,9 @@ export type { AddAccountModalProps } from './AddAccountModal';
 export { CreateTaskModal } from './CreateTaskModal';
 export type { CreateTaskModalProps } from './CreateTaskModal';
 
+export { CreateMoneyMovementModal } from './CreateMoneyMovementModal';
+export type { CreateMoneyMovementModalProps } from './CreateMoneyMovementModal';
+
 export { ScheduleMeetingModal } from './ScheduleMeetingModal';
 export type { ScheduleMeetingModalProps } from './ScheduleMeetingModal';
 
