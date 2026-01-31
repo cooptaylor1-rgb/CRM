@@ -99,7 +99,7 @@ export function Form<TFieldValues extends FieldValues = FieldValues>({
   form: externalForm,
 }: FormProps<TFieldValues>) {
   const internalForm = useForm<TFieldValues>({
-    resolver: schema ? zodResolver(schema) : undefined,
+    resolver: schema ? (zodResolver(schema as any) as any) : undefined,
     defaultValues,
     mode,
     reValidateMode,
@@ -290,21 +290,21 @@ export function FormField<
           defaultValue={defaultValue}
           rules={rules}
           shouldUnregister={shouldUnregister}
-          render={({ field, fieldState }) =>
-            typeof children === 'function' ? (
-              children({ ...field, error: fieldState.error?.message })
-            ) : (
-              React.Children.map(children, (child) => {
-                if (React.isValidElement(child)) {
-                  return React.cloneElement(child as React.ReactElement<any>, {
-                    ...field,
-                    error: fieldState.error?.message,
-                  });
-                }
-                return child;
-              })
-            )
-          }
+          render={({ field, fieldState }) => (
+            <>
+              {typeof children === 'function'
+                ? children({ ...field, error: fieldState.error?.message })
+                : React.Children.map(children, (child) => {
+                    if (React.isValidElement(child)) {
+                      return React.cloneElement(child as React.ReactElement<any>, {
+                        ...field,
+                        error: fieldState.error?.message,
+                      });
+                    }
+                    return child;
+                  })}
+            </>
+          )}
         />
 
         <AnimatePresence mode="wait">
@@ -735,7 +735,7 @@ export function SubmitButton({
         variantClasses[variant],
         className
       )}
-      {...props}
+      {...(props as any)}
     >
       <AnimatePresence mode="wait">
         {isSubmitting ? (

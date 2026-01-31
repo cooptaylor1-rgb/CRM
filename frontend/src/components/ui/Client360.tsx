@@ -638,14 +638,13 @@ function ActivityTab({ data }: { data: Client360Data }) {
   const filteredActivities = useMemo(() => {
     if (!data.recentActivity) return [];
     if (filter === 'all') return data.recentActivity;
-    const typeMap: Record<typeof filter, string[]> = {
+    const typeMap: Record<Exclude<typeof filter, 'all'>, string[]> = {
       calls: ['call'],
       emails: ['email'],
       meetings: ['meeting'],
       tasks: ['task'],
-      all: [],
     };
-    return data.recentActivity.filter(a => typeMap[filter].includes(a.type));
+    return data.recentActivity.filter(a => typeMap[filter as Exclude<typeof filter, 'all'>].includes(a.type));
   }, [data.recentActivity, filter]);
 
   return (
