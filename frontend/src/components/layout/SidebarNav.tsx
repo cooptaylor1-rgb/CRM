@@ -66,6 +66,7 @@ const navigationGroups: NavGroup[] = [
     icon: PresentationChartLineIcon,
     defaultOpen: true,
     items: [
+      { name: 'Work', href: '/work', icon: BoltIcon },
       { name: 'Dashboard', href: '/dashboard', icon: ChartBarSquareIcon },
       { name: 'Analytics', href: '/analytics', icon: ChartPieIcon },
       { name: 'Intelligence', href: '/intelligence', icon: SparklesIcon },
@@ -113,7 +114,7 @@ const navigationGroups: NavGroup[] = [
 
 // Quick access / favorites (could be user-configurable)
 const quickAccess: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: ChartBarSquareIcon },
+  { name: 'Work', href: '/work', icon: BoltIcon },
   { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentCheckIcon },
   { name: 'Households', href: '/households', icon: BuildingOffice2Icon },
 ];

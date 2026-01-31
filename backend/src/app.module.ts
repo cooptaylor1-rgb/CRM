@@ -79,6 +79,9 @@ import { RiskScore } from './modules/intelligence/entities/risk-score.entity';
 import { MoneyMovementsModule } from './modules/money-movements/money-movements.module';
 import { MoneyMovementRequest } from './modules/money-movements/entities/money-movement.entity';
 
+// Advisor work queue
+import { WorkModule } from './modules/work/work.module';
+
 const entities = [
   // Core entities
   User,
@@ -252,6 +255,9 @@ const entities = [
 
     // Core workflow: money movements
     MoneyMovementsModule,
+
+    // Advisor work queue
+    WorkModule,
   ],
   controllers: [HealthController],
 })

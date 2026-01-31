@@ -85,6 +85,7 @@ const navigationGroups: NavGroup[] = [
     icon: PresentationChartLineIcon,
     defaultOpen: true,
     items: [
+      { name: 'Work', href: '/work', icon: BoltIcon },
       { name: 'Dashboard', href: '/dashboard', icon: ChartBarSquareIcon },
       { name: 'Analytics', href: '/analytics', icon: ChartPieIcon },
       { name: 'Intelligence', href: '/intelligence', icon: SparklesIcon },
@@ -132,7 +133,7 @@ const navigationGroups: NavGroup[] = [
 
 // Bottom navigation for mobile
 const mobileBottomNav = [
-  { name: 'Home', href: '/dashboard', icon: HomeIcon, iconActive: HomeIconSolid },
+  { name: 'Home', href: '/work', icon: HomeIcon, iconActive: HomeIconSolid },
   { name: 'Clients', href: '/households', icon: UserGroupIcon, iconActive: ClientsIconSolid },
   { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentCheckIcon, iconActive: TasksIconSolid },
   { name: 'Calendar', href: '/meetings', icon: CalendarDaysIcon, iconActive: CalendarIconSolid },
