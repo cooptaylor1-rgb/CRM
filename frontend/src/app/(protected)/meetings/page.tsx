@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   PageHeader, 
   PageContent 
@@ -75,6 +76,9 @@ const isToday = (dateString: string) => {
 };
 
 export default function MeetingsPage() {
+  const searchParams = useSearchParams();
+  const householdIdFilter = searchParams.get('householdId') || undefined;
+
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [stats, setStats] = useState<MeetingStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,18 +90,23 @@ export default function MeetingsPage() {
     setLoading(true);
     try {
       let meetingsData: Meeting[];
-      
-      switch (viewMode) {
-        case 'upcoming':
-          meetingsData = await meetingsService.getUpcoming(7);
-          break;
-        case 'week':
-          meetingsData = await meetingsService.getUpcoming(7);
-          break;
-        default:
-          meetingsData = await meetingsService.getAll();
+
+      // If a householdId filter is present, force "all" mode and filter server-side.
+      if (householdIdFilter) {
+        meetingsData = await meetingsService.getAll({ householdId: householdIdFilter });
+      } else {
+        switch (viewMode) {
+          case 'upcoming':
+            meetingsData = await meetingsService.getUpcoming(7);
+            break;
+          case 'week':
+            meetingsData = await meetingsService.getUpcoming(7);
+            break;
+          default:
+            meetingsData = await meetingsService.getAll();
+        }
       }
-      
+
       setMeetings(meetingsData);
       const statsData = await meetingsService.getStats();
       setStats(statsData);
@@ -109,8 +118,14 @@ export default function MeetingsPage() {
   };
 
   useEffect(() => {
+    if (householdIdFilter) {
+      setViewMode('all');
+    }
+  }, [householdIdFilter]);
+
+  useEffect(() => {
     fetchData();
-  }, [viewMode]);
+  }, [viewMode, householdIdFilter]);
 
   const handleComplete = async (meetingId: string) => {
     try {

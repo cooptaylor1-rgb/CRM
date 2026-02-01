@@ -18,6 +18,7 @@ export interface CreateMoneyMovementModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (createdId?: string) => void;
+  preselectedHouseholdId?: string;
 }
 
 const typeOptions: Array<{ value: MoneyMovementType; label: string }> = [
@@ -34,7 +35,12 @@ const currencyOptions = [
   { value: 'GBP', label: 'GBP' },
 ];
 
-export function CreateMoneyMovementModal({ isOpen, onClose, onSuccess }: CreateMoneyMovementModalProps) {
+export function CreateMoneyMovementModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  preselectedHouseholdId,
+}: CreateMoneyMovementModalProps) {
   const toast = useToastHelpers();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -47,6 +53,7 @@ export function CreateMoneyMovementModal({ isOpen, onClose, onSuccess }: CreateM
     currency: 'USD',
     title: '',
     notes: '',
+    householdId: preselectedHouseholdId || '',
   });
 
   const reset = React.useCallback(() => {
@@ -56,9 +63,10 @@ export function CreateMoneyMovementModal({ isOpen, onClose, onSuccess }: CreateM
       currency: 'USD',
       title: '',
       notes: '',
+      householdId: preselectedHouseholdId || '',
     });
     setError(null);
-  }, []);
+  }, [preselectedHouseholdId]);
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -84,6 +92,7 @@ export function CreateMoneyMovementModal({ isOpen, onClose, onSuccess }: CreateM
         currency: formData.currency,
         title: formData.title?.trim() ? formData.title.trim() : undefined,
         notes: formData.notes?.trim() ? formData.notes.trim() : undefined,
+        householdId: formData.householdId?.trim() ? formData.householdId.trim() : undefined,
       };
 
       const created = await moneyMovementsService.create(dto);

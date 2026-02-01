@@ -18,6 +18,7 @@ import {
 import { PageHeader, PageContent } from '@/components/layout/AppShell';
 import { Button, Card, StatusBadge, DataTable, EmptyState, formatCurrency, formatDate, formatDateTime } from '@/components/ui';
 import { householdsService, Household, HouseholdTimelineItem } from '@/services/households.service';
+import { CreateTaskModal, ScheduleMeetingModal, CreateMoneyMovementModal } from '@/components/modals';
 import { 
   AssetAllocationManager, 
   FeeScheduleManager,
@@ -54,6 +55,10 @@ export default function HouseholdDetailPage() {
   const [loading, setLoading] = useState(true);
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [showCreateTask, setShowCreateTask] = useState(false);
+  const [showScheduleMeeting, setShowScheduleMeeting] = useState(false);
+  const [showCreateMoneyMovement, setShowCreateMoneyMovement] = useState(false);
 
   useEffect(() => {
     const fetchHousehold = async () => {
@@ -250,18 +255,40 @@ export default function HouseholdDetailPage() {
                 <p className="text-sm text-stone-400">Recent activity across tasks, meetings, money movements, and compliance.</p>
               </div>
               <div className="flex items-center gap-2">
-                <Link href="/tasks">
-                  <Button size="sm" variant="ghost">Tasks</Button>
-                </Link>
-                <Link href="/money-movements">
-                  <Button size="sm" variant="ghost">Money</Button>
-                </Link>
+                <Button size="sm" variant="secondary" onClick={() => setShowCreateTask(true)}>
+                  New Task
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => setShowScheduleMeeting(true)}>
+                  Schedule Meeting
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => setShowCreateMoneyMovement(true)}>
+                  New Money Movement
+                </Button>
               </div>
             </div>
 
             <DataTable
               data={timeline.slice(0, 15)}
               loading={timelineLoading}
+              onRowClick={(row) => {
+                const item = row as HouseholdTimelineItem;
+                if (item.type === 'money_movement') {
+                  router.push(`/money-movements/${item.id}`);
+                  return;
+                }
+                if (item.type === 'task') {
+                  router.push(`/tasks?householdId=${householdId}`);
+                  return;
+                }
+                if (item.type === 'meeting') {
+                  router.push(`/meetings?householdId=${householdId}`);
+                  return;
+                }
+                if (item.type === 'compliance_review') {
+                  router.push(`/compliance`);
+                  return;
+                }
+              }}
               columns={[
                 {
                   id: 'occurredAt',
@@ -417,6 +444,37 @@ export default function HouseholdDetailPage() {
           </motion.div>
         </div>
       </PageContent>
+
+      <CreateTaskModal
+        isOpen={showCreateTask}
+        onClose={() => setShowCreateTask(false)}
+        onSuccess={() => {
+          setShowCreateTask(false);
+          // Refresh timeline (best-effort)
+          householdsService.getTimeline(householdId).then(setTimeline).catch(() => null);
+        }}
+        preselectedHouseholdId={householdId}
+      />
+
+      <ScheduleMeetingModal
+        isOpen={showScheduleMeeting}
+        onClose={() => setShowScheduleMeeting(false)}
+        onSuccess={() => {
+          setShowScheduleMeeting(false);
+          householdsService.getTimeline(householdId).then(setTimeline).catch(() => null);
+        }}
+        preselectedHouseholdId={householdId}
+      />
+
+      <CreateMoneyMovementModal
+        isOpen={showCreateMoneyMovement}
+        onClose={() => setShowCreateMoneyMovement(false)}
+        onSuccess={() => {
+          setShowCreateMoneyMovement(false);
+          householdsService.getTimeline(householdId).then(setTimeline).catch(() => null);
+        }}
+        preselectedHouseholdId={householdId}
+      />
     </>
   );
 }

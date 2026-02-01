@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   PageHeader, 
   PageContent 
@@ -66,6 +67,8 @@ const isOverdue = (dueDate?: string, status?: string) => {
 };
 
 export default function TasksPage() {
+  const searchParams = useSearchParams();
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [stats, setStats] = useState<TaskStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -105,6 +108,15 @@ export default function TasksPage() {
       setLoading(false);
     }
   }, [activeTab, filter]);
+
+  useEffect(() => {
+    const householdId = searchParams.get('householdId');
+    if (householdId) {
+      setActiveTab('all');
+      setFilter((prev) => ({ ...prev, householdId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     fetchData();
