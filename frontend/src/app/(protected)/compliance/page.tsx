@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { complianceService, type ComplianceReview as ApiComplianceReview, type ReviewStatus } from '@/services/compliance.service';
 import { 
   PageHeader, 
   PageContent,
@@ -38,15 +39,18 @@ import { format, formatDistanceToNow, addDays, isBefore, isWithinInterval } from
 // Types
 interface ComplianceReview {
   id: string;
-  householdId: string;
-  householdName: string;
-  reviewType: 'annual' | 'quarterly' | 'kyc_refresh' | 'suitability' | 'best_interest';
-  status: 'pending' | 'in_progress' | 'completed' | 'overdue' | 'scheduled';
-  assignedTo: string;
-  dueDate: string;
-  completedDate?: string;
-  notes?: string;
+  householdId?: string | null;
+  householdName?: string | null;
+  reviewType: 'annual' | 'quarterly' | 'ad_hoc';
+  status: 'pending' | 'in_progress' | 'completed' | 'requires_action';
+  reviewerId: string;
+  reviewDate: string;
+  findings?: string | null;
+  notes?: string | null;
+  // Derived for UI-only badges
   riskLevel: 'low' | 'medium' | 'high';
+
+  // Optional legacy field (not yet provided by backend)
   lastReviewDate?: string;
 }
 
@@ -75,7 +79,8 @@ interface RegulatoryRequirement {
 }
 
 // Mock data
-const mockReviews: ComplianceReview[] = [
+// Legacy mock data retained for UI scaffolding; real data is loaded from the API.
+const mockReviews: unknown[] = [
   {
     id: 'cr1',
     householdId: 'h1',
@@ -235,16 +240,13 @@ const statusStyles = {
   pending: { color: 'warning' as const, label: 'Pending' },
   in_progress: { color: 'info' as const, label: 'In Progress' },
   completed: { color: 'success' as const, label: 'Completed' },
-  overdue: { color: 'error' as const, label: 'Overdue' },
-  scheduled: { color: 'default' as const, label: 'Scheduled' },
+  requires_action: { color: 'error' as const, label: 'Requires Action' },
 };
 
 const reviewTypeLabels: Record<string, string> = {
   annual: 'Annual Review',
   quarterly: 'Quarterly Review',
-  kyc_refresh: 'KYC Refresh',
-  suitability: 'Suitability Review',
-  best_interest: 'Best Interest',
+  ad_hoc: 'Ad Hoc Review',
 };
 
 const alertSeverityStyles = {
@@ -257,23 +259,70 @@ export default function CompliancePage() {
   const searchParams = useSearchParams();
   const householdIdFilter = searchParams.get('householdId') || undefined;
 
-  const [reviews, setReviews] = useState<ComplianceReview[]>(mockReviews);
+  const [reviews, setReviews] = useState<ComplianceReview[]>([]);
   const [alerts, setAlerts] = useState<ComplianceAlert[]>(mockAlerts);
   const [requirements] = useState<RegulatoryRequirement[]>(mockRequirements);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'reviews' | 'alerts' | 'requirements'>('overview');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedReview, setSelectedReview] = useState<ComplianceReview | null>(null);
 
   useEffect(() => {
     if (householdIdFilter) {
       setActiveTab('reviews');
     }
   }, [householdIdFilter]);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedReview, setSelectedReview] = useState<ComplianceReview | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      try {
+        const status = statusFilter === 'all' ? undefined : (statusFilter as ReviewStatus);
+        const apiReviews = await complianceService.listReviews({
+          householdId: householdIdFilter,
+          status,
+        });
+
+        const mapped: ComplianceReview[] = apiReviews.map((r: ApiComplianceReview) => {
+          const riskLevel: ComplianceReview['riskLevel'] =
+            r.status === 'requires_action' ? 'high' : r.status === 'in_progress' ? 'medium' : 'low';
+
+          return {
+            id: r.id,
+            householdId: r.householdId ?? undefined,
+            householdName: r.householdName ?? undefined,
+            reviewType: r.reviewType,
+            status: r.status,
+            reviewerId: r.reviewerId,
+            reviewDate: r.reviewDate,
+            findings: r.findings,
+            notes: r.notes,
+            riskLevel,
+          };
+        });
+
+        if (!cancelled) {
+          setReviews(mapped);
+        }
+      } catch (e) {
+        console.error('[Compliance] Failed to load reviews', e);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [householdIdFilter, statusFilter]);
 
   const stats = {
     pendingReviews: reviews.filter(r => r.status === 'pending').length,
-    overdueReviews: reviews.filter(r => r.status === 'overdue').length,
+    requiresActionReviews: reviews.filter(r => r.status === 'requires_action').length,
     completedThisMonth: reviews.filter(r => r.status === 'completed').length,
     complianceScore: Math.round(
       requirements.reduce((sum, r) => sum + r.completionRate, 0) / requirements.length
@@ -286,8 +335,7 @@ export default function CompliancePage() {
     { label: 'Completed', value: reviews.filter(r => r.status === 'completed').length, color: '#22c55e' },
     { label: 'In Progress', value: reviews.filter(r => r.status === 'in_progress').length, color: '#3b82f6' },
     { label: 'Pending', value: reviews.filter(r => r.status === 'pending').length, color: '#f59e0b' },
-    { label: 'Overdue', value: reviews.filter(r => r.status === 'overdue').length, color: '#ef4444' },
-    { label: 'Scheduled', value: reviews.filter(r => r.status === 'scheduled').length, color: '#6b7280' },
+    { label: 'Requires Action', value: reviews.filter(r => r.status === 'requires_action').length, color: '#ef4444' },
   ].filter(s => s.value > 0);
 
   const filteredReviews = (statusFilter === 'all'
@@ -357,7 +405,7 @@ export default function CompliancePage() {
           <MetricCard
             label="Pending Reviews"
             value={stats.pendingReviews.toString()}
-            subtext={`${stats.overdueReviews} overdue`}
+            subtext={`${stats.requiresActionReviews} require action`}
             icon="calendar"
           />
           <MetricCard
@@ -441,7 +489,7 @@ export default function CompliancePage() {
               <div className="divide-y divide-border">
                 {reviews
                   .filter(r => ['pending', 'scheduled'].includes(r.status))
-                  .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+                  .sort((a, b) => new Date(a.reviewDate).getTime() - new Date(b.reviewDate).getTime())
                   .slice(0, 4)
                   .map(review => (
                     <div key={review.id} className="px-6 py-4 flex items-center justify-between hover:bg-surface-secondary transition-colors">
@@ -466,10 +514,10 @@ export default function CompliancePage() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium text-content-primary">
-                          {format(new Date(review.dueDate), 'MMM d, yyyy')}
+                          {format(new Date(review.reviewDate), 'MMM d, yyyy')}
                         </p>
                         <p className="text-xs text-content-tertiary">
-                          {formatDistanceToNow(new Date(review.dueDate), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(review.reviewDate), { addSuffix: true })}
                         </p>
                       </div>
                     </div>
@@ -564,7 +612,7 @@ export default function CompliancePage() {
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
                   <option value="in_progress">In Progress</option>
-                  <option value="overdue">Overdue</option>
+                  <option value="requires_action">Requires Action</option>
                   <option value="completed">Completed</option>
                 </select>
               </div>
@@ -575,8 +623,8 @@ export default function CompliancePage() {
                   <tr className="border-b border-border bg-surface-secondary">
                     <th className="text-left px-4 py-3 text-xs font-medium text-content-secondary uppercase tracking-wider">Household</th>
                     <th className="text-left px-4 py-3 text-xs font-medium text-content-secondary uppercase tracking-wider">Review Type</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-content-secondary uppercase tracking-wider">Assigned To</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-content-secondary uppercase tracking-wider">Due Date</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-content-secondary uppercase tracking-wider">Reviewer</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-content-secondary uppercase tracking-wider">Review Date</th>
                     <th className="text-left px-4 py-3 text-xs font-medium text-content-secondary uppercase tracking-wider">Risk</th>
                     <th className="text-left px-4 py-3 text-xs font-medium text-content-secondary uppercase tracking-wider">Status</th>
                     <th className="text-right px-4 py-3 text-xs font-medium text-content-secondary uppercase tracking-wider">Actions</th>
@@ -586,20 +634,20 @@ export default function CompliancePage() {
                   {filteredReviews.map(review => (
                     <tr key={review.id} className="hover:bg-surface-secondary transition-colors">
                       <td className="px-4 py-3">
-                        <span className="font-medium text-content-primary">{review.householdName}</span>
+                        <span className="font-medium text-content-primary">{review.householdName ?? review.householdId ?? '—'}</span>
                       </td>
                       <td className="px-4 py-3 text-sm text-content-secondary">
                         {reviewTypeLabels[review.reviewType]}
                       </td>
                       <td className="px-4 py-3 text-sm text-content-secondary">
-                        {review.assignedTo}
+                        {review.reviewerId.slice(0, 8)}
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <span className={cn(
                           'text-content-primary',
-                          isBefore(new Date(review.dueDate), new Date()) && review.status !== 'completed' && 'text-red-600 dark:text-red-400'
+                          isBefore(new Date(review.reviewDate), new Date()) && review.status !== 'completed' && 'text-red-600 dark:text-red-400'
                         )}>
-                          {format(new Date(review.dueDate), 'MMM d, yyyy')}
+                          {format(new Date(review.reviewDate), 'MMM d, yyyy')}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -783,8 +831,8 @@ export default function CompliancePage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-content-tertiary">Assigned To</p>
-                  <p className="font-medium text-content-primary">{selectedReview.assignedTo}</p>
+                  <p className="text-sm text-content-tertiary">Reviewer</p>
+                  <p className="font-medium text-content-primary">{selectedReview.reviewerId}</p>
                 </div>
                 <div>
                   <p className="text-sm text-content-tertiary">Risk Level</p>
@@ -797,9 +845,9 @@ export default function CompliancePage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-content-tertiary">Due Date</p>
+                  <p className="text-sm text-content-tertiary">Review Date</p>
                   <p className="font-medium text-content-primary">
-                    {format(new Date(selectedReview.dueDate), 'MMM d, yyyy')}
+                    {format(new Date(selectedReview.reviewDate), 'MMM d, yyyy')}
                   </p>
                 </div>
                 {selectedReview.lastReviewDate && (

@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ComplianceService } from './compliance.service';
 import { CreateComplianceReviewDto } from './dto/create-compliance-review.dto';
 import { UpdateComplianceReviewDto } from './dto/update-compliance-review.dto';
+import { ListComplianceReviewsDto } from './dto/list-compliance-reviews.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -28,6 +30,13 @@ export class ComplianceController {
   @ApiOperation({ summary: 'Create a compliance review' })
   create(@Body() createDto: CreateComplianceReviewDto) {
     return this.complianceService.create(createDto);
+  }
+
+  @Get('reviews')
+  @Roles('admin', 'compliance_officer', 'advisor')
+  @ApiOperation({ summary: 'List compliance reviews with filters (householdId, status, type, date range)' })
+  list(@Query() query: ListComplianceReviewsDto) {
+    return this.complianceService.list(query);
   }
 
   @Get()
