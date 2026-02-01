@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { PageHeader, PageContent } from '@/components/layout/AppShell';
 import { Button, Card, DataTable, EmptyState, StatusBadge } from '@/components/ui';
 import { PlusIcon, BanknotesIcon } from '@heroicons/react/20/solid';
@@ -45,6 +45,9 @@ export default function MoneyMovementsPage() {
   const router = useRouter();
   const toast = useToastHelpers();
 
+  const searchParams = useSearchParams();
+  const householdIdFilter = searchParams.get('householdId') || undefined;
+
   const [rows, setRows] = React.useState<MoneyMovement[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [showCreate, setShowCreate] = React.useState(false);
@@ -52,7 +55,7 @@ export default function MoneyMovementsPage() {
   const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const data = await moneyMovementsService.list();
+      const data = await moneyMovementsService.list({ householdId: householdIdFilter });
       setRows(Array.isArray(data) ? data : []);
     } catch (err: any) {
       const message = err?.message || 'Failed to load money movements';
@@ -61,7 +64,7 @@ export default function MoneyMovementsPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, householdIdFilter]);
 
   React.useEffect(() => {
     fetchData();

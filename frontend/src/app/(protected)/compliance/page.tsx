@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   PageHeader, 
   PageContent,
@@ -253,11 +254,20 @@ const alertSeverityStyles = {
 };
 
 export default function CompliancePage() {
+  const searchParams = useSearchParams();
+  const householdIdFilter = searchParams.get('householdId') || undefined;
+
   const [reviews, setReviews] = useState<ComplianceReview[]>(mockReviews);
   const [alerts, setAlerts] = useState<ComplianceAlert[]>(mockAlerts);
   const [requirements] = useState<RegulatoryRequirement[]>(mockRequirements);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'reviews' | 'alerts' | 'requirements'>('overview');
+
+  useEffect(() => {
+    if (householdIdFilter) {
+      setActiveTab('reviews');
+    }
+  }, [householdIdFilter]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedReview, setSelectedReview] = useState<ComplianceReview | null>(null);
 
@@ -280,9 +290,10 @@ export default function CompliancePage() {
     { label: 'Scheduled', value: reviews.filter(r => r.status === 'scheduled').length, color: '#6b7280' },
   ].filter(s => s.value > 0);
 
-  const filteredReviews = statusFilter === 'all'
+  const filteredReviews = (statusFilter === 'all'
     ? reviews
-    : reviews.filter(r => r.status === statusFilter);
+    : reviews.filter(r => r.status === statusFilter)
+  ).filter(r => (householdIdFilter ? r.householdId === householdIdFilter : true));
 
   const handleResolveAlert = (alertId: string) => {
     setAlerts(prev => prev.map(a => 

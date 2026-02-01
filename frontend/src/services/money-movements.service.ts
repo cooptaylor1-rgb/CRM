@@ -45,10 +45,16 @@ export interface CreateMoneyMovementDto {
   accountId?: string;
 }
 
+export interface MoneyMovementFilter {
+  householdId?: string;
+  status?: MoneyMovementStatus;
+  type?: MoneyMovementType;
+}
+
 class MoneyMovementsService {
-  async list(): Promise<MoneyMovement[]> {
+  async list(filter: MoneyMovementFilter = {}): Promise<MoneyMovement[]> {
     try {
-      const res = await api.get<MoneyMovement[]>(BASE);
+      const res = await api.get<MoneyMovement[]>(BASE, { params: filter });
       return Array.isArray(res.data) ? res.data : [];
     } catch (err) {
       throw parseApiError(err);

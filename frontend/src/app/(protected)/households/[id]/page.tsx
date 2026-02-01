@@ -14,10 +14,13 @@ import {
   ClockIcon,
   BuildingLibraryIcon,
   SparklesIcon,
+  ShieldCheckIcon,
+  BanknotesIcon,
+  ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import { PageHeader, PageContent } from '@/components/layout/AppShell';
 import { Button, Card, StatusBadge, DataTable, EmptyState, formatCurrency, formatDate, formatDateTime } from '@/components/ui';
-import { householdsService, Household, HouseholdTimelineItem } from '@/services/households.service';
+import { householdsService, Household, HouseholdTimelineItem, TimelineItemType } from '@/services/households.service';
 import { CreateTaskModal, ScheduleMeetingModal, CreateMoneyMovementModal } from '@/components/modals';
 import { 
   AssetAllocationManager, 
@@ -45,6 +48,90 @@ const riskToleranceLabels: Record<string, string> = {
   aggressive: 'Aggressive',
 };
 
+const timelineTypeLabels: Record<TimelineItemType, string> = {
+  task: 'Task',
+  meeting: 'Meeting',
+  money_movement: 'Money movement',
+  compliance_review: 'Compliance',
+};
+
+const taskStatusVariant: Record<string, StatusVariant> = {
+  pending: 'default',
+  in_progress: 'info',
+  completed: 'success',
+  cancelled: 'error',
+  on_hold: 'warning',
+};
+
+const meetingStatusVariant: Record<string, StatusVariant> = {
+  scheduled: 'info',
+  confirmed: 'success',
+  in_progress: 'warning',
+  completed: 'default',
+  cancelled: 'error',
+  no_show: 'error',
+};
+
+const moneyMovementStatusVariant: Record<string, StatusVariant> = {
+  requested: 'info',
+  in_review: 'warning',
+  approved: 'info',
+  initiated: 'info',
+  submitted: 'info',
+  confirmed: 'success',
+  closed: 'default',
+  cancelled: 'default',
+};
+
+const complianceStatusVariant: Record<string, StatusVariant> = {
+  pending: 'warning',
+  in_progress: 'info',
+  completed: 'success',
+  requires_action: 'error',
+};
+
+function getTimelineStatusVariant(item: HouseholdTimelineItem): StatusVariant {
+  const status = String(item.status ?? '');
+  switch (item.type) {
+    case 'task':
+      return taskStatusVariant[status] ?? 'default';
+    case 'meeting':
+      return meetingStatusVariant[status] ?? 'default';
+    case 'money_movement':
+      return moneyMovementStatusVariant[status] ?? 'default';
+    case 'compliance_review':
+      return complianceStatusVariant[status] ?? 'default';
+    default:
+      return 'default';
+  }
+}
+
+function getTimelineIcon(type: TimelineItemType) {
+  switch (type) {
+    case 'task':
+      return <ClipboardDocumentCheckIcon className="w-4 h-4 text-amber-400" />;
+    case 'meeting':
+      return <CalendarIcon className="w-4 h-4 text-purple-400" />;
+    case 'money_movement':
+      return <BanknotesIcon className="w-4 h-4 text-emerald-400" />;
+    case 'compliance_review':
+      return <ShieldCheckIcon className="w-4 h-4 text-blue-400" />;
+  }
+}
+
+function getTimelineIconBg(type: TimelineItemType) {
+  switch (type) {
+    case 'task':
+      return 'bg-amber-500/10';
+    case 'meeting':
+      return 'bg-purple-500/10';
+    case 'money_movement':
+      return 'bg-emerald-500/10';
+    case 'compliance_review':
+      return 'bg-blue-500/10';
+  }
+}
+
 export default function HouseholdDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -52,9 +139,19 @@ export default function HouseholdDetailPage() {
 
   const [household, setHousehold] = useState<Household | null>(null);
   const [timeline, setTimeline] = useState<HouseholdTimelineItem[]>([]);
+  const [timelineFilter, setTimelineFilter] = useState<TimelineItemType | 'all'>('all');
   const [loading, setLoading] = useState(true);
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const filteredTimeline = timelineFilter === 'all' ? timeline : timeline.filter((t) => t.type === timelineFilter);
+  const timelineCounts = {
+    all: timeline.length,
+    task: timeline.filter((t) => t.type === 'task').length,
+    meeting: timeline.filter((t) => t.type === 'meeting').length,
+    money_movement: timeline.filter((t) => t.type === 'money_movement').length,
+    compliance_review: timeline.filter((t) => t.type === 'compliance_review').length,
+  } as const;
 
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showScheduleMeeting, setShowScheduleMeeting] = useState(false);
@@ -267,8 +364,37 @@ export default function HouseholdDetailPage() {
               </div>
             </div>
 
+
+
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              {[
+                { key: 'all' as const, label: 'All', count: timelineCounts.all },
+                { key: 'task' as const, label: 'Tasks', count: timelineCounts.task },
+                { key: 'meeting' as const, label: 'Meetings', count: timelineCounts.meeting },
+                { key: 'money_movement' as const, label: 'Money movements', count: timelineCounts.money_movement },
+                { key: 'compliance_review' as const, label: 'Compliance', count: timelineCounts.compliance_review },
+              ].map((opt) => (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setTimelineFilter(opt.key)}
+                  className={
+                    'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-colors ' +
+                    (timelineFilter === opt.key
+                      ? 'bg-surface-secondary border-border-default text-content-primary'
+                      : 'bg-transparent border-border-default/50 text-content-secondary hover:text-content-primary hover:bg-surface-secondary')
+                  }
+                >
+                  <span>{opt.label}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-surface-primary/50 text-content-tertiary">
+                    {opt.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
             <DataTable
-              data={timeline.slice(0, 15)}
+              data={filteredTimeline.slice(0, 25)}
               loading={timelineLoading}
               onRowClick={(row) => {
                 const item = row as HouseholdTimelineItem;
@@ -285,36 +411,61 @@ export default function HouseholdDetailPage() {
                   return;
                 }
                 if (item.type === 'compliance_review') {
-                  router.push(`/compliance`);
+                  router.push(`/compliance?householdId=${householdId}`);
                   return;
                 }
               }}
               columns={[
+                {
+                  id: 'activity',
+                  header: 'Activity',
+                  accessorFn: (row) => row,
+                  cell: ({ value }) => {
+                    const item = value as HouseholdTimelineItem;
+                    const typeLabel = timelineTypeLabels[item.type] ?? item.type;
+                    return (
+                      <div className="flex items-start gap-3">
+                        <div className={"mt-0.5 p-2 rounded-lg " + getTimelineIconBg(item.type)}>
+                          {getTimelineIcon(item.type)}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs uppercase tracking-wide text-content-tertiary">{typeLabel}</span>
+                            {item.status ? (
+                              <StatusBadge
+                                status={getTimelineStatusVariant(item)}
+                                label={String(item.status).replaceAll('_', ' ')}
+                              />
+                            ) : null}
+                          </div>
+                          <div className="font-medium text-content-primary truncate">{item.title}</div>
+                          {item.subtitle ? (
+                            <div className="text-sm text-content-secondary line-clamp-1">{item.subtitle}</div>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  },
+                },
+                {
+                  id: 'amount',
+                  header: 'Amount',
+                  accessorFn: (row) => row,
+                  hiddenOnMobile: true,
+                  cell: ({ value }) => {
+                    const item = value as HouseholdTimelineItem;
+                    if (item.type !== 'money_movement') return <span className="text-content-tertiary">-</span>;
+                    const amount = (item.entity as any)?.amount;
+                    if (amount === undefined || amount === null) return <span className="text-content-tertiary">-</span>;
+                    return <span className="font-medium">{formatCurrency(Number(amount))}</span>
+                  },
+                },
                 {
                   id: 'occurredAt',
                   header: 'When',
                   accessorKey: 'occurredAt',
                   hiddenOnMobile: true,
                   cell: ({ value }) => (value ? formatDateTime(value as any) : '-'),
-                },
-                {
-                  id: 'type',
-                  header: 'Type',
-                  accessorKey: 'type',
-                  cell: ({ value }) => <span className="capitalize">{String(value ?? '').replaceAll('_', ' ')}</span>,
-                },
-                {
-                  id: 'title',
-                  header: 'Title',
-                  accessorKey: 'title',
-                  cell: ({ value }) => <span className="font-medium">{String(value ?? '')}</span>,
-                },
-                {
-                  id: 'status',
-                  header: 'Status',
-                  accessorKey: 'status',
-                  hiddenOnMobile: true,
-                  cell: ({ value }) => (value ? <StatusBadge status="info" label={String(value)} /> : '-'),
                 },
               ]}
               emptyState={
