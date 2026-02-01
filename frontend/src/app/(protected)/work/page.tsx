@@ -128,6 +128,21 @@ export default function WorkPage() {
                   hiddenOnMobile: true,
                   cell: ({ value }) => (value ? formatDateTime(value as any) : '-'),
                 },
+                {
+                  id: 'household',
+                  header: 'Household',
+                  accessorKey: 'householdId',
+                  hiddenOnMobile: true,
+                  cell: ({ value }) => {
+                    const id = String(value ?? '');
+                    if (!id) return '-';
+                    return (
+                      <Link href={`/households/${id}`} className="text-brand-600 hover:underline" onClick={(e) => e.stopPropagation()}>
+                        Open
+                      </Link>
+                    );
+                  },
+                },
               ]}
               emptyState={
                 <EmptyState
@@ -169,6 +184,21 @@ export default function WorkPage() {
                     accessorKey: 'status',
                     cell: ({ value }) => <StatusBadge status="info" label={String(value ?? '')} />,
                   },
+                  {
+                    id: 'household',
+                    header: 'Household',
+                    accessorKey: 'householdId',
+                    hiddenOnMobile: true,
+                    cell: ({ value }) => {
+                      const id = String(value ?? '');
+                      if (!id) return '-';
+                      return (
+                        <Link href={`/households/${id}`} className="text-brand-600 hover:underline" onClick={(e) => e.stopPropagation()}>
+                          Open
+                        </Link>
+                      );
+                    },
+                  },
                 ]}
                 emptyState={
                   <EmptyState
@@ -204,6 +234,21 @@ export default function WorkPage() {
                     accessorKey: 'startTime',
                     hiddenOnMobile: true,
                     cell: ({ value }) => (value ? formatDateTime(value as any) : '-'),
+                  },
+                  {
+                    id: 'household',
+                    header: 'Household',
+                    accessorKey: 'householdId',
+                    hiddenOnMobile: true,
+                    cell: ({ value }) => {
+                      const id = String(value ?? '');
+                      if (!id) return '-';
+                      return (
+                        <Link href={`/households/${id}`} className="text-brand-600 hover:underline" onClick={(e) => e.stopPropagation()}>
+                          Open
+                        </Link>
+                      );
+                    },
                   },
                 ]}
                 emptyState={
