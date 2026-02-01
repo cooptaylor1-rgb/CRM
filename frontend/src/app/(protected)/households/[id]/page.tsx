@@ -16,8 +16,8 @@ import {
   SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { PageHeader, PageContent } from '@/components/layout/AppShell';
-import { Button, Card, StatusBadge, formatCurrency, formatDate } from '@/components/ui';
-import { householdsService, Household } from '@/services/households.service';
+import { Button, Card, StatusBadge, DataTable, EmptyState, formatCurrency, formatDate, formatDateTime } from '@/components/ui';
+import { householdsService, Household, HouseholdTimelineItem } from '@/services/households.service';
 import { 
   AssetAllocationManager, 
   FeeScheduleManager,
@@ -50,7 +50,9 @@ export default function HouseholdDetailPage() {
   const householdId = params.id as string;
 
   const [household, setHousehold] = useState<Household | null>(null);
+  const [timeline, setTimeline] = useState<HouseholdTimelineItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timelineLoading, setTimelineLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,8 +70,23 @@ export default function HouseholdDetailPage() {
       }
     };
 
+    const fetchTimeline = async () => {
+      try {
+        setTimelineLoading(true);
+        const items = await householdsService.getTimeline(householdId);
+        setTimeline(items);
+      } catch (err) {
+        // Timeline is best-effort for now; don't fail the whole page.
+        console.warn('Failed to fetch household timeline');
+        setTimeline([]);
+      } finally {
+        setTimelineLoading(false);
+      }
+    };
+
     if (householdId) {
       fetchHousehold();
+      fetchTimeline();
     }
   }, [householdId]);
 
@@ -224,6 +241,64 @@ export default function HouseholdDetailPage() {
               </Card>
             </motion.div>
           </div>
+
+          {/* Timeline */}
+          <Card className="p-5">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <h2 className="text-base font-semibold text-white">Timeline</h2>
+                <p className="text-sm text-stone-400">Recent activity across tasks, meetings, money movements, and compliance.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/tasks">
+                  <Button size="sm" variant="ghost">Tasks</Button>
+                </Link>
+                <Link href="/money-movements">
+                  <Button size="sm" variant="ghost">Money</Button>
+                </Link>
+              </div>
+            </div>
+
+            <DataTable
+              data={timeline.slice(0, 15)}
+              loading={timelineLoading}
+              columns={[
+                {
+                  id: 'occurredAt',
+                  header: 'When',
+                  accessorKey: 'occurredAt',
+                  hiddenOnMobile: true,
+                  cell: ({ value }) => (value ? formatDateTime(value as any) : '-'),
+                },
+                {
+                  id: 'type',
+                  header: 'Type',
+                  accessorKey: 'type',
+                  cell: ({ value }) => <span className="capitalize">{String(value ?? '').replaceAll('_', ' ')}</span>,
+                },
+                {
+                  id: 'title',
+                  header: 'Title',
+                  accessorKey: 'title',
+                  cell: ({ value }) => <span className="font-medium">{String(value ?? '')}</span>,
+                },
+                {
+                  id: 'status',
+                  header: 'Status',
+                  accessorKey: 'status',
+                  hiddenOnMobile: true,
+                  cell: ({ value }) => (value ? <StatusBadge status="info" label={String(value)} /> : '-'),
+                },
+              ]}
+              emptyState={
+                <EmptyState
+                  icon={<CalendarIcon className="w-6 h-6" />}
+                  title="No timeline items"
+                  description="As activity happens (tasks, meetings, money movements), it will show up here."
+                />
+              }
+            />
+          </Card>
 
           {/* Investment Details Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

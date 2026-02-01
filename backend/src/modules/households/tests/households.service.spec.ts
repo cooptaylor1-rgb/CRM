@@ -2,12 +2,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HouseholdsService } from '../households.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Household, HouseholdStatus } from '../entities/household.entity';
+import { Task } from '../../tasks/entities/task.entity';
+import { Meeting } from '../../meetings/entities/meeting.entity';
+import { MoneyMovementRequest } from '../../money-movements/entities/money-movement.entity';
+import { ComplianceReview } from '../../compliance/entities/compliance-review.entity';
 import { AuditService } from '../../audit/audit.service';
 import { NotFoundException } from '@nestjs/common';
 
 describe('HouseholdsService', () => {
   let service: HouseholdsService;
   let mockHouseholdRepository: any;
+  let mockTasksRepository: any;
+  let mockMeetingsRepository: any;
+  let mockMoneyMovementsRepository: any;
+  let mockComplianceReviewsRepository: any;
   let mockAuditService: any;
 
   const mockHousehold: Partial<Household> = {
@@ -30,6 +38,11 @@ describe('HouseholdsService', () => {
       softRemove: jest.fn().mockResolvedValue(mockHousehold),
     };
 
+    mockTasksRepository = { find: jest.fn().mockResolvedValue([]) };
+    mockMeetingsRepository = { find: jest.fn().mockResolvedValue([]) };
+    mockMoneyMovementsRepository = { find: jest.fn().mockResolvedValue([]) };
+    mockComplianceReviewsRepository = { find: jest.fn().mockResolvedValue([]) };
+
     mockAuditService = {
       logEvent: jest.fn().mockResolvedValue(undefined),
     };
@@ -41,6 +54,10 @@ describe('HouseholdsService', () => {
           provide: getRepositoryToken(Household),
           useValue: mockHouseholdRepository,
         },
+        { provide: getRepositoryToken(Task), useValue: mockTasksRepository },
+        { provide: getRepositoryToken(Meeting), useValue: mockMeetingsRepository },
+        { provide: getRepositoryToken(MoneyMovementRequest), useValue: mockMoneyMovementsRepository },
+        { provide: getRepositoryToken(ComplianceReview), useValue: mockComplianceReviewsRepository },
         {
           provide: AuditService,
           useValue: mockAuditService,
