@@ -77,11 +77,12 @@ export function MobileSearch({
           setResults(searchResults);
         } else {
           // Mock search results
-          setResults([
+          const mockResults: SearchResult[] = [
             { id: '1', type: 'household', title: 'Anderson Family', subtitle: '$12.5M AUM', href: '/households/1' },
             { id: '2', type: 'account', title: 'Anderson IRA', subtitle: 'Traditional IRA • $2.1M', href: '/accounts/1' },
             { id: '3', type: 'document', title: 'Anderson IMA 2024', subtitle: 'Investment Management Agreement', href: '/documents/1' },
-          ].filter(r => r.title.toLowerCase().includes(query.toLowerCase())));
+          ];
+          setResults(mockResults.filter(r => r.title.toLowerCase().includes(query.toLowerCase())));
         }
       } catch (error) {
         console.error('Search error:', error);

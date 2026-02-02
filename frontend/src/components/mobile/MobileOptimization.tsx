@@ -694,7 +694,7 @@ export function NetworkStatusBanner({
             {network.status === 'offline' ? (
               <>
                 <SignalSlashIcon className="h-4 w-4" />
-                <span>You're offline. Changes will sync when connected.</span>
+                <span>You&apos;re offline. Changes will sync when connected.</span>
               </>
             ) : network.status === 'slow' ? (
               <>
@@ -709,7 +709,7 @@ export function NetworkStatusBanner({
             ) : (
               <>
                 <WifiIcon className="h-4 w-4" />
-                <span>You're back online!</span>
+                <span>You&apos;re back online!</span>
               </>
             )}
           </div>

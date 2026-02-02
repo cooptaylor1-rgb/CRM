@@ -40,6 +40,7 @@ import {
   UsersIcon,
   ClipboardDocumentListIcon,
   WrenchScrewdriverIcon,
+  BanknotesIcon,
   HomeIcon,
 } from '@heroicons/react/24/outline';
 import {
@@ -84,6 +85,7 @@ const navigationGroups: NavGroup[] = [
     icon: PresentationChartLineIcon,
     defaultOpen: true,
     items: [
+      { name: 'Work', href: '/work', icon: BoltIcon },
       { name: 'Dashboard', href: '/dashboard', icon: ChartBarSquareIcon },
       { name: 'Analytics', href: '/analytics', icon: ChartPieIcon },
       { name: 'Intelligence', href: '/intelligence', icon: SparklesIcon },
@@ -110,6 +112,7 @@ const navigationGroups: NavGroup[] = [
       { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentCheckIcon, badge: 5 },
       { name: 'Meetings', href: '/meetings', icon: CalendarDaysIcon },
       { name: 'Documents', href: '/documents', icon: DocumentDuplicateIcon },
+      { name: 'Money Movements', href: '/money-movements', icon: BanknotesIcon },
       { name: 'Workflows', href: '/workflows', icon: BoltIcon },
       { name: 'Email Templates', href: '/email-templates', icon: EnvelopeIcon },
     ],
@@ -130,7 +133,7 @@ const navigationGroups: NavGroup[] = [
 
 // Bottom navigation for mobile
 const mobileBottomNav = [
-  { name: 'Home', href: '/dashboard', icon: HomeIcon, iconActive: HomeIconSolid },
+  { name: 'Home', href: '/work', icon: HomeIcon, iconActive: HomeIconSolid },
   { name: 'Clients', href: '/households', icon: UserGroupIcon, iconActive: ClientsIconSolid },
   { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentCheckIcon, iconActive: TasksIconSolid },
   { name: 'Calendar', href: '/meetings', icon: CalendarDaysIcon, iconActive: CalendarIconSolid },

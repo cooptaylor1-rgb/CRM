@@ -8,7 +8,7 @@ import { cn } from './utils';
  * Uses muted semantic colors for a professional appearance.
  */
 
-export type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'info';
+export type BadgeVariant = 'default' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 export type BadgeSize = 'sm' | 'md';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -20,6 +20,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const badgeVariants: Record<BadgeVariant, string> = {
   default: 'bg-surface-tertiary text-content-secondary border-border-secondary',
+  secondary: 'bg-surface-tertiary text-content-secondary border-border-secondary',
   success: 'bg-status-success-bg text-status-success-text border-status-success-border',
   warning: 'bg-status-warning-bg text-status-warning-text border-status-warning-border',
   error: 'bg-status-error-bg text-status-error-text border-status-error-border',
@@ -33,6 +34,7 @@ const badgeSizes: Record<BadgeSize, string> = {
 
 const dotColors: Record<BadgeVariant, string> = {
   default: 'bg-neutral-400',
+  secondary: 'bg-neutral-400',
   success: 'bg-status-success-text',
   warning: 'bg-status-warning-text',
   error: 'bg-status-error-text',

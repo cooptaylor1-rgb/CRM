@@ -704,7 +704,7 @@ function ActionCard({
 
           {/* Why It Matters Panel - NEW */}
           <AnimatePresence>
-            {showWhyItMatters && (
+            {showWhyItMatters && whyItMatters && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
@@ -1124,7 +1124,7 @@ export function DailyBriefing({
         </div>
         <div>
           <h2 className="text-lg font-semibold text-white">{greeting}</h2>
-          <p className="text-sm text-neutral-400">Here's your day at a glance</p>
+          <p className="text-sm text-neutral-400">Here&apos;s your day at a glance</p>
         </div>
       </div>
 

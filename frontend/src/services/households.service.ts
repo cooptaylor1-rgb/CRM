@@ -16,6 +16,18 @@ export interface Household {
   updatedAt: string;
 }
 
+export type TimelineItemType = 'task' | 'meeting' | 'money_movement' | 'compliance_review';
+
+export interface HouseholdTimelineItem {
+  type: TimelineItemType;
+  id: string;
+  occurredAt: string;
+  title: string;
+  subtitle?: string;
+  status?: string;
+  entity?: any;
+}
+
 // Helper to ensure array response
 const ensureArray = <T>(data: unknown): T[] => {
   if (Array.isArray(data)) return data;
@@ -37,6 +49,11 @@ export const householdsService = {
   async getHousehold(id: string): Promise<Household> {
     const response = await api.get(`/households/${id}`);
     return response.data;
+  },
+
+  async getTimeline(id: string): Promise<HouseholdTimelineItem[]> {
+    const response = await api.get(`/households/${id}/timeline`);
+    return ensureArray<HouseholdTimelineItem>(response.data);
   },
 
   async createHousehold(data: Partial<Household>): Promise<Household> {

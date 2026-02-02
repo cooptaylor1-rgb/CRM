@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { ComplianceService } from '../compliance.service';
-import { ComplianceReview } from '../entities/compliance-review.entity';
+import { ComplianceReview, ReviewStatus, ReviewType } from '../entities/compliance-review.entity';
 import { CreateComplianceReviewDto } from '../dto/create-compliance-review.dto';
 import { UpdateComplianceReviewDto } from '../dto/update-compliance-review.dto';
 
@@ -14,13 +14,12 @@ import { UpdateComplianceReviewDto } from '../dto/update-compliance-review.dto';
 const mockReview: ComplianceReview = {
   id: 'review-1',
   householdId: 'household-123',
-  reviewType: 'annual',
+  reviewType: ReviewType.ANNUAL,
   reviewDate: new Date('2024-01-15'),
-  reviewedBy: 'user-456',
-  status: 'completed',
+  reviewerId: 'user-456',
+  status: ReviewStatus.COMPLETED,
   findings: 'No issues found',
-  recommendations: 'Continue current investment strategy',
-  nextReviewDate: new Date('2025-01-15'),
+  notes: 'Continue current investment strategy',
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -32,7 +31,7 @@ const mockReviews: ComplianceReview[] = [
     id: 'review-2',
     householdId: 'household-456',
     reviewDate: new Date('2024-02-01'),
-    status: 'in_progress',
+    status: ReviewStatus.IN_PROGRESS,
   },
 ];
 
@@ -79,9 +78,10 @@ describe('ComplianceService', () => {
     it('should create a compliance review', async () => {
       const createDto: CreateComplianceReviewDto = {
         householdId: 'household-123',
-        reviewType: 'annual',
-        reviewedBy: 'user-456',
-        status: 'pending',
+        reviewType: ReviewType.ANNUAL,
+        reviewDate: '2024-01-15',
+        reviewerId: 'user-456',
+        status: ReviewStatus.PENDING,
       };
 
       repository.create.mockReturnValue(mockReview);
@@ -155,11 +155,11 @@ describe('ComplianceService', () => {
   describe('update', () => {
     it('should update an existing review', async () => {
       const updateDto: UpdateComplianceReviewDto = {
-        status: 'completed',
+        status: ReviewStatus.COMPLETED,
         findings: 'Updated findings',
       };
 
-      const updatedReview = { ...mockReview, ...updateDto };
+      const updatedReview: ComplianceReview = { ...mockReview, ...updateDto } as any;
 
       repository.findOne.mockResolvedValue(mockReview);
       repository.save.mockResolvedValue(updatedReview);
@@ -170,7 +170,7 @@ describe('ComplianceService', () => {
         where: { id: 'review-1' },
       });
       expect(repository.save).toHaveBeenCalled();
-      expect(result.status).toBe('completed');
+      expect(result.status).toBe(ReviewStatus.COMPLETED);
       expect(result.findings).toBe('Updated findings');
     });
 
@@ -178,7 +178,7 @@ describe('ComplianceService', () => {
       repository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.update('non-existent', { status: 'completed' })
+        service.update('non-existent', { status: ReviewStatus.COMPLETED })
       ).rejects.toThrow(NotFoundException);
     });
   });

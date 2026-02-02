@@ -8,7 +8,16 @@ import {
   ChevronRight, ChevronDown, Palette, Check, MoreVertical
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui';
-import customizationService, { Tag, CreateTagDto } from '@/services/customization.service';
+import customizationService, { Tag } from '@/services/customization.service';
+
+type CreateTagDto = {
+  name: string;
+  category?: string;
+  color?: string;
+  icon?: string;
+  description?: string;
+  parentId?: string;
+};
 import { parseApiError } from '@/services/api';
 
 const colorPalette = [

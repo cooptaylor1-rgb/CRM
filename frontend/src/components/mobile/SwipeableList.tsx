@@ -78,9 +78,10 @@ export function SwipeableListItem({
           className={`absolute inset-y-0 left-0 flex items-center px-4 ${leftActions[0].bgColor}`}
         >
           <motion.div style={{ scale: leftScale }} className="flex items-center gap-2">
-            {leftActions[0].icon && (
-              <leftActions[0].icon className={`w-6 h-6 ${leftActions[0].color}`} />
-            )}
+            {(() => {
+              const Icon = leftActions[0].icon;
+              return Icon ? <Icon className={`w-6 h-6 ${leftActions[0].color}`} /> : null;
+            })()}
             <span className={`font-medium ${leftActions[0].color}`}>
               {leftActions[0].label}
             </span>
@@ -98,9 +99,10 @@ export function SwipeableListItem({
             <span className={`font-medium ${rightActions[0].color}`}>
               {rightActions[0].label}
             </span>
-            {rightActions[0].icon && (
-              <rightActions[0].icon className={`w-6 h-6 ${rightActions[0].color}`} />
-            )}
+            {(() => {
+              const Icon = rightActions[0].icon;
+              return Icon ? <Icon className={`w-6 h-6 ${rightActions[0].color}`} /> : null;
+            })()}
           </motion.div>
         </motion.div>
       )}

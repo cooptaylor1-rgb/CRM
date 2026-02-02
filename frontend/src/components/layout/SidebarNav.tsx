@@ -34,6 +34,7 @@ import {
   UsersIcon,
   ClipboardDocumentListIcon,
   WrenchScrewdriverIcon,
+  BanknotesIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -65,6 +66,7 @@ const navigationGroups: NavGroup[] = [
     icon: PresentationChartLineIcon,
     defaultOpen: true,
     items: [
+      { name: 'Work', href: '/work', icon: BoltIcon },
       { name: 'Dashboard', href: '/dashboard', icon: ChartBarSquareIcon },
       { name: 'Analytics', href: '/analytics', icon: ChartPieIcon },
       { name: 'Intelligence', href: '/intelligence', icon: SparklesIcon },
@@ -91,6 +93,7 @@ const navigationGroups: NavGroup[] = [
       { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentCheckIcon, badge: 5 },
       { name: 'Meetings', href: '/meetings', icon: CalendarDaysIcon },
       { name: 'Documents', href: '/documents', icon: DocumentDuplicateIcon },
+      { name: 'Money Movements', href: '/money-movements', icon: BanknotesIcon },
       { name: 'Workflows', href: '/workflows', icon: BoltIcon },
       { name: 'Email Templates', href: '/email-templates', icon: EnvelopeIcon },
     ],
@@ -111,7 +114,7 @@ const navigationGroups: NavGroup[] = [
 
 // Quick access / favorites (could be user-configurable)
 const quickAccess: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: ChartBarSquareIcon },
+  { name: 'Work', href: '/work', icon: BoltIcon },
   { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentCheckIcon },
   { name: 'Households', href: '/households', icon: BuildingOffice2Icon },
 ];

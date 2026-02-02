@@ -1086,7 +1086,7 @@ function ConfigField({ field, value, onChange }: ConfigFieldProps) {
     case 'tag_select':
     case 'entity_select':
       return (
-        <div className={field.type === 'textarea' ? 'col-span-2' : ''}>
+        <div className={(field.type as any) === 'textarea' ? 'col-span-2' : ''}>
           <label className="block text-xs font-medium text-neutral-400 mb-1.5">{field.label}</label>
           <select
             value={(value as string) || ''}

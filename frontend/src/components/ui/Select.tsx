@@ -36,6 +36,8 @@ export interface SelectProps<T = string> {
   error?: string;
   /** Disabled state */
   disabled?: boolean;
+  /** Mark as required (visual/ARIA only for now) */
+  required?: boolean;
   /** Size variant */
   size?: 'sm' | 'md' | 'lg';
   /** Full width */
@@ -66,6 +68,7 @@ export function Select<T extends string = string>({
   description,
   error,
   disabled,
+  required: _required,
   size = 'md',
   fullWidth = true,
   className,

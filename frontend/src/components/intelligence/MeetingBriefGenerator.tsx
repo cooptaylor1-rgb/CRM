@@ -140,7 +140,6 @@ export function MeetingBriefGenerator({
             options={households.map((h) => ({ value: h.id, label: h.name }))}
             placeholder={loadingHouseholds ? 'Loading...' : 'Select household'}
             disabled={loadingHouseholds}
-            required
           />
         )}
 

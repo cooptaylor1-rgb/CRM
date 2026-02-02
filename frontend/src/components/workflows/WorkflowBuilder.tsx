@@ -255,9 +255,9 @@ export function WorkflowBuilder({ templateId, onSave, onClose }: WorkflowBuilder
     try {
       let template: WorkflowTemplate;
       if (templateId) {
-        template = await workflowsService.updateTemplate(templateId, formData);
+        template = await workflowsService.updateTemplate(templateId, formData as any);
       } else {
-        template = await workflowsService.createTemplate(formData);
+        template = await workflowsService.createTemplate(formData as any);
       }
       toast.success('Workflow saved successfully');
       onSave?.(template);

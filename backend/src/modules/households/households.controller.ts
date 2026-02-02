@@ -52,6 +52,14 @@ export class HouseholdsController {
     return this.householdsService.findOne(id);
   }
 
+  @Get(':id/timeline')
+  @ApiOperation({ summary: 'Get unified household timeline (tasks, meetings, money movements, compliance)' })
+  @ApiResponse({ status: 200, description: 'Timeline retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Household not found' })
+  getTimeline(@Param('id') id: string) {
+    return this.householdsService.getTimeline(id);
+  }
+
   @Patch(':id')
   @Roles('admin', 'advisor', 'operations')
   @ApiOperation({ summary: 'Update a household' })
